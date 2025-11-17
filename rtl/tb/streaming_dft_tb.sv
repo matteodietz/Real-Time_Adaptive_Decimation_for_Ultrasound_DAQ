@@ -166,13 +166,14 @@ module dft_accumulation_tb ();
                 // Read I, Q, window_coeff
                 status = $fscanf(file, "%h %h %h", 
                                i_samples[n], q_samples[n], window_coeffs[n]);
+                $display("%h %h %h", i_samples[n], q_samples[n], window_coeffs[n]);
                 
                 // Read W_real[0..K-1]
                 for (int k = 0; k < num_bins_read; k++) begin
                     status = $fscanf(file, "%h", W_real_data[n][k]);
+                    // $display("%h ", W_real_data[n][k]);
+
                 end
-                
-                // TODO: the following does not get written into the dut
 
                 // Read W_imag[0..K-1]
                 for (int k = 0; k < num_bins_read; k++) begin
@@ -180,18 +181,22 @@ module dft_accumulation_tb ();
                     // $display("oscillator values read for bin number %d", k);
                 end
                 
-                status = $fgets(line, file); // Consume newline
+                // status = $fgets(line, file); // Consume newline
             end
             
             $display("  Loaded %0d samples", num_samples_read);
             
             // Read EXPECTED line
+            $display("\nExpected Accumulator Values (real) given by: \n");
             status = $fgets(line, file); // Read "EXPECTED" keyword
             for (int k = 0; k < num_bins_read; k++) begin
                 status = $fscanf(file, "%h", exp_A_real[k]);
+                $display( " %h ", exp_A_real[k]);
             end
+            $display("\nExpected Accumulator Values (imag) given by: \n");
             for (int k = 0; k < num_bins_read; k++) begin
                 status = $fscanf(file, "%h", exp_A_imag[k]);
+                $display( " %h ", exp_A_imag[k]);
             end
             status = $fgets(line, file); // Consume newline
             

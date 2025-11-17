@@ -231,24 +231,28 @@ def main():
     test_cases = []
 
     # ====================================================================
-    # --- NEW: Sanity Check Test Case (8-point DFT) ---
+    # --- NEW: Sanity Check Test Case (4-point DFT) ---
     # ====================================================================
     print("\n========== Sanity Check Test Case ==========")
     
-    fs_sanity = 8.0 # Use a simple sample rate, e.g., 8 Hz
-    nperseg_sanity = 8
+    # Use simple parameters for easy manual verification
+    fs_sanity = 4.0 # 4 Hz sample rate
+    nperseg_sanity = 4 # 4-point DFT
     
     # A simple real-valued cosine wave at 1 Hz. 
-    # Its spectrum should have two peaks at +1 Hz and -1 Hz.
+    # With fs=4 and N=4, this 1 Hz signal is perfectly on-bin.
+    # x[n] = cos(2*pi*1.0*n/4) = cos(pi*n/2)
+    # The values will be: [1, 0, -1, 0]
     t_sanity = np.arange(nperseg_sanity) / fs_sanity
     signal_sanity = np.cos(2 * np.pi * 1.0 * t_sanity)
     
-    # For this test, we will calculate ALL 8 frequency bins
+    # For this test, we will calculate ALL 4 frequency bins
+    # Frequencies will be: [0, 1, -2, -1] Hz (for fs=4, N=4)
     S_bins_sanity = np.fft.fftfreq(nperseg_sanity, 1/fs_sanity)
     
-    print("\n--- Test Case: 8-point DFT of a 1 Hz Cosine ---")
+    print("\n--- Test Case: 4-point DFT of a 1 Hz Cosine ---")
     tc_sanity = generate_test_case(
-        "sanity_check_8pt_dft",
+        "sanity_check_4pt_dft",
         signal_sanity,
         fs_sanity,
         S_bins_sanity,
@@ -257,7 +261,7 @@ def main():
         WINDOW_WIDTH,
         ACCUM_WIDTH,
         OSC_WIDTH,
-        8 # Actual number of bins for this test
+        4 # Actual number of bins for this test
     )
     test_cases.append(tc_sanity)
     # ====================================================================

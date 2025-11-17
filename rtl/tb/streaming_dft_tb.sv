@@ -190,11 +190,13 @@ module dft_accumulation_tb ();
             $display("\nExpected Accumulator Values (real) given by: \n");
             status = $fgets(line, file); // Read "EXPECTED" keyword
             for (int k = 0; k < num_bins_read; k++) begin
+                status = $fgets(line, file);
                 status = $fscanf(file, "%h", exp_A_real[k]);
                 $display( " %h ", exp_A_real[k]);
             end
             $display("\nExpected Accumulator Values (imag) given by: \n");
             for (int k = 0; k < num_bins_read; k++) begin
+                status = $fgets(line, file);
                 status = $fscanf(file, "%h", exp_A_imag[k]);
                 $display( " %h ", exp_A_imag[k]);
             end

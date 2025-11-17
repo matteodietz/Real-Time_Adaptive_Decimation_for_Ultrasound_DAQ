@@ -27,17 +27,17 @@ def simplify_exponent(k, n, N):
 if __name__ == '__main__':
     print("--- DFT Sanity Check Value Generator ---")
 
-    N = 8 # The size of our DFT
+    N = 4 # The size of our DFT
 
     # --- 1. Calculate and Print the Time-Domain Signal x[n] ---
-    # Your signal is x(n) = cos(2*pi*n). In a discrete context, this is always 1.
+    # Your signal is x(n) = cos(pi*n/2). In a discrete context, this is always 1.
     # cos(2*pi*integer) = 1 for all integer n.
     x_n = np.zeros(N)
-    print("\n--- Time-Domain Signal x[n] = cos(2*pi*n) ---")
+    print("\n--- Time-Domain Signal x[n] = cos(pi*n/2) ---")
     print(" n | x[n]")
     print("---|------")
     for n in range(N):
-        x_n[n] = np.cos(2 * np.pi * n / 8)
+        x_n[n] = np.cos(2 * np.pi * n / 4)
         print(f" {n} | {x_n[n]:.2f}")
     
     # --- 2. Calculate and Print the Complex Oscillator Values W_N^kn ---

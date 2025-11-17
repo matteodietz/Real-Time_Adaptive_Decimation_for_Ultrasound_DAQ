@@ -53,15 +53,36 @@ def fixed_point_to_float(fixed_val, total_bits, frac_bits, signed=True):
 
 # --- example usage ---
 if __name__ == '__main__':
-    val1_float = fixed_point_to_float(0x1E00, 18, 8)
-    val2_float = fixed_point_to_float(0x3E200, 18, 8)
-    val3_float = fixed_point_to_float(0x3D70A, 18, 8)
-    val4_float = fixed_point_to_float(0x3E834, 18, 8)
+    val1_float = fixed_point_to_float(0x4000, 16, 14)
+    val2_float = fixed_point_to_float(0x0000, 16, 14)
+    val3_float = fixed_point_to_float(0xC000, 16, 14)
+
+    val4_float = fixed_point_to_float(0x1000000, 27, 24)
+    val5_float = fixed_point_to_float(0x0000000, 27, 24)
+    val6_float = fixed_point_to_float(0x7000000, 27, 24)
+
+    val7_float = fixed_point_to_float(0x008000000000, 48, 40)
+    val8_float = fixed_point_to_float(0x000000000000, 48, 40)
+    val9_float = fixed_point_to_float(0x010000000000, 48, 40)
+
     
-    print(f"0x1E00 (Q18.8) = {val1_float}")
-    print(f"0x3E200 (Q18.8) = {val2_float}")
-    print(f"L1 = {val3_float}")
-    print(f"L2 = {val4_float}")
+    print("Values of input signal x[n]")
+    print(f"0x4000 (Q16.14) = {val1_float}")
+    print(f"0x0000 (Q16.14) = {val2_float}")
+    print(f"0xC000 (Q16.14) = {val3_float}")
+
+
+    print("\nValues for oscillator w[n,k]")
+    print(f"0x1000000 (Q27.24) = {val4_float}")
+    print(f"0x0000000 (Q27.24) = {val5_float}")
+    print(f"0x7000000 (Q27.24) = {val6_float}")
+
+
+    print("\nValues for accumulators A[k]")
+    print(f"0x008000000000 (Q48.40) = {val7_float}")
+    print(f"0x000000000000 (Q48.40) = {val8_float}")
+    print(f"0x010000000000 (Q48.40) = {val9_float}")
+
     
     # # Verify the reverse calculation
     # neg_val_hex = 0xFFFFA0

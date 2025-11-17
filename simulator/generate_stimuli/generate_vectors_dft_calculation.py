@@ -196,11 +196,11 @@ def write_vector_file(test_cases, output_path, iq_width, window_width,
                 f.write("\n")
             
             # Write expected outputs
-            f.write("EXPECTED ")
+            f.write("EXPECTED\n")
             for k in range(tc['num_bins']):
-                f.write(f"{tc['expected_A_real'][k]:05x} ")
+                f.write(f"{tc['expected_A_real'][k]:05x}\n")
             for k in range(tc['num_bins']):
-                f.write(f"{tc['expected_A_imag'][k]:05x} ")
+                f.write(f"{tc['expected_A_imag'][k]:05x}\n")
             f.write("\n")
             
             # Write golden reference

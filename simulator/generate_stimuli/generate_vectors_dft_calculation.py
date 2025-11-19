@@ -99,14 +99,13 @@ def generate_test_case(test_name, iq_data, fs, freq_bins, window_type,
             W_imag_hw[n, k] = float_to_fixed_point(np.imag(W_values[n, k]), 
                                                     osc_int_bits, osc_frac_bits, signed=True)
     
-    # Expected accumulator outputs: Use Q(accum_width-8).8 format (8 fractional bits)
-    # Note: The accumulators grow large, so we need more integer bits
+    # Expected accumulator outputs width: 48 bits
     accum_frac_bits = 40
     accum_int_bits = accum_width - accum_frac_bits
     
     # Scale expected outputs to match hardware scaling
-    # The hardware shifts the products: SHIFT_AMOUNT = IQ_WIDTH + WINDOW_WIDTH + OSC_WIDTH + 2 - ACCUM_WIDTH
-    shift_amount = iq_width + window_width + osc_width + 2 - accum_width
+    # The hardware shifts the products: SHIFT_AMOUNT = IQ_WIDTH + WINDOW_WIDTH + OSC_WIDTH - ACCUM_WIDTH
+    shift_amount = iq_width + window_width + osc_width - accum_width
     
     # Calculate scaling factor for expected values
     # Products are scaled by: 2^(iq_frac + window_frac + osc_frac)

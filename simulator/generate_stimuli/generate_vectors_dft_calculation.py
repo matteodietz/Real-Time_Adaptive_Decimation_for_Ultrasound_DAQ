@@ -105,13 +105,17 @@ def generate_test_case(test_name, iq_data, fs, freq_bins, window_type,
     
     # Scale expected outputs to match hardware scaling
     # The hardware shifts the products: SHIFT_AMOUNT = IQ_WIDTH + WINDOW_WIDTH + OSC_WIDTH - ACCUM_WIDTH
-    shift_amount = iq_width + window_width + osc_width - accum_width
+    # shift_amount = iq_width + window_width + osc_width - accum_width
     
     # Calculate scaling factor for expected values
     # Products are scaled by: 2^(iq_frac + window_frac + osc_frac)
     # Then shifted right by shift_amount
-    total_frac_bits = iq_frac_bits + window_frac_bits + osc_frac_bits
-    effective_scale = 2 ** (total_frac_bits - shift_amount - accum_frac_bits)
+    # total_frac_bits = iq_frac_bits + window_frac_bits + osc_frac_bits
+    # effective_scale = 2 ** (total_frac_bits - shift_amount - accum_frac_bits)
+
+    # CORRECTED VERSION OF BITSHIFTS:
+    shift_amount = iq_frac_bits + window_frac_bits + osc_frac_bits - accum_frac_bits
+    effective_scale = 2 ** shift_amount
     
     A_real_hw = [float_to_fixed_point(np.real(a) / effective_scale, 
                                        accum_int_bits, accum_frac_bits, signed=True) 

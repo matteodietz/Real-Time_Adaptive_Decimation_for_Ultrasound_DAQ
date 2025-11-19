@@ -43,8 +43,8 @@ module dft_accumulation #(
 
     // ===== Pipeline Stage 1: Window Multiplication =====
     // Registers for windowed I/Q samples: x[n] * h[n]
-    logic signed [IQ_WIDTH+WINDOW_WIDTH:0] x_weighted_real_q, x_weighted_real_d;
-    logic signed [IQ_WIDTH+WINDOW_WIDTH:0] x_weighted_imag_q, x_weighted_imag_d;
+    logic signed [IQ_WIDTH+WINDOW_WIDTH-1:0] x_weighted_real_q, x_weighted_real_d;
+    logic signed [IQ_WIDTH+WINDOW_WIDTH-1:0] x_weighted_imag_q, x_weighted_imag_d;
     
     // Pipeline control signals - stage 1
     logic sample_valid_stage1_q, sample_valid_stage1_d;
@@ -56,8 +56,8 @@ module dft_accumulation #(
 
     // ===== Pipeline Stage 2: Complex Multiplication with W =====
     // Products: (x_weighted_real + j*x_weighted_imag) * (W_real + j*W_imag)
-    logic signed [IQ_WIDTH+WINDOW_WIDTH+OSC_WIDTH+1:0] prod_real_q[NUM_BINS], prod_real_d[NUM_BINS];
-    logic signed [IQ_WIDTH+WINDOW_WIDTH+OSC_WIDTH+1:0] prod_imag_q[NUM_BINS], prod_imag_d[NUM_BINS];
+    logic signed [IQ_WIDTH+WINDOW_WIDTH+OSC_WIDTH-1:0] prod_real_q[NUM_BINS], prod_real_d[NUM_BINS];
+    logic signed [IQ_WIDTH+WINDOW_WIDTH+OSC_WIDTH-1:0] prod_imag_q[NUM_BINS], prod_imag_d[NUM_BINS];
     
     // Pipeline control signals - stage 2
     logic sample_valid_stage2_q, sample_valid_stage2_d;
@@ -171,6 +171,23 @@ module dft_accumulation #(
         end
     end
 
+
+    // ------------------------------------------------------
+    // Assertion: Check that if WINDOW_WIDTH < IQ_WIDTH, window_coeff_i gets 
+    // left extended (signed) properly: MSB must be zero otherwise window coeff
+    // will get interpreted as a negative number
+    // ------------------------------------------------------
+    property window_msb_ok;
+        @(posedge clk_i)
+        (sample_valid_i && state_q == ACCUMULATE && (WINDOW_WIDTH < IQ_WIDTH))
+            |-> (window_coeff_i[WINDOW_WIDTH-1] == 1'b0);
+    endproperty
+
+
+    assert_window_msb_ok: assert property (window_msb_ok)
+        else $error("window_coeff_i gets sign extended as a negative number in the first multiplication stage");
+
+
     // ========================================
     // Combinational Logic - Pipeline Stage 2
     // Complex multiplication with W: (x_real + j*x_imag) * (W_real + j*W_imag)
@@ -248,7 +265,7 @@ module dft_accumulation #(
                 if (sample_valid_stage2_q) begin
                     for (int k = 0; k < NUM_BINS; k++) begin
                         // Calculate shift amount to fit product into accumulator width
-                        localparam int PRODUCT_WIDTH = IQ_WIDTH + WINDOW_WIDTH + OSC_WIDTH + 2;
+                        localparam int PRODUCT_WIDTH = IQ_WIDTH + WINDOW_WIDTH + OSC_WIDTH;
                         localparam int SHIFT_AMOUNT = PRODUCT_WIDTH - ACCUM_WIDTH;
                         
                         if (SHIFT_AMOUNT > 0) begin

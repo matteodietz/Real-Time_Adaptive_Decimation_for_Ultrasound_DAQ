@@ -305,9 +305,9 @@ module dft_accumulation_tb ();
         inout integer error_count
     );
         automatic logic mismatch = 1'b0;
-        automatic integer max_error_real = 0;
-        automatic integer max_error_imag = 0;
-        automatic integer error_real, error_imag;
+        automatic longint max_error_real = 0;           // 64 bit because the accum vals are 48 bit and dont fit into a 32 bit int
+        automatic longint max_error_imag = 0;
+        automatic longint error_real, error_imag;
         
         $display("  Checking results...");
         
@@ -330,22 +330,30 @@ module dft_accumulation_tb ();
             if (error_imag > max_error_imag) max_error_imag = error_imag;
             
             // Allow small tolerance for rounding errors (adjust as needed)
-            if (error_real > 100 || error_imag > 100) begin
+            // TODO: ADD TOLERANCE, for now zero tolerance
+            if (error_real != 0 || error_imag != 0) begin
                 $display("    ERROR: Bin %0d mismatch", k);
                 $display("      A_real: Expected=%h, Got=%h, Error=%0d", 
-                        expected_A_real[k], act_A_real[k], error_real);
+                        expected_A_real[k], act_A_real[k], error_real / (2**ACCUM_WIDTH_FRAC));
                 $display("      A_imag: Expected=%h, Got=%h, Error=%0d", 
-                        expected_A_imag[k], act_A_imag[k], error_imag);
+                        expected_A_imag[k], act_A_imag[k], error_imag / (2**ACCUM_WIDTH_FRAC));
                 mismatch = 1'b1;
+            end else begin
+                $display("    SUCCESS: Bin %0d matches", k);
+                $display("      A_real: Expected=%h, Got=%h, Error=%0d", 
+                        expected_A_real[k], act_A_real[k], error_real / (2**ACCUM_WIDTH_FRAC));
+                $display("      A_imag: Expected=%h, Got=%h, Error=%0d", 
+                        expected_A_imag[k], act_A_imag[k], error_imag / (2**ACCUM_WIDTH_FRAC));
             end
         end
         
         if (mismatch) begin
             error_count++;
             $display("  RESULT: FAIL");
+            $display("    Max error: Real=%0d, Imag=%0d", max_error_real / (2**ACCUM_WIDTH_FRAC), max_error_imag / (2**ACCUM_WIDTH_FRAC));
         end else begin
             $display("  RESULT: PASS");
-            $display("    Max error: Real=%0d, Imag=%0d", max_error_real, max_error_imag);
+            $display("    Max error: Real=%0d, Imag=%0d", max_error_real / (2**ACCUM_WIDTH_FRAC), max_error_imag / (2**ACCUM_WIDTH_FRAC));
         end
     endtask
 

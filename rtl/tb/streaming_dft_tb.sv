@@ -8,9 +8,13 @@ module dft_accumulation_tb ();
     localparam unsigned RST_CLK_CYCLES = 5;
     
     localparam integer IQ_WIDTH = 16;
+    localparam integer IQ_WIDTH_FRAC = 14;
     localparam integer WINDOW_WIDTH = 16;
+    localparam integer WINDOW_WIDTH_FRAC = 14;
     localparam integer ACCUM_WIDTH = 48;
+    localparam integer ACCUM_WIDTH_FRAC = 40;
     localparam integer OSC_WIDTH = 27;
+    localparam OSC_WIDTH_FRAC = 24;
     localparam integer NUM_BINS = 24;
     localparam integer SAMPLE_COUNT_WIDTH = 16;
     
@@ -50,10 +54,14 @@ module dft_accumulation_tb ();
     // --- DUT Instantiation ---
     dft_accumulation #(
         .IQ_WIDTH(IQ_WIDTH),
+        .IQ_WIDTH_FRAC(IQ_WIDTH_FRAC),
         .WINDOW_WIDTH(WINDOW_WIDTH),
+        .WINDOW_WIDTH_FRAC(WINDOW_WIDTH_FRAC),
         .ACCUM_WIDTH(ACCUM_WIDTH),
+        .ACCUM_WIDTH_FRAC(ACCUM_WIDTH_FRAC),
         .NUM_BINS(NUM_BINS),
         .OSC_WIDTH(OSC_WIDTH),
+        .OSC_WIDTH_FRAC(OSC_WIDTH_FRAC),
         .SAMPLE_COUNT_WIDTH(SAMPLE_COUNT_WIDTH)
     ) dut (
         .clk_i(clk),

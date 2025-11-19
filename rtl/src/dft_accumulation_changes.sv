@@ -1,9 +1,13 @@
 module dft_accumulation #(
     parameter integer IQ_WIDTH = 16,           // Width of I and Q samples
+    parameter integer IQ_WIDTH_FRAC = 14,
     parameter integer WINDOW_WIDTH = 16,       // Width of window coefficients
+    parameter integer WINDOW_WIDTH_FRAC = 14,
     parameter integer ACCUM_WIDTH = 48,        // Width of accumulators (complex real/imag)
+    parameter integer ACCUM_WIDTH_FRAC = 40,
     parameter integer NUM_BINS = 16,           // Number of frequency bins to calculate
     parameter integer OSC_WIDTH = 27,          // Width of complex oscillator (W) real/imag parts
+    parameter integer OSC_WIDTH_FRAC = 24,
     parameter integer SAMPLE_COUNT_WIDTH = 16  // Width of sample counter
 )(
     input  logic clk_i,
@@ -31,6 +35,24 @@ module dft_accumulation #(
     output logic valid_o,                      // Accumulation complete
     output logic busy_o                        // Module is processing
 );
+
+    // -------------------------------------------------------------
+    // Immediate assertions for parameter sanity check (time 0) corresponding to signal widths
+    // -------------------------------------------------------------
+    initial begin
+        // Check total width
+        assert (ACCUM_WIDTH <= IQ_WIDTH + WINDOW_WIDTH + OSC_WIDTH)
+            else $warning("ACCUM_WIDTH (%0d) exceeds allowed sum IQ_WIDTH + WINDOW_WIDTH + OSC_WIDTH (%0d)",
+                        ACCUM_WIDTH,
+                        IQ_WIDTH + WINDOW_WIDTH + OSC_WIDTH);
+
+        // Check fractional width
+        assert (ACCUM_WIDTH_FRAC <= IQ_WIDTH_FRAC + WINDOW_WIDTH_FRAC + OSC_WIDTH_FRAC)
+            else $warning("ACCUM_WIDTH_FRAC (%0d) exceeds allowed sum IQ_WIDTH_FRAC + WINDOW_WIDTH_FRAC + OSC_WIDTH_FRAC (%0d)",
+                        ACCUM_WIDTH_FRAC,
+                        IQ_WIDTH_FRAC + WINDOW_WIDTH_FRAC + OSC_WIDTH_FRAC);
+    end
+
 
     // State machine
     typedef enum logic [1:0] {
@@ -209,10 +231,10 @@ module dft_accumulation #(
                 // Real part = x_real * W_real - x_imag * W_imag
                 // Imag part = x_real * W_imag + x_imag * W_real
                 
-                logic signed [IQ_WIDTH+WINDOW_WIDTH+OSC_WIDTH+1:0] xr_wr;
-                logic signed [IQ_WIDTH+WINDOW_WIDTH+OSC_WIDTH+1:0] xi_wi;
-                logic signed [IQ_WIDTH+WINDOW_WIDTH+OSC_WIDTH+1:0] xr_wi;
-                logic signed [IQ_WIDTH+WINDOW_WIDTH+OSC_WIDTH+1:0] xi_wr;
+                logic signed [IQ_WIDTH+WINDOW_WIDTH+OSC_WIDTH-1:0] xr_wr;
+                logic signed [IQ_WIDTH+WINDOW_WIDTH+OSC_WIDTH-1:0] xi_wi;
+                logic signed [IQ_WIDTH+WINDOW_WIDTH+OSC_WIDTH-1:0] xr_wi;
+                logic signed [IQ_WIDTH+WINDOW_WIDTH+OSC_WIDTH-1:0] xi_wr;
                 
                 xr_wr = x_weighted_real_q * W_real_stage1_q[k];
                 xi_wi = x_weighted_imag_q * W_imag_stage1_q[k];
@@ -263,20 +285,23 @@ module dft_accumulation #(
             ACCUMULATE: begin
                 // Accumulate when stage 2 produces valid output
                 if (sample_valid_stage2_q) begin
-                    for (int k = 0; k < NUM_BINS; k++) begin
-                        // Calculate shift amount to fit product into accumulator width
-                        localparam int PRODUCT_WIDTH = IQ_WIDTH + WINDOW_WIDTH + OSC_WIDTH;
-                        localparam int SHIFT_AMOUNT = PRODUCT_WIDTH - ACCUM_WIDTH;
+                    for (int k = 0; k < NUM_BINS; k++) begin 
+
+                        localparam int SHIFT_AMOUNT = IQ_WIDTH_FRAC + WINDOW_WIDTH_FRAC + OSC_WIDTH_FRAC - ACCUM_WIDTH_FRAC;
                         
                         if (SHIFT_AMOUNT > 0) begin
                             // Scale down products to fit accumulator
+                            // NOTE: prod_real/imag_q is wider than A_real/imag_q
+                            // The shift amount is chosen properly s.t. LSBs of shifted signal have the same
+                            // scale as the accumulator values
                             A_real_d[k] = A_real_q[k] + (prod_real_q[k] >>> SHIFT_AMOUNT);
                             A_imag_d[k] = A_imag_q[k] + (prod_imag_q[k] >>> SHIFT_AMOUNT);
                         end else begin
                             // No scaling needed
                             A_real_d[k] = A_real_q[k] + prod_real_q[k];
                             A_imag_d[k] = A_imag_q[k] + prod_imag_q[k];
-                        end
+                        end 
+                        
                     end
                     
                     sample_count_d = sample_count_q + 1;

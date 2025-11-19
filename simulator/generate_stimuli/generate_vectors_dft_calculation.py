@@ -114,13 +114,16 @@ def generate_test_case(test_name, iq_data, fs, freq_bins, window_type,
     # effective_scale = 2 ** (total_frac_bits - shift_amount - accum_frac_bits)
 
     # CORRECTED VERSION OF BITSHIFTS:
-    shift_amount = iq_frac_bits + window_frac_bits + osc_frac_bits - accum_frac_bits
-    effective_scale = 2 ** shift_amount
+    # shift_amount = iq_frac_bits + window_frac_bits + osc_frac_bits - accum_frac_bits
+    # effective_scale = 2 ** shift_amount
+
+    # the stimuli do not need to get shifted. since a already corresponds to the true golden floating point solution. 
+    # if i just transform this to the correct format directly, i don't have any scaling issues
     
-    A_real_hw = [float_to_fixed_point(np.real(a) / effective_scale, 
+    A_real_hw = [float_to_fixed_point(np.real(a), 
                                        accum_int_bits, accum_frac_bits, signed=True) 
                  for a in accums_sorted]
-    A_imag_hw = [float_to_fixed_point(np.imag(a) / effective_scale, 
+    A_imag_hw = [float_to_fixed_point(np.imag(a), 
                                        accum_int_bits, accum_frac_bits, signed=True) 
                  for a in accums_sorted]
     

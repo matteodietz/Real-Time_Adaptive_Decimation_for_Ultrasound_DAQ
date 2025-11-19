@@ -86,7 +86,7 @@ def generate_test_case(test_name, iq_data, fs, freq_bins, window_type,
     
     # Oscillator values W: Use Q(osc_width-16).16 format (16 fractional bits)
     # W values are complex with magnitude ~1
-    osc_frac_bits = 24
+    osc_frac_bits = 28
     osc_int_bits = osc_width - osc_frac_bits
     
     W_real_hw = np.zeros((N, K), dtype=int)
@@ -100,7 +100,7 @@ def generate_test_case(test_name, iq_data, fs, freq_bins, window_type,
                                                     osc_int_bits, osc_frac_bits, signed=True)
     
     # Expected accumulator outputs width: 48 bits
-    accum_frac_bits = 40
+    accum_frac_bits = 56
     accum_int_bits = accum_width - accum_frac_bits
     
     # Scale expected outputs to match hardware scaling
@@ -230,8 +230,8 @@ def main():
     # Hardware parameters
     IQ_WIDTH = 16           # Q2.14
     WINDOW_WIDTH = 16       # Q2.14
-    ACCUM_WIDTH = 48        # Q8.40 Needs to be large to avoid overflow
-    OSC_WIDTH = 27          # Q3.24
+    ACCUM_WIDTH = 64        # Q8.40 Needs to be large to avoid overflow
+    OSC_WIDTH = 32          # Q3.24
     NUM_BINS = 24           # Maximum
     
     test_cases = []
@@ -351,7 +351,7 @@ def main():
     
     fs_synth = 31.25e6
     nperseg_synth = 256
-    mod_freq_synth = 7.8125e6
+    mod_freq_synth = 6.8125e6
     
     # Define sparse frequency bins
     delta_f = 0.25e6
@@ -383,7 +383,7 @@ def main():
     
     # Test Case 2: DC signal (0 Hz)
     print("\n--- Test Case: DC signal ---")
-    signal_2 = np.ones(nperseg_synth, dtype=np.complex128)
+    signal_2 = 0.5 * np.ones(nperseg_synth, dtype=np.complex128)
     
     tc2 = generate_test_case(
         "synth_dc",

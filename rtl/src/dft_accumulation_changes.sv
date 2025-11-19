@@ -236,6 +236,9 @@ module dft_accumulation #(
                 logic signed [IQ_WIDTH+WINDOW_WIDTH+OSC_WIDTH-1:0] xr_wi;
                 logic signed [IQ_WIDTH+WINDOW_WIDTH+OSC_WIDTH-1:0] xi_wr;
                 
+                // TODO: check if this is correct (bit width extensions)
+                // most likely should be correct though.
+
                 xr_wr = x_weighted_real_q * W_real_stage1_q[k];
                 xi_wi = x_weighted_imag_q * W_imag_stage1_q[k];
                 xr_wi = x_weighted_real_q * W_imag_stage1_q[k];

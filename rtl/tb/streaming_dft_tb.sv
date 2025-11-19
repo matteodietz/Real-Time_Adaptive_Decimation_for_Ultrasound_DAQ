@@ -11,10 +11,10 @@ module dft_accumulation_tb ();
     localparam integer IQ_WIDTH_FRAC = 14;
     localparam integer WINDOW_WIDTH = 16;
     localparam integer WINDOW_WIDTH_FRAC = 14;
-    localparam integer ACCUM_WIDTH = 48;
-    localparam integer ACCUM_WIDTH_FRAC = 40;
-    localparam integer OSC_WIDTH = 27;
-    localparam OSC_WIDTH_FRAC = 24;
+    localparam integer ACCUM_WIDTH = 64;
+    localparam integer ACCUM_WIDTH_FRAC = 56;
+    localparam integer OSC_WIDTH = 32;
+    localparam integer OSC_WIDTH_FRAC = 28;
     localparam integer NUM_BINS = 24;
     localparam integer SAMPLE_COUNT_WIDTH = 16;
     
@@ -278,7 +278,7 @@ module dft_accumulation_tb ();
             end
             
             // early exit to reduce the waveform to one testcase
-            break;
+            // break;
             // Wait before next test
             repeat(10) @(posedge clk);
         end
@@ -331,19 +331,20 @@ module dft_accumulation_tb ();
             
             // Allow small tolerance for rounding errors (adjust as needed)
             // TODO: ADD TOLERANCE, for now zero tolerance
+            // TODO: NOT USE INTEGER DIVISION for error, use frac division
             if (error_real != 0 || error_imag != 0) begin
                 $display("    ERROR: Bin %0d mismatch", k);
-                $display("      A_real: Expected=%h, Got=%h, Error=%0d", 
-                        expected_A_real[k], act_A_real[k], error_real / (2**ACCUM_WIDTH_FRAC));
-                $display("      A_imag: Expected=%h, Got=%h, Error=%0d", 
-                        expected_A_imag[k], act_A_imag[k], error_imag / (2**ACCUM_WIDTH_FRAC));
+                $display("      A_real: Expected=%h, Got=%h, Error=%f", 
+                        expected_A_real[k], act_A_real[k], $itor(longint'(error_real)) / (2.0**ACCUM_WIDTH_FRAC));
+                $display("      A_imag: Expected=%h, Got=%h, Error=%f", 
+                        expected_A_imag[k], act_A_imag[k], $itor(longint'(error_imag)) / (2.0**ACCUM_WIDTH_FRAC));
                 mismatch = 1'b1;
             end else begin
                 $display("    SUCCESS: Bin %0d matches", k);
-                $display("      A_real: Expected=%h, Got=%h, Error=%0d", 
-                        expected_A_real[k], act_A_real[k], error_real / (2**ACCUM_WIDTH_FRAC));
-                $display("      A_imag: Expected=%h, Got=%h, Error=%0d", 
-                        expected_A_imag[k], act_A_imag[k], error_imag / (2**ACCUM_WIDTH_FRAC));
+                $display("      A_real: Expected=%h, Got=%h", 
+                        expected_A_real[k], act_A_real[k]);
+                $display("      A_imag: Expected=%h, Got=%h", 
+                        expected_A_imag[k], act_A_imag[k],);
             end
         end
         

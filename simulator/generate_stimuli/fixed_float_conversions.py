@@ -93,3 +93,13 @@ if __name__ == '__main__':
     val10_float = fixed_point_to_float(val1_fixed, 64, 56)
     print(f"10e-6 = {val1_fixed}")
     print(f"10e-6 = {val10_float}")
+
+    val11_float =  fixed_point_to_float(0xfc0002afed0d0000, 64, 56)
+    val12_float =  fixed_point_to_float(0x000002afed0d0000, 64, 56)
+    val13_float =  fixed_point_to_float(0xfffffd5012f30000, 64, 56)
+    val14_float =  fixed_point_to_float(0x03fffd5012f30000, 64, 56)
+
+    print(f"{val11_float}")
+    print(f"{val12_float}")
+    print(f"{val13_float}")
+    print(f"{val14_float}")

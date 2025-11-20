@@ -239,7 +239,7 @@ def main():
     # ====================================================================
     # --- NEW: Sanity Check Test Case (4-point DFT) ---
     # ====================================================================
-    print("\n========== Sanity Check Test Case ==========")
+    print("\n========== Sanity Check 1 Test Case (4-point DFT) ==========")
     
     # Use simple parameters for easy manual verification
     fs_sanity = 4.0 # 4 Hz sample rate
@@ -270,6 +270,76 @@ def main():
         4 # Actual number of bins for this test
     )
     test_cases.append(tc_sanity)
+
+
+
+    print("\n========== Sanity Check 2 Test Case (8-point DFT) ==========")
+
+    # Use simple parameters for easy manual verification
+    fs_sanity8 = 8.0    # 8 Hz sample rate
+    nperseg_sanity8 = 8 # 8-point DFT
+
+    # A simple real-valued cosine wave at 1 Hz.
+    # x[n] = sin(2*pi*1.0*n/8) = cos(pi*n/4)
+    t_sanity8 = np.arange(nperseg_sanity8) / fs_sanity8
+    signal_sanity8 = np.sin(2 * np.pi * 1.0 * t_sanity8)
+
+    # For this test, calculate ALL 8 frequency bins
+    # Frequencies: [0,1,2,3,-4,-3,-2,-1] Hz (fs=8, N=8)
+    S_bins_sanity8 = np.fft.fftfreq(nperseg_sanity8, 1/fs_sanity8)
+
+    print("\n--- Test Case: 8-point DFT of a 1 Hz Cosine ---")
+    tc_sanity8 = generate_test_case(
+        "sanity_check_8pt_dft",
+        signal_sanity8,
+        fs_sanity8,
+        S_bins_sanity8,
+        'rect',        # Rectangular window
+        IQ_WIDTH,
+        WINDOW_WIDTH,
+        ACCUM_WIDTH,
+        OSC_WIDTH,
+        8              # Actual number of bins for this test
+    )
+    test_cases.append(tc_sanity8)
+
+    
+
+    print("\n========== Sanity Check Test Case (64-point sin+cos DFT) ==========")
+
+    # Parameters
+    fs_sanity64 = 64.0    # 64 Hz sample rate
+    nperseg_sanity64 = 64 # 64-point DFT
+
+    # Two perfectly on-bin tones:
+    #   cos(2π*5*n/64)
+    #   sin(2π*12*n/64)
+    f_cos = 5.0
+    f_sin = 12.0
+
+    t_sanity64 = np.arange(nperseg_sanity64) / fs_sanity64
+    signal_sanity64 = (
+        np.cos(2 * np.pi * f_cos * t_sanity64) +
+        np.sin(2 * np.pi * f_sin * t_sanity64)
+    )
+
+    # All 64 frequency bins
+    S_bins_sanity64 = np.fft.fftfreq(nperseg_sanity64, 1/fs_sanity64)
+
+    print("\n--- Test Case: 64-point DFT of cos(5 Hz) + sin(12 Hz) ---")
+    tc_sanity64 = generate_test_case(
+        "sanity_check_64pt_sin_plus_cos",
+        signal_sanity64,
+        fs_sanity64,
+        S_bins_sanity64,
+        'rect',        # Rectangular window for exact bin alignment
+        IQ_WIDTH,
+        WINDOW_WIDTH,
+        ACCUM_WIDTH,
+        OSC_WIDTH,
+        64             # Actual number of bins for this test
+    )
+    test_cases.append(tc_sanity64)
     # ====================================================================
     
     # ===== Test Cases from PICMUS Data =====

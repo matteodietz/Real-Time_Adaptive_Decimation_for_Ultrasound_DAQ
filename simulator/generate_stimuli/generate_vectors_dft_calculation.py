@@ -49,7 +49,7 @@ def generate_test_case(test_name, iq_data, fs, freq_bins, window_type,
     # Sort by frequency for consistent output
     sort_indices = np.argsort(freqs)
     freqs_sorted = freqs[sort_indices]
-    accums_sorted = 100 * accumulators[sort_indices]      # TODO: Change the 100 *
+    accums_sorted = accumulators[sort_indices]    
     
     print(f"  Golden accumulator magnitudes: {np.abs(accums_sorted)}")
     
@@ -58,7 +58,7 @@ def generate_test_case(test_name, iq_data, fs, freq_bins, window_type,
     
     # Generate complex oscillator values W[n,k] = exp(-j*2*pi*k*n/fs)
     # W starts at 1+0j and is multiplied by E each sample
-    E = np.exp(-1j * 2 * np.pi * freqs_sorted / fs) # TODO: IS THIS FREQS SORTED OR FREQ BINS????
+    E = np.exp(-1j * 2 * np.pi * freqs_sorted / fs) 
     
     # Pre-compute all W values for all samples and all bins
     W_values = np.zeros((N, K), dtype=np.complex128)

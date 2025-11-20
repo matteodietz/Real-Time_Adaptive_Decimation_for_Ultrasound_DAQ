@@ -58,7 +58,7 @@ def generate_test_case(test_name, iq_data, fs, freq_bins, window_type,
     
     # Generate complex oscillator values W[n,k] = exp(-j*2*pi*k*n/fs)
     # W starts at 1+0j and is multiplied by E each sample
-    E = np.exp(-1j * 2 * np.pi * freq_bins / fs)
+    E = np.exp(-1j * 2 * np.pi * freqs_sorted / fs) # TODO: IS THIS FREQS SORTED OR FREQ BINS????
     
     # Pre-compute all W values for all samples and all bins
     W_values = np.zeros((N, K), dtype=np.complex128)

@@ -88,3 +88,8 @@ if __name__ == '__main__':
     # neg_val_hex = 0xFFFFA0
     # neg_val_float = fixed_point_to_float(neg_val_hex, 24, 6)
     # print(f"0xFFFFA0 (Q18.6) = {neg_val_float}")
+
+    val1_fixed = float_to_fixed_point(10e-6, 8, 56)
+    val10_float = fixed_point_to_float(val1_fixed, 64, 56)
+    print(f"10e-6 = {val1_fixed}")
+    print(f"10e-6 = {val10_float}")

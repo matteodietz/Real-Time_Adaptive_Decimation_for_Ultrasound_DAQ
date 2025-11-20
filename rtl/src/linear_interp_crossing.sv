@@ -1,8 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Purpose:     Performs linear interpolation to find the precise crossing
-//              frequency where a signal crosses a threshold.
-//
 //              Given two frequency points (f1, f2) and their corresponding
 //              dB levels (L1, L2), calculates:
 //              f_star = f1 + (f2 - f1) * (threshold_db - L1) / (L2 - L1)

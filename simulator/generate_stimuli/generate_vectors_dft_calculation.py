@@ -49,7 +49,7 @@ def generate_test_case(test_name, iq_data, fs, freq_bins, window_type,
     # Sort by frequency for consistent output
     sort_indices = np.argsort(freqs)
     freqs_sorted = freqs[sort_indices]
-    accums_sorted = accumulators[sort_indices]
+    accums_sorted = 100 * accumulators[sort_indices]      # TODO: Change the 100 *
     
     print(f"  Golden accumulator magnitudes: {np.abs(accums_sorted)}")
     

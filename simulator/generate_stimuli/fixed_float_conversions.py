@@ -1,4 +1,4 @@
-def float_to_fixed_point(value, int_bits, frac_bits, signed=True):
+def float_to_fixed_point(value, int_bits, frac_bits, signed=True, zero_threshold=1e-10):
     """
     Convert floating point to fixed point representation.
     
@@ -11,6 +11,11 @@ def float_to_fixed_point(value, int_bits, frac_bits, signed=True):
     Returns:
         Integer representation of fixed point number
     """
+
+    # Implement a "dead zone" around zero to handle floating point noise
+    if abs(value) < zero_threshold:
+        return 0
+
     total_bits = int_bits + frac_bits
     scale = 2 ** frac_bits
     fixed_val = int(round(value * scale))

@@ -1,72 +1,72 @@
     ERROR: Bin 0 mismatch
-      A_real: Expected=fffffffd7345ba3b, Got=ffffffa699176b47, Error=0.000005
-      A_imag: Expected=000000074cb7c2d7, Got=00000d7f50dc3a39, Error=0.000206
+      A_real: Expected=fffffffd73104a40, Got=ffffffa69cedd08a, Error=0.000005
+      A_imag: Expected=000000074ca952d9, Got=00000d7f54089269, Error=0.000206
     ERROR: Bin 1 mismatch
-      A_real: Expected=0000001a2bebe57a, Got=000003c1f722db7b, Error=0.000056
-      A_imag: Expected=0000001ccb2c908b, Got=000005a14dafa2fd, Error=0.000084
+      A_real: Expected=0000001a2b062692, Got=000003c1f67dbc5a, Error=0.000056
+      A_imag: Expected=0000001ccc0037b5, Got=000005a14e474829, Error=0.000084
     ERROR: Bin 2 mismatch
-      A_real: Expected=000000d9176655e7, Got=fffff5aad646d27d, Error=0.000171
-      A_imag: Expected=00000045ccc224d7, Got=fffffbdb48a79e28, Error=0.000067
+      A_real: Expected=000000d91539c6f2, Got=fffff5aad7cb84ab, Error=0.000171
+      A_imag: Expected=00000045d28ec8ae, Got=fffffbdb4ba3cef5, Error=0.000067
     ERROR: Bin 3 mismatch
-      A_real: Expected=ffffff064266b7e3, Got=fffffb607871cda0, Error=0.000056
-      A_imag: Expected=ffffffefe4f0df31, Got=0000021c044d8327, Error=0.000033
+      A_real: Expected=ffffff064333e60a, Got=fffffb607834f7b2, Error=0.000056
+      A_imag: Expected=ffffffefdf799633, Got=0000021c03eed72a, Error=0.000033
     ERROR: Bin 4 mismatch
-      A_real: Expected=00000140c6af0945, Got=fffff97d9d979b0f, Error=0.000118
-      A_imag: Expected=ffffff037008840e, Got=0000041be0b83ed6, Error=0.000078
+      A_real: Expected=00000140cc46ca09, Got=fffff97d9f10e77d, Error=0.000118
+      A_imag: Expected=ffffff037bd27722, Got=0000041bdc9098a6, Error=0.000078
     ERROR: Bin 5 mismatch
-      A_real: Expected=ffffff42c8cdec6e, Got=0000090199217989, Error=0.000149
-      A_imag: Expected=000001281c602326, Got=00000e5fba95754a, Error=0.000202
+      A_real: Expected=ffffff42c30ec027, Got=0000090198575810, Error=0.000149
+      A_imag: Expected=000001281c412e26, Got=00000e5fbb61b104, Error=0.000202
     ERROR: Bin 6 mismatch
-      A_real: Expected=00000037944ece12, Got=00000b890a412084, Error=0.000173
-      A_imag: Expected=fffffc750aad2fec, Got=ffffee8cdab41613, Error=0.000212
+      A_real: Expected=000000379723d677, Got=00000b890acabc2a, Error=0.000173
+      A_imag: Expected=fffffc75202c2a14, Got=ffffee8ce0531ecf, Error=0.000212
     ERROR: Bin 7 mismatch
-      A_real: Expected=ffffff8b35ba00b0, Got=fffff1105443e4d5, Error=0.000221
-      A_imag: Expected=ffffffe425e52ba8, Got=fffffae5262734c7, Error=0.000076
+      A_real: Expected=ffffff8ba5fb2db3, Got=fffff11054a889eb, Error=0.000221
+      A_imag: Expected=ffffffe46ea42a8a, Got=fffffae525b7f52c, Error=0.000076
     ERROR: Bin 8 mismatch
-      A_real: Expected=ffffee6943518197, Got=ffffef9ed821c706, Error=0.000018
-      A_imag: Expected=fffffc13833b66c9, Got=000006f3259330d5, Error=0.000166
+      A_real: Expected=ffffee69af0e3328, Got=ffffef9ed8657065, Error=0.000018
+      A_imag: Expected=fffffc1205ed7203, Got=000006f3233c1bf8, Error=0.000166
     ERROR: Bin 9 mismatch
-      A_real: Expected=fffffdece884ba98, Got=000001d54517d129, Error=0.000060
-      A_imag: Expected=000031503f7de36c, Got=00002e44a4fedb1e, Error=0.000046
+      A_real: Expected=fffffdea5311646a, Got=000001d54838475b, Error=0.000060
+      A_imag: Expected=000031502d1db82e, Got=00002e44a60e9ed8, Error=0.000046
     ERROR: Bin 10 mismatch
-      A_real: Expected=000061df236fcec6, Got=0000666785ea99ac, Error=0.000069
-      A_imag: Expected=ffff6ea275c8f080, Got=ffff6d6480f7433b, Error=0.000019
+      A_real: Expected=000061e3fb67cfc9, Got=000066679903a5a6, Error=0.000069
+      A_imag: Expected=ffff6ea54af75d20, Got=ffff6d64653584c1, Error=0.000019
     ERROR: Bin 11 mismatch
-      A_real: Expected=0001e870201dc1db, Got=0001e3ca46134a20, Error=0.000071
-      A_imag: Expected=ffff3b4a6d0c01f3, Got=ffff24fbae7d9b16, Error=0.000340
+      A_real: Expected=0001e876021a0f04, Got=0001e3ca7daf6b11, Error=0.000071
+      A_imag: Expected=ffff3b58ff8e5345, Got=ffff24fb78c7f381, Error=0.000341
     ERROR: Bin 12 mismatch
-      A_real: Expected=ffff0d532e59b368, Got=ffff167c2f6d31c2, Error=0.000140
-      A_imag: Expected=0000b183bd4f68bf, Got=0000ad40ab2e2d58, Error=0.000065
+      A_real: Expected=ffff0d4d9d39543f, Got=ffff167c06ea8f33, Error=0.000140
+      A_imag: Expected=0000b17c8bc155a4, Got=0000ad40c01c9f83, Error=0.000065
     ERROR: Bin 13 mismatch
-      A_real: Expected=00000765a26d0874, Got=000002c2d89a25d0, Error=0.000071
-      A_imag: Expected=ffffddf75ac52b11, Got=ffffdf46f56ea3e1, Error=0.000020
+      A_real: Expected=00000766de547d07, Got=000002c2da8ed2ac, Error=0.000071
+      A_imag: Expected=ffffddf7b2475027, Got=ffffdf46f3da86fb, Error=0.000020
     ERROR: Bin 14 mismatch
-      A_real: Expected=ffffed3cf50a1e4c, Got=ffffed3cfb7ebad9, Error=0.000000
-      A_imag: Expected=00000ca78c369f00, Got=00000c41cac8b618, Error=0.000006
+      A_real: Expected=ffffed3c01358f2c, Got=ffffed3cfa0db947, Error=0.000000
+      A_imag: Expected=00000ca6b24c0dfe, Got=00000c41c9b135d0, Error=0.000006
     ERROR: Bin 15 mismatch
-      A_real: Expected=0000040847ea02ea, Got=ffffff80b7b67dce, Error=0.000069
-      A_imag: Expected=000001af1854675a, Got=00000469f96ccf1f, Error=0.000042
+      A_real: Expected=0000040820db16f9, Got=ffffff80b788052f, Error=0.000069
+      A_imag: Expected=000001afc2965abb, Got=00000469f86f5040, Error=0.000042
     ERROR: Bin 16 mismatch
-      A_real: Expected=fffffcdd53d7ccfd, Got=000000b076081e71, Error=0.000058
-      A_imag: Expected=00000097f52f48d6, Got=000009e9dc531d85, Error=0.000142
+      A_real: Expected=fffffcdd9b538b77, Got=000000b0765f8dd1, Error=0.000058
+      A_imag: Expected=00000097d5338665, Got=000009e9dc1d2cc0, Error=0.000142
     ERROR: Bin 17 mismatch
-      A_real: Expected=000000481f4c0fec, Got=00000dba2f8ed3a2, Error=0.000205
-      A_imag: Expected=0000008bc22ef61c, Got=ffffff148e53eb4f, Error=0.000022
+      A_real: Expected=0000004813409212, Got=00000dba2d86a7a2, Error=0.000205
+      A_imag: Expected=0000008bb48505b3, Got=ffffff148c957d23, Error=0.000022
     ERROR: Bin 18 mismatch
-      A_real: Expected=ffffff721d2ccd9f, Got=000002b150e3842f, Error=0.000050
-      A_imag: Expected=0000008becc1de11, Got=ffffef6b4f6ac128, Error=0.000261
+      A_real: Expected=ffffff721c627cd5, Got=000002b1505f22b8, Error=0.000050
+      A_imag: Expected=0000008be6b7a2df, Got=ffffef6b4ed5f4f0, Error=0.000261
     ERROR: Bin 19 mismatch
-      A_real: Expected=ffffffe2f4177d58, Got=ffffeccb530d4071, Error=0.000291
-      A_imag: Expected=fffffff76038a653, Got=fffff95515fded66, Error=0.000101
+      A_real: Expected=ffffffe2f2bb70ee, Got=ffffeccb4f9710c3, Error=0.000291
+      A_imag: Expected=fffffff75e80c09b, Got=fffff95520e51ec8, Error=0.000101
     ERROR: Bin 20 mismatch
-      A_real: Expected=ffffffea4e02392f, Got=fffff8112a297f1c, Error=0.000120
-      A_imag: Expected=0000004d95b71013, Got=00000f96eb89fbab, Error=0.000233
+      A_real: Expected=ffffffea4c4f7881, Got=fffff8112bd38266, Error=0.000120
+      A_imag: Expected=0000004d93c98e90, Got=00000f96e950a9d4, Error=0.000233
     ERROR: Bin 21 mismatch
-      A_real: Expected=ffffffd055154e97, Got=000004b610480631, Error=0.000075
-      A_imag: Expected=ffffffff3752c232, Got=00000bb34aae86dc, Error=0.000179
+      A_real: Expected=ffffffd0552109d7, Got=000004b60eef4c0b, Error=0.000075
+      A_imag: Expected=ffffffff35ee61e5, Got=00000bb34a5a5865, Error=0.000179
     ERROR: Bin 22 mismatch
-      A_real: Expected=fffffff7ff538490, Got=00000e01322f451d, Error=0.000214
-      A_imag: Expected=fffffffe271fe650, Got=00000185793946f3, Error=0.000023
+      A_real: Expected=fffffff7ff63c07b, Got=00000e01329beb86, Error=0.000214
+      A_imag: Expected=fffffffe26e3adde, Got=0000018577a06319, Error=0.000023
     ERROR: Bin 23 mismatch
-      A_real: Expected=fffffffe12d9da01, Got=00000fab32c2b7fb, Error=0.000239
-      A_imag: Expected=000000012faa7a87, Got=fffff4b2abf85197, Error=0.000173
+      A_real: Expected=fffffffe12cf7f4f, Got=00000fab38ae2b80, Error=0.000239
+      A_imag: Expected=000000012f9a4b1a, Got=fffff4b2ae146ec1, Error=0.000173

@@ -1,25 +1,24 @@
-    ERROR: Bin 0 mismatch
-      A_real: Expected=0000000000000010, Got=0000000000000000, Error=0.000000
-      A_imag: Expected=fffffffffffffff1, Got=0000000000000000, Error=0.000000
+    SUCCESS: Bin 0 matches
+      A_real: Expected=0000000000000000, Got=0000000000000000
+      A_imag: Expected=0000000000000000, Got=0000000000000000 
     ERROR: Bin 1 mismatch
       A_real: Expected=0000000000000000, Got=0000000000000000, Error=0.000000
-      A_imag: Expected=fffffffffffffff8, Got=fc0002afed0d0000, Error=3.999959
-    ERROR: Bin 2 mismatch
-      A_real: Expected=0000000000000006, Got=0000000000000000, Error=0.000000
-      A_imag: Expected=fffffffffffffff8, Got=0000000000000000, Error=0.000000
+      A_imag: Expected=0000000000000000, Got=fffffd5012f30000, Error=0.000041
+    SUCCESS: Bin 2 matches
+      A_real: Expected=0000000000000000, Got=0000000000000000
+      A_imag: Expected=0000000000000000, Got=0000000000000000 
     ERROR: Bin 3 mismatch
-      A_real: Expected=0000000000000044, Got=0000000000000000, Error=0.000000
-      A_imag: Expected=0400000000000000, Got=000002afed0d0000, Error=3.999959
-    ERROR: Bin 4 mismatch
-      A_real: Expected=fffffffffffffff0, Got=0000000000000000, Error=0.000000
-      A_imag: Expected=0000000000000000, Got=0000000000000000, Error=0.000000
+      A_real: Expected=0000000000000000, Got=0000000000000000, Error=0.000000
+      A_imag: Expected=0400000000000000, Got=03fffd5012f30000, Error=0.000041
+    SUCCESS: Bin 4 matches
+      A_real: Expected=0000000000000000, Got=0000000000000000
+      A_imag: Expected=0000000000000000, Got=0000000000000000 
     ERROR: Bin 5 mismatch
-      A_real: Expected=0000000000000044, Got=0000000000000000, Error=0.000000
-      A_imag: Expected=fc00000000000000, Got=fffffd5012f30000, Error=3.999959
-    ERROR: Bin 6 mismatch
-      A_real: Expected=0000000000000006, Got=0000000000000000, Error=0.000000
-      A_imag: Expected=0000000000000008, Got=0000000000000000, Error=0.000000
+      A_real: Expected=0000000000000000, Got=0000000000000000, Error=0.000000
+      A_imag: Expected=fc00000000000000, Got=fc0002afed0d0000, Error=0.000041
+    SUCCESS: Bin 6 matches
+      A_real: Expected=0000000000000000, Got=0000000000000000
+      A_imag: Expected=0000000000000000, Got=0000000000000000 
     ERROR: Bin 7 mismatch
       A_real: Expected=0000000000000000, Got=0000000000000000, Error=0.000000
-      A_imag: Expected=0000000000000008, Got=03fffd5012f30000, Error=3.999959
-  RESULT: FAIL
+      A_imag: Expected=0000000000000000, Got=000002afed0d0000, Error=0.000041

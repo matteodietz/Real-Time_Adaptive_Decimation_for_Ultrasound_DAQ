@@ -1,12 +1,12 @@
-    ERROR: Bin 0 mismatch
-      A_real: Expected=0000000000000005, Got=0000000000000000, Error=0.000000
-      A_imag: Expected=0000000000000012, Got=0000000000000000, Error=0.000000
-    ERROR: Bin 1 mismatch
-      A_real: Expected=0200000000000000, Got=0200000000000000, Error=0.000000
-      A_imag: Expected=0000000000000009, Got=0000000000000000, Error=0.000000
-    ERROR: Bin 2 mismatch
-      A_real: Expected=fffffffffffffff3, Got=0000000000000000, Error=0.000000
-      A_imag: Expected=0000000000000000, Got=0000000000000000, Error=0.000000
-    ERROR: Bin 3 mismatch
-      A_real: Expected=0200000000000000, Got=0200000000000000, Error=0.000000
-      A_imag: Expected=fffffffffffffff7, Got=0000000000000000, Error=0.000000
+    SUCCESS: Bin 0 matches
+      A_real: Expected=0000000000000000, Got=0000000000000000
+      A_imag: Expected=0000000000000000, Got=0000000000000000 
+    SUCCESS: Bin 1 matches
+      A_real: Expected=0200000000000000, Got=0200000000000000
+      A_imag: Expected=0000000000000000, Got=0000000000000000 
+    SUCCESS: Bin 2 matches
+      A_real: Expected=0000000000000000, Got=0000000000000000
+      A_imag: Expected=0000000000000000, Got=0000000000000000 
+    SUCCESS: Bin 3 matches
+      A_real: Expected=0200000000000000, Got=0200000000000000
+      A_imag: Expected=0000000000000000, Got=0000000000000000 

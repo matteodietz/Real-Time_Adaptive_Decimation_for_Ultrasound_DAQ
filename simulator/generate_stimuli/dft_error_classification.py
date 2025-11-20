@@ -9,7 +9,7 @@ SIGNED = True
 
 # Path to input file: parent_dir / dft_error_eval / filename
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-INPUT_FILE = os.path.join(SCRIPT_DIR, "dft_error_eval", "sanity_2.txt")  # file to investigate
+INPUT_FILE = os.path.join(SCRIPT_DIR, "dft_error_eval", "synth_2.txt")  # file to investigate
 
 
 # Regex patterns to parse the file

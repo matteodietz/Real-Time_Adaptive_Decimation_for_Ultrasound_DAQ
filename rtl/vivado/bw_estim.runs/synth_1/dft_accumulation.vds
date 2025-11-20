@@ -1,0 +1,1041 @@
+#-----------------------------------------------------------
+# Vivado v2024.2.2 (64-bit)
+# SW Build 6060944 on Thu Mar 06 19:10:09 MST 2025
+# IP Build 6050500 on Thu Mar  6 23:33:39 MST 2025
+# SharedData Build 6060542 on Thu Mar 06 10:31:07 MST 2025
+# Start of session at: Thu Nov 20 13:57:58 2025
+# Process ID         : 910262
+# Current directory  : /home/bsc25h10/mdietz/bachelors_thesis/rtl/vivado/bw_estim.runs/synth_1
+# Command line       : vivado -log dft_accumulation.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source dft_accumulation.tcl
+# Log file           : /home/bsc25h10/mdietz/bachelors_thesis/rtl/vivado/bw_estim.runs/synth_1/dft_accumulation.vds
+# Journal file       : /home/bsc25h10/mdietz/bachelors_thesis/rtl/vivado/bw_estim.runs/synth_1/vivado.jou
+# Running On         : badile11.ee.ethz.ch
+# Platform           : AlmaLinux
+# Operating System   : AlmaLinux release 8.10 (Cerulean Leopard)
+# Processor Detail   : AMD Ryzen 9 9900X 12-Core Processor
+# CPU Frequency      : 600.000 MHz
+# CPU Physical cores : 12
+# CPU Logical cores  : 24
+# Host memory        : 66895 MB
+# Swap memory        : 53687 MB
+# Total Virtual      : 120582 MB
+# Available Virtual  : 116237 MB
+#-----------------------------------------------------------
+source dft_accumulation.tcl -notrace
+Command: synth_design -top dft_accumulation -part xck26-sfvc784-2LV-c
+Starting synth_design
+Attempting to get a license for feature 'Synthesis' and/or device 'xck26'
+INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xck26'
+INFO: [Synth 8-7079] Multithreading enabled for synth_design using a maximum of 7 processes.
+INFO: [Synth 8-7078] Launching helper process for spawning children vivado processes
+INFO: [Synth 8-7075] Helper process launched with PID 910309
+---------------------------------------------------------------------------------
+Starting Synthesize : Time (s): cpu = 00:00:02 ; elapsed = 00:00:02 . Memory (MB): peak = 2179.020 ; gain = 443.883 ; free physical = 52578 ; free virtual = 109779
+---------------------------------------------------------------------------------
+INFO: [Synth 8-6157] synthesizing module 'dft_accumulation' [/home/bsc25h10/mdietz/bachelors_thesis/rtl/src/dft_accumulation_changes.sv:1]
+WARNING: [Synth 8-2898] ignoring property declaration [/home/bsc25h10/mdietz/bachelors_thesis/rtl/src/dft_accumulation_changes.sv:202]
+WARNING: [Synth 8-2898] ignoring concurrent assertion [/home/bsc25h10/mdietz/bachelors_thesis/rtl/src/dft_accumulation_changes.sv:209]
+INFO: [Synth 8-6155] done synthesizing module 'dft_accumulation' (0#1) [/home/bsc25h10/mdietz/bachelors_thesis/rtl/src/dft_accumulation_changes.sv:1]
+WARNING: [Synth 8-6014] Unused sequential element sample_count_q_reg was removed.  [/home/bsc25h10/mdietz/bachelors_thesis/rtl/src/dft_accumulation_changes.sv:103]
+---------------------------------------------------------------------------------
+Finished Synthesize : Time (s): cpu = 00:00:02 ; elapsed = 00:00:03 . Memory (MB): peak = 2258.957 ; gain = 523.820 ; free physical = 52489 ; free virtual = 109694
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Constraint Validation : Time (s): cpu = 00:00:03 ; elapsed = 00:00:03 . Memory (MB): peak = 2273.801 ; gain = 538.664 ; free physical = 52481 ; free virtual = 109685
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Loading Part and Timing Information
+---------------------------------------------------------------------------------
+Loading part: xck26-sfvc784-2LV-c
+INFO: [Synth 8-6742] Reading net delay rules and data
+INFO: [Device 21-403] Loading part xck26-sfvc784-2LV-c
+---------------------------------------------------------------------------------
+Finished Loading Part and Timing Information : Time (s): cpu = 00:00:03 ; elapsed = 00:00:03 . Memory (MB): peak = 2281.805 ; gain = 546.668 ; free physical = 52481 ; free virtual = 109685
+---------------------------------------------------------------------------------
+INFO: [Synth 8-802] inferred FSM for state register 'state_q_reg' in module 'dft_accumulation'
+---------------------------------------------------------------------------------------------------
+                   State |                     New Encoding |                Previous Encoding 
+---------------------------------------------------------------------------------------------------
+                    IDLE |                              001 |                               00
+              ACCUMULATE |                              010 |                               01
+                    DONE |                              100 |                               10
+---------------------------------------------------------------------------------------------------
+INFO: [Synth 8-3354] encoded FSM with state register 'state_q_reg' using encoding 'one-hot' in module 'dft_accumulation'
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 2 : Time (s): cpu = 00:00:03 ; elapsed = 00:00:03 . Memory (MB): peak = 2293.680 ; gain = 558.543 ; free physical = 52458 ; free virtual = 109671
+---------------------------------------------------------------------------------
+No constraint files found.
+---------------------------------------------------------------------------------
+Start RTL Component Statistics 
+---------------------------------------------------------------------------------
+Detailed RTL Component Info : 
++---Adders : 
+	   3 Input   59 Bit       Adders := 16    
+	   2 Input   59 Bit       Adders := 16    
+	   2 Input   48 Bit       Adders := 32    
++---Registers : 
+	               59 Bit    Registers := 32    
+	               48 Bit    Registers := 32    
+	               32 Bit    Registers := 2     
+	               27 Bit    Registers := 32    
+	                1 Bit    Registers := 4     
++---Multipliers : 
+	              27x32  Multipliers := 64    
++---Muxes : 
+	   3 Input   48 Bit        Muxes := 32    
+	   3 Input    1 Bit        Muxes := 2     
+---------------------------------------------------------------------------------
+Finished RTL Component Statistics 
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Part Resource Summary
+---------------------------------------------------------------------------------
+Part Resources:
+DSPs: 1248 (col length:96)
+BRAMs: 288 (col length: RAMB18 96 RAMB36 48)
+---------------------------------------------------------------------------------
+Finished Part Resource Summary
+---------------------------------------------------------------------------------
+No constraint files found.
+---------------------------------------------------------------------------------
+Start Cross Boundary and Area Optimization
+---------------------------------------------------------------------------------
+WARNING: [Synth 8-7080] Parallel synthesis criteria is not met
+DSP Report: Generating DSP x_weighted_imag_q0, operation Mode is: A*B.
+DSP Report: operator x_weighted_imag_q0 is absorbed into DSP x_weighted_imag_q0.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP x_weighted_real_q0, operation Mode is: A*B.
+DSP Report: operator x_weighted_real_q0 is absorbed into DSP x_weighted_real_q0.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: Generating DSP p_0_out, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+DSP Report: operator p_0_out is absorbed into DSP p_0_out.
+---------------------------------------------------------------------------------
+Finished Cross Boundary and Area Optimization : Time (s): cpu = 00:00:07 ; elapsed = 00:00:10 . Memory (MB): peak = 3084.531 ; gain = 1349.395 ; free physical = 51368 ; free virtual = 108709
+---------------------------------------------------------------------------------
+ Sort Area is  p_0_out_10 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_10 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_11 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_11 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_12 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_12 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_13 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_13 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_14 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_14 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_15 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_15 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_16 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_16 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_17 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_17 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_18 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_18 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_19 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_19 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_1a : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_1a : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_1b : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_1b : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_1c : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_1c : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_1d : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_1d : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_1e : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_1e : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_1f : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_1f : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_2 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_2 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_20 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_20 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_21 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_21 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_22 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_22 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_23 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_23 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_24 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_24 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_25 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_25 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_26 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_26 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_27 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_27 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_28 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_28 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_29 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_29 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_2a : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_2a : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_2b : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_2b : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_2c : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_2c : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_2d : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_2d : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_2e : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_2e : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_2f : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_2f : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_30 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_30 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_31 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_31 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_32 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_32 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_33 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_33 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_34 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_34 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_35 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_35 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_36 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_36 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_37 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_37 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_38 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_38 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_39 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_39 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_3a : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_3a : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_3b : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_3b : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_3c : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_3c : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_3d : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_3d : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_3e : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_3e : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_3f : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_3f : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_40 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_40 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_41 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_41 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_42 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_42 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_43 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_43 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_44 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_44 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_6 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_6 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_7 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_7 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_8 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_8 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_9 : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_9 : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_a : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_a : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_b : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_b : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_c : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_c : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_d : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_d : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_e : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_e : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  p_0_out_f : 0 0 : 3698 6846 : Used 1 time 0
+ Sort Area is  p_0_out_f : 0 1 : 3148 6846 : Used 1 time 0
+ Sort Area is  x_weighted_imag_q0_5 : 0 0 : 1937 1937 : Used 1 time 0
+ Sort Area is  x_weighted_real_q0_0 : 0 0 : 1937 1937 : Used 1 time 0
+---------------------------------------------------------------------------------
+Start ROM, RAM, DSP, Shift Register and Retiming Reporting
+---------------------------------------------------------------------------------
+
+DSP: Preliminary Mapping Report (see note below. The ' indicates corresponding REG is set)
++-----------------+----------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
+|Module Name      | DSP Mapping    | A Size | B Size | C Size | D Size | P Size | AREG | BREG | CREG | DREG | ADREG | MREG | PREG | 
++-----------------+----------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
+|dft_accumulation | A*B            | 16     | 16     | -      | -      | 32     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 16     | 16     | -      | -      | 32     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B            | 27     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (PCIN>>17)+A*B | 27     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
++-----------------+----------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
+
+Note: The table above is a preliminary report that shows the DSPs inferred at the current stage of the synthesis flow. Some DSP may be reimplemented as non DSP primitives later in the synthesis flow. Multiple instantiated DSPs are reported only once.
+---------------------------------------------------------------------------------
+Finished ROM, RAM, DSP, Shift Register and Retiming Reporting
+---------------------------------------------------------------------------------
+No constraint files found.
+---------------------------------------------------------------------------------
+Start Timing Optimization
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Timing Optimization : Time (s): cpu = 00:00:07 ; elapsed = 00:00:10 . Memory (MB): peak = 3084.531 ; gain = 1349.395 ; free physical = 51368 ; free virtual = 108709
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Technology Mapping
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Technology Mapping : Time (s): cpu = 00:00:07 ; elapsed = 00:00:11 . Memory (MB): peak = 3084.531 ; gain = 1349.395 ; free physical = 51362 ; free virtual = 108703
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished IO Insertion : Time (s): cpu = 00:00:09 ; elapsed = 00:00:13 . Memory (MB): peak = 3100.375 ; gain = 1365.238 ; free physical = 51334 ; free virtual = 108675
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Instances
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Instances : Time (s): cpu = 00:00:09 ; elapsed = 00:00:13 . Memory (MB): peak = 3100.375 ; gain = 1365.238 ; free physical = 51334 ; free virtual = 108675
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Rebuilding User Hierarchy
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Rebuilding User Hierarchy : Time (s): cpu = 00:00:09 ; elapsed = 00:00:13 . Memory (MB): peak = 3100.375 ; gain = 1365.238 ; free physical = 51334 ; free virtual = 108675
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Ports
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Ports : Time (s): cpu = 00:00:09 ; elapsed = 00:00:13 . Memory (MB): peak = 3100.375 ; gain = 1365.238 ; free physical = 51334 ; free virtual = 108675
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:09 ; elapsed = 00:00:13 . Memory (MB): peak = 3100.375 ; gain = 1365.238 ; free physical = 51334 ; free virtual = 108675
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Nets
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Nets : Time (s): cpu = 00:00:09 ; elapsed = 00:00:13 . Memory (MB): peak = 3100.375 ; gain = 1365.238 ; free physical = 51334 ; free virtual = 108675
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Writing Synthesis Report
+---------------------------------------------------------------------------------
+
+DSP Final Report (the ' indicates corresponding REG is set)
++-----------------+--------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
+|Module Name      | DSP Mapping  | A Size | B Size | C Size | D Size | P Size | AREG | BREG | CREG | DREG | ADREG | MREG | PREG | 
++-----------------+--------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
+|dft_accumulation | (A*B)'       | 30     | 18     | -      | -      | 32     | 0    | 0    | -    | -    | -     | 0    | 1    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | (A*B)'       | 30     | 18     | -      | -      | 32     | 0    | 0    | -    | -    | -     | 0    | 1    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | A*B          | 30     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|dft_accumulation | PCIN>>17+A*B | 30     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
++-----------------+--------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
+
+
+Report BlackBoxes: 
++-+--------------+----------+
+| |BlackBox name |Instances |
++-+--------------+----------+
++-+--------------+----------+
+
+Report Cell Usage: 
++------+----------------+------+
+|      |Cell            |Count |
++------+----------------+------+
+|1     |BUFG            |     1|
+|2     |CARRY8          |   448|
+|3     |DSP48E2         |   128|
+|4     |DSP_ALU         |     2|
+|5     |DSP_A_B_DATA    |     2|
+|6     |DSP_C_DATA      |     2|
+|7     |DSP_MULTIPLIER  |     2|
+|8     |DSP_M_DATA      |     2|
+|9     |DSP_OUTPUT      |     2|
+|10    |DSP_PREADD      |     2|
+|11    |DSP_PREADD_DATA |     2|
+|12    |LUT1            |     1|
+|13    |LUT2            |  5050|
+|14    |LUT3            |     1|
+|15    |LUT4            |     1|
+|16    |LUT6            |     1|
+|17    |FDCE            |  3924|
+|18    |FDPE            |     1|
+|19    |IBUF            |   917|
+|20    |OBUF            |  1538|
++------+----------------+------+
+
+Report Instance Areas: 
++------+---------------------+-----------------------------+------+
+|      |Instance             |Module                       |Cells |
++------+---------------------+-----------------------------+------+
+|1     |top                  |                             | 12027|
+|2     |  x_weighted_imag_q0 |x_weighted_imag_q0_funnel    |     8|
+|3     |  x_weighted_real_q0 |x_weighted_imag_q0_funnel__1 |     8|
++------+---------------------+-----------------------------+------+
+---------------------------------------------------------------------------------
+Finished Writing Synthesis Report : Time (s): cpu = 00:00:09 ; elapsed = 00:00:13 . Memory (MB): peak = 3100.375 ; gain = 1365.238 ; free physical = 51334 ; free virtual = 108675
+---------------------------------------------------------------------------------
+Synthesis finished with 0 errors, 0 critical warnings and 4 warnings.
+Synthesis Optimization Runtime : Time (s): cpu = 00:00:09 ; elapsed = 00:00:13 . Memory (MB): peak = 3100.375 ; gain = 1365.238 ; free physical = 51334 ; free virtual = 108675
+Synthesis Optimization Complete : Time (s): cpu = 00:00:09 ; elapsed = 00:00:13 . Memory (MB): peak = 3100.383 ; gain = 1365.238 ; free physical = 51334 ; free virtual = 108675
+INFO: [Project 1-571] Translating synthesized netlist
+Netlist sorting complete. Time (s): cpu = 00:00:00.03 ; elapsed = 00:00:00.03 . Memory (MB): peak = 3123.363 ; gain = 0.000 ; free physical = 51476 ; free virtual = 108817
+INFO: [Netlist 29-17] Analyzing 1496 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
+WARNING: [Netlist 29-101] Netlist 'dft_accumulation' is not ideal for floorplanning, since the cellview 'dft_accumulation' contains a large number of primitives.  Please consider enabling hierarchy in synthesis if you want to do floorplanning.
+INFO: [Project 1-570] Preparing netlist for logic optimization
+INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 3305.461 ; gain = 0.000 ; free physical = 51346 ; free virtual = 108699
+INFO: [Project 1-111] Unisim Transformation Summary:
+  A total of 1048 instances were transformed.
+  BUFG => BUFGCE: 1 instance 
+  DSP48E2 => DSP48E2 (DSP_ALU, DSP_A_B_DATA, DSP_C_DATA, DSP_MULTIPLIER, DSP_M_DATA, DSP_OUTPUT, DSP_PREADD, DSP_PREADD_DATA): 130 instances
+  IBUF => IBUF (IBUFCTRL, INBUF): 917 instances
+
+Synth Design complete | Checksum: 3272e3f0
+INFO: [Common 17-83] Releasing license: Synthesis
+17 Infos, 5 Warnings, 0 Critical Warnings and 0 Errors encountered.
+synth_design completed successfully
+synth_design: Time (s): cpu = 00:00:13 ; elapsed = 00:00:16 . Memory (MB): peak = 3305.461 ; gain = 1573.297 ; free physical = 51346 ; free virtual = 108698
+INFO: [Common 17-2834] synth_design peak Physical Memory [PSS] (MB): overall = 2347.817; main = 2301.238; forked = 276.755
+INFO: [Common 17-2834] synth_design peak Virtual Memory [VSS] (MB): overall = 4637.688; main = 3305.465; forked = 1553.152
+Write ShapeDB Complete: Time (s): cpu = 00:00:00.04 ; elapsed = 00:00:00.01 . Memory (MB): peak = 3329.473 ; gain = 0.000 ; free physical = 51344 ; free virtual = 108698
+INFO: [Common 17-1381] The checkpoint '/home/bsc25h10/mdietz/bachelors_thesis/rtl/vivado/bw_estim.runs/synth_1/dft_accumulation.dcp' has been generated.
+INFO: [Vivado 12-24828] Executing command : report_utilization -file dft_accumulation_utilization_synth.rpt -pb dft_accumulation_utilization_synth.pb
+INFO: [Common 17-206] Exiting Vivado at Thu Nov 20 13:58:23 2025...

@@ -302,6 +302,49 @@ def main():
         8              # Actual number of bins for this test
     )
     test_cases.append(tc_sanity8)
+
+
+
+    print("\n========== Sanity Check 3 Test Case (24-point DFT: sin + cos) ==========")
+
+    # Use parameters for a 24-point DFT
+    fs_sanity24 = 24.0   # 24 Hz sample rate (to keep integer frequencies simple)
+    nperseg_sanity24 = 24 # 24-point DFT
+
+    # A mixed signal: 1 Hz sine wave + 2 Hz cosine wave.
+    # x[n] = sin(2*pi*1.0*n/fs) + cos(2*pi*2.0*n/fs)
+    # The time vector covers one segment (N=24 samples)
+    t_sanity24 = np.arange(nperseg_sanity24) / fs_sanity24
+
+    # Generate the mixed signal
+    # 1.0 Hz sine component
+    sin_comp = np.sin(2 * np.pi * 1.0 * t_sanity24)
+    # 2.0 Hz cosine component
+    cos_comp = np.cos(2 * np.pi * 2.0 * t_sanity24)
+
+    # Combined signal
+    signal_sanity24 = sin_comp + cos_comp
+
+    # For this test, calculate ALL 24 frequency bins
+    # Frequencies: [0, 1, ..., 11, -12, -11, ..., -1] Hz (fs=24, N=24)
+    S_bins_sanity24 = np.fft.fftfreq(nperseg_sanity24, 1/fs_sanity24)
+
+    print("\n--- Test Case: 24-point DFT of (1 Hz Sine + 2 Hz Cosine) ---")
+    tc_sanity24 = generate_test_case(
+        "sanity_check_24pt_dft_sin_cos",
+        signal_sanity24,
+        fs_sanity24,
+        S_bins_sanity24,
+        'rect',        # Rectangular window
+        IQ_WIDTH,
+        WINDOW_WIDTH,
+        ACCUM_WIDTH,
+        OSC_WIDTH,
+        24             # Actual number of bins for this test
+    )
+    test_cases.append(tc_sanity24)
+
+
     # =================================================================================
     
     
@@ -345,8 +388,8 @@ def main():
             
             # Test different windows
             test_configs = [
-                ("picmus_ch64_win29", 64, 29),
-                ("picmus_ch64_win15", 96, 30),
+                ("picmus_ch64_win29", 64, 5),
+                ("picmus_ch64_win15", 96, 29),
                 ("picmus_ch64_win15", 32, 27),
             ]
             

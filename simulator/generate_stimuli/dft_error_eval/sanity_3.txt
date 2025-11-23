@@ -1,4 +1,4 @@
-    ERROR: Bin 0 mismatch
+ERROR: Bin 0 mismatch
       A_real: Expected=0000000000000000, Got=0000080000000000, Error=0.000122
       A_imag: Expected=0000000000000000, Got=0000000000000000, Error=0.000000
     ERROR: Bin 1 mismatch

@@ -81,7 +81,7 @@ def generate_test_case(test_name, iq_data, fs, freq_bins, window_type,
         target_max_val = 2 ** (iq_int_bits - 1)
         
         scale_factor = target_max_val / max_magnitude
-        print(f"  [Normalization] Max Mag: {max_magnitude:.2e} -> Target: {target_max_val}")
+        # print(f"  [Normalization] Max Mag: {max_magnitude:.2e} -> Target: {target_max_val}")
         print(f"  [Normalization] Applying Scale Factor: {scale_factor:.4f}")
     else:
         scale_factor = 1.0
@@ -398,8 +398,10 @@ def main():
             rf_data, angles, _, _, fs_picmus, mod_freq, _, _, _ = load_picmus_rf_data(rf_path, iq_path, scan_path)
 
             # find max abs val of rf_data to properly quantize the iq data
-            max_rf = np.max(np.abs(rf_data))
-            max_rf_safe = 2 * max_rf
+            max_rf = np.max(np.abs(rf_data))        # apparently this is 1.0, but iq data is much smaller
+            max_rf_safe = max_rf                    # -> normalize according to max iq value * 2
+
+            print(f"max safe rf value for iq normalization before quantization: {max_rf_safe}")
             
             # Get baseline I/Q data
             center_angle_index = np.argmin(np.abs(angles))
@@ -411,6 +413,11 @@ def main():
                 decimation_factor=baseline_decimation,
                 adc_sample_rate=adc_rate
             )
+
+            max_iq = np.max(np.abs(baseline_iq_data))
+            max_iq_safe = 2 * max_iq
+
+            print(f"max safe iq value for comparison: {max_iq_safe}")
             
             # STFT parameters
             nperseg = 256
@@ -452,7 +459,7 @@ def main():
                     OSC_WIDTH,
                     NUM_BINS,
                     normalize=True,
-                    max_magnitude=max_rf_safe
+                    max_magnitude=max_iq_safe
                 )
                 test_cases.append(tc)
                 

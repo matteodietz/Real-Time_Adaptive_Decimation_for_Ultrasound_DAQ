@@ -23,7 +23,7 @@ except ImportError:
     PICMUS_AVAILABLE = False
 
 def generate_test_case(test_name, iq_data, fs, freq_bins, window_type,
-                       iq_width, window_width, accum_width, osc_width, num_bins, normalize=True, iq_quant_max=2):
+                       iq_width, window_width, accum_width, osc_width, num_bins):
     """
     Generate a single test case for the DFT accumulator.
     
@@ -57,7 +57,6 @@ def generate_test_case(test_name, iq_data, fs, freq_bins, window_type,
     window_coeffs = signal.windows.get_window(window_type, N)
 
     window_max = np.max(np.abs(window_coeffs))
-    window_max_safe = 2 * window_max
     
     # Generate complex oscillator values W[n,k] = exp(-j*2*pi*k*n/fs)
     # W starts at 1+0j and is multiplied by E each sample
@@ -76,17 +75,10 @@ def generate_test_case(test_name, iq_data, fs, freq_bins, window_type,
 
     # adc_quantize_signed(value, bit_width=16, max_magnitude=1.0, return_as_unsigned_bit_representation=True)
 
-    if normalize == True:
-        i_samples_hw, scale_factor = adc_quantize_signed(np.real(iq_data), iq_width, iq_quant_max, return_as_unsigned_bit_representation=True) 
-        q_samples_hw, _ = adc_quantize_signed(np.imag(iq_data), iq_width, iq_quant_max, return_as_unsigned_bit_representation=True) 
-        if isinstance(i_samples_hw, np.ndarray):
-            i_samples_hw = i_samples_hw.tolist()
-        if isinstance(q_samples_hw, np.ndarray):
-            q_samples_hw = q_samples_hw.tolist()
-    else:
-        i_samples_hw = [float_to_fixed_point(np.real(s), iq_int_bits, iq_frac_bits, signed=True) 
+
+    i_samples_hw = [float_to_fixed_point(np.real(s), iq_int_bits, iq_frac_bits, signed=True) 
                     for s in iq_data]
-        q_samples_hw = [float_to_fixed_point(np.imag(s), iq_int_bits, iq_frac_bits, signed=True) 
+    q_samples_hw = [float_to_fixed_point(np.imag(s), iq_int_bits, iq_frac_bits, signed=True) 
                     for s in iq_data]
     
     
@@ -134,18 +126,10 @@ def generate_test_case(test_name, iq_data, fs, freq_bins, window_type,
     # the stimuli do not need to get shifted. since a already corresponds to the true golden floating point solution. 
     # if i just transform this to the correct format directly, i don't have any scaling issue
 
-    if normalize == True:
-        A_real_hw = [float_to_fixed_point(scale_factor * np.real(a), 
-                                       accum_width, accum_frac_bits, signed=True) 
-                 for a in accums_sorted]
-        A_imag_hw = [float_to_fixed_point(scale_factor * np.imag(a), 
+    A_real_hw = [float_to_fixed_point(np.real(a), 
                                        accum_int_bits, accum_frac_bits, signed=True) 
                  for a in accums_sorted]
-    else:
-        A_real_hw = [float_to_fixed_point(np.real(a), 
-                                       accum_int_bits, accum_frac_bits, signed=True) 
-                 for a in accums_sorted]
-        A_imag_hw = [float_to_fixed_point(np.imag(a), 
+    A_imag_hw = [float_to_fixed_point(np.imag(a), 
                                        accum_int_bits, accum_frac_bits, signed=True) 
                  for a in accums_sorted]
     
@@ -291,8 +275,7 @@ def main():
         WINDOW_WIDTH,
         ACCUM_WIDTH,
         OSC_WIDTH,
-        4, # Actual number of bins for this test
-        False
+        4 # Actual number of bins for this test
     )
     test_cases.append(tc_sanity)
 
@@ -324,8 +307,7 @@ def main():
         WINDOW_WIDTH,
         ACCUM_WIDTH,
         OSC_WIDTH,
-        8,              # Actual number of bins for this test
-        False
+        8              # Actual number of bins for this test
     )
     test_cases.append(tc_sanity8)
 
@@ -366,8 +348,7 @@ def main():
         WINDOW_WIDTH,
         ACCUM_WIDTH,
         OSC_WIDTH,
-        24,             # Actual number of bins for this test
-        False
+        24             # Actual number of bins for this test
     )
     test_cases.append(tc_sanity24)
 
@@ -391,8 +372,8 @@ def main():
             rf_data, angles, _, _, fs_picmus, mod_freq, _, _, _ = load_picmus_rf_data(rf_path, iq_path, scan_path)
 
             # find max abs val of rf_data to properly quantize the iq data
-            max_rf = np.max(np.abs(rf_data))
-            max_rf_safe = 2 * max_rf
+            # max_rf = np.max(np.abs(rf_data))
+            # max_rf_safe = 2 * max_rf
             
             # Get baseline I/Q data
             center_angle_index = np.argmin(np.abs(angles))
@@ -443,9 +424,7 @@ def main():
                     WINDOW_WIDTH,
                     ACCUM_WIDTH,
                     OSC_WIDTH,
-                    NUM_BINS,
-                    True,
-                    max_rf_safe
+                    NUM_BINS
                 )
                 test_cases.append(tc)
                 

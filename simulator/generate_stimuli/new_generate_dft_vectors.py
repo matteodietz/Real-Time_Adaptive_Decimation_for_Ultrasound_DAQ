@@ -415,7 +415,7 @@ def main():
             )
 
             max_iq = np.max(np.abs(baseline_iq_data))
-            max_iq_safe = 2 * max_iq
+            max_iq_safe = max_iq
 
             print(f"max safe iq value for comparison: {max_iq_safe}")
             

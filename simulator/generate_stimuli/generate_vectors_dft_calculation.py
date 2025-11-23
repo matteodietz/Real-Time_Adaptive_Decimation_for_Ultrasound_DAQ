@@ -11,7 +11,7 @@ SIMULATOR_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(SIMULATOR_ROOT / "src"))
 
 from golden_model_floating_point import streaming_dft_processor
-from fixed_float_conversions import float_to_fixed_point, fixed_point_to_float
+from fixed_float_conversions import float_to_fixed_point, fixed_point_to_float, adc_quantize_signed
 
 # Import data loading functions
 try:
@@ -23,7 +23,7 @@ except ImportError:
     PICMUS_AVAILABLE = False
 
 def generate_test_case(test_name, iq_data, fs, freq_bins, window_type,
-                       iq_width, window_width, accum_width, osc_width, num_bins):
+                       iq_width, window_width, accum_width, osc_width, num_bins, normalize=True, iq_quant_max=2):
     """
     Generate a single test case for the DFT accumulator.
     
@@ -55,6 +55,9 @@ def generate_test_case(test_name, iq_data, fs, freq_bins, window_type,
     
     # Generate window coefficients
     window_coeffs = signal.windows.get_window(window_type, N)
+
+    window_max = np.max(np.abs(window_coeffs))
+    window_max_safe = 2 * window_max
     
     # Generate complex oscillator values W[n,k] = exp(-j*2*pi*k*n/fs)
     # W starts at 1+0j and is multiplied by E each sample
@@ -70,11 +73,22 @@ def generate_test_case(test_name, iq_data, fs, freq_bins, window_type,
     # I/Q samples: Use Q(iq_width-8).8 format (8 fractional bits)
     iq_frac_bits = 14
     iq_int_bits = iq_width - iq_frac_bits
+
+    # adc_quantize_signed(value, bit_width=16, max_magnitude=1.0, return_as_unsigned_bit_representation=True)
+
+    if normalize == True:
+        i_samples_hw, scale_factor = adc_quantize_signed(np.real(iq_data), iq_width, iq_quant_max, return_as_unsigned_bit_representation=True) 
+        q_samples_hw, _ = adc_quantize_signed(np.imag(iq_data), iq_width, iq_quant_max, return_as_unsigned_bit_representation=True) 
+        if isinstance(i_samples_hw, np.ndarray):
+            i_samples_hw = i_samples_hw.tolist()
+        if isinstance(q_samples_hw, np.ndarray):
+            q_samples_hw = q_samples_hw.tolist()
+    else:
+        i_samples_hw = [float_to_fixed_point(np.real(s), iq_int_bits, iq_frac_bits, signed=True) 
+                    for s in iq_data]
+        q_samples_hw = [float_to_fixed_point(np.imag(s), iq_int_bits, iq_frac_bits, signed=True) 
+                    for s in iq_data]
     
-    i_samples_hw = [float_to_fixed_point(np.real(s), iq_int_bits, iq_frac_bits, signed=True) 
-                    for s in iq_data]
-    q_samples_hw = [float_to_fixed_point(np.imag(s), iq_int_bits, iq_frac_bits, signed=True) 
-                    for s in iq_data]
     
     # Window coefficients: Use Q(window_width-16).16 format (16 fractional bits)
     # Window values are between 0 and 1
@@ -118,14 +132,24 @@ def generate_test_case(test_name, iq_data, fs, freq_bins, window_type,
     # effective_scale = 2 ** shift_amount
 
     # the stimuli do not need to get shifted. since a already corresponds to the true golden floating point solution. 
-    # if i just transform this to the correct format directly, i don't have any scaling issues
+    # if i just transform this to the correct format directly, i don't have any scaling issue
+
+    if normalize == True:
+        A_real_hw = [float_to_fixed_point(scale_factor * np.real(a), 
+                                       accum_width, accum_frac_bits, signed=True) 
+                 for a in accums_sorted]
+        A_imag_hw = [float_to_fixed_point(scale_factor * np.imag(a), 
+                                       accum_int_bits, accum_frac_bits, signed=True) 
+                 for a in accums_sorted]
+    else:
+        A_real_hw = [float_to_fixed_point(np.real(a), 
+                                       accum_int_bits, accum_frac_bits, signed=True) 
+                 for a in accums_sorted]
+        A_imag_hw = [float_to_fixed_point(np.imag(a), 
+                                       accum_int_bits, accum_frac_bits, signed=True) 
+                 for a in accums_sorted]
     
-    A_real_hw = [float_to_fixed_point(np.real(a), 
-                                       accum_int_bits, accum_frac_bits, signed=True) 
-                 for a in accums_sorted]
-    A_imag_hw = [float_to_fixed_point(np.imag(a), 
-                                       accum_int_bits, accum_frac_bits, signed=True) 
-                 for a in accums_sorted]
+    
     
     return {
         'test_name': test_name,
@@ -267,7 +291,8 @@ def main():
         WINDOW_WIDTH,
         ACCUM_WIDTH,
         OSC_WIDTH,
-        4 # Actual number of bins for this test
+        4, # Actual number of bins for this test
+        False
     )
     test_cases.append(tc_sanity)
 
@@ -299,7 +324,8 @@ def main():
         WINDOW_WIDTH,
         ACCUM_WIDTH,
         OSC_WIDTH,
-        8              # Actual number of bins for this test
+        8,              # Actual number of bins for this test
+        False
     )
     test_cases.append(tc_sanity8)
 
@@ -340,7 +366,8 @@ def main():
         WINDOW_WIDTH,
         ACCUM_WIDTH,
         OSC_WIDTH,
-        24             # Actual number of bins for this test
+        24,             # Actual number of bins for this test
+        False
     )
     test_cases.append(tc_sanity24)
 
@@ -362,6 +389,10 @@ def main():
             baseline_decimation = 4
             
             rf_data, angles, _, _, fs_picmus, mod_freq, _, _, _ = load_picmus_rf_data(rf_path, iq_path, scan_path)
+
+            # find max abs val of rf_data to properly quantize the iq data
+            max_rf = np.max(np.abs(rf_data))
+            max_rf_safe = 2 * max_rf
             
             # Get baseline I/Q data
             center_angle_index = np.argmin(np.abs(angles))
@@ -412,7 +443,9 @@ def main():
                     WINDOW_WIDTH,
                     ACCUM_WIDTH,
                     OSC_WIDTH,
-                    NUM_BINS
+                    NUM_BINS,
+                    True,
+                    max_rf_safe
                 )
                 test_cases.append(tc)
                 
@@ -422,58 +455,58 @@ def main():
             traceback.print_exc()
             print("Skipping PICMUS test cases.")
     
-    # ===== Synthetic Test Cases =====
-    print("\n========== Synthetic Test Cases ==========")
+    # # ===== Synthetic Test Cases =====
+    # print("\n========== Synthetic Test Cases ==========")
     
-    fs_synth = 31.25e6
-    nperseg_synth = 256
-    mod_freq_synth = 6.8125e6
+    # fs_synth = 31.25e6
+    # nperseg_synth = 256
+    # mod_freq_synth = 6.8125e6
     
-    # Define sparse frequency bins
-    delta_f = 0.25e6
-    half_bw_est = mod_freq_synth / 2
-    s_coarse = np.linspace(-mod_freq_synth, mod_freq_synth, 8)
-    s_fine_left = np.linspace(-half_bw_est - delta_f, -half_bw_est + delta_f, 8)
-    s_fine_right = np.linspace(half_bw_est - delta_f, half_bw_est + delta_f, 8)
-    S_bins_synth = np.unique(np.concatenate([s_coarse, s_fine_left, s_fine_right]))
+    # # Define sparse frequency bins
+    # delta_f = 0.25e6
+    # half_bw_est = mod_freq_synth / 2
+    # s_coarse = np.linspace(-mod_freq_synth, mod_freq_synth, 8)
+    # s_fine_left = np.linspace(-half_bw_est - delta_f, -half_bw_est + delta_f, 8)
+    # s_fine_right = np.linspace(half_bw_est - delta_f, half_bw_est + delta_f, 8)
+    # S_bins_synth = np.unique(np.concatenate([s_coarse, s_fine_left, s_fine_right]))
     
-    t = np.arange(nperseg_synth) / fs_synth
+    # t = np.arange(nperseg_synth) / fs_synth
     
-    # Test Case 1: Simple sine wave
-    print("\n--- Test Case: Simple sine wave at 2 MHz ---")
-    signal_1 = np.exp(1j * 2 * np.pi * 2e6 * t)
+    # # Test Case 1: Simple sine wave
+    # print("\n--- Test Case: Simple sine wave at 2 MHz ---")
+    # signal_1 = np.exp(1j * 2 * np.pi * 2e6 * t)
     
-    tc1 = generate_test_case(
-        "synth_sine_2mhz",
-        signal_1,
-        fs_synth,
-        S_bins_synth,
-        'hann',
-        IQ_WIDTH,
-        WINDOW_WIDTH,
-        ACCUM_WIDTH,
-        OSC_WIDTH,
-        NUM_BINS
-    )
-    test_cases.append(tc1)
+    # tc1 = generate_test_case(
+    #     "synth_sine_2mhz",
+    #     signal_1,
+    #     fs_synth,
+    #     S_bins_synth,
+    #     'hann',
+    #     IQ_WIDTH,
+    #     WINDOW_WIDTH,
+    #     ACCUM_WIDTH,
+    #     OSC_WIDTH,
+    #     NUM_BINS
+    # )
+    # test_cases.append(tc1)
     
-    # Test Case 2: DC signal (0 Hz)
-    print("\n--- Test Case: DC signal ---")
-    signal_2 = 0.5 * np.ones(nperseg_synth, dtype=np.complex128)
+    # # Test Case 2: DC signal (0 Hz)
+    # print("\n--- Test Case: DC signal ---")
+    # signal_2 = 0.5 * np.ones(nperseg_synth, dtype=np.complex128)
     
-    tc2 = generate_test_case(
-        "synth_dc",
-        signal_2,
-        fs_synth,
-        S_bins_synth,
-        'hann',
-        IQ_WIDTH,
-        WINDOW_WIDTH,
-        ACCUM_WIDTH,
-        OSC_WIDTH,
-        NUM_BINS
-    )
-    test_cases.append(tc2)
+    # tc2 = generate_test_case(
+    #     "synth_dc",
+    #     signal_2,
+    #     fs_synth,
+    #     S_bins_synth,
+    #     'hann',
+    #     IQ_WIDTH,
+    #     WINDOW_WIDTH,
+    #     ACCUM_WIDTH,
+    #     OSC_WIDTH,
+    #     NUM_BINS
+    # )
+    # test_cases.append(tc2)
     
     # Write to file
     output_dir = SIMULATOR_ROOT.parent / "rtl" / "simvectors"

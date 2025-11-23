@@ -107,7 +107,7 @@ def adc_quantize_signed(value, bit_width=16, max_magnitude=1.0, return_as_unsign
     # 6. Convert to integer type
     val_int = val_clipped.astype(int)
     
-    # 7. (Optional) Convert to unsigned 2's complement bit representation
+    # 7. Convert to unsigned 2's complement bit representation
     # This matches the behavior of 'float_to_fixed_point' where negative numbers
     # are converted to their large unsigned equivalent (e.g. -1 becomes 0xFFFF).
     if return_as_unsigned_bit_representation:
@@ -120,7 +120,7 @@ def adc_quantize_signed(value, bit_width=16, max_magnitude=1.0, return_as_unsign
             if val_int < 0:
                 val_int = val_int + (1 << bit_width)
                 
-    return val_int
+    return val_int, scale_factor
 
 # --- Example Usage / Sanity Check ---
 if __name__ == "__main__":
@@ -137,12 +137,12 @@ if __name__ == "__main__":
     # Standard Signed Output (Math mode)
     quantized_signed = adc_quantize_signed(test_inputs, my_bits, my_max_mag, False)
     print(f"Signed Output: {quantized_signed}") 
-    # Expected: [0, 32767, -32767, 32767, -491] roughly
+    # Expected: [0, 32767, -32767, 32767, -491]
     
     # Hardware/File Output (Bit pattern mode)
     quantized_bits = adc_quantize_signed(test_inputs, my_bits, my_max_mag, True)
     print(f"Hex/Bit Output: {quantized_bits}")
-    # Expected: [0, 32767, 32769, 32767, 65045] roughly
+    # Expected: [0, 32767, 32769, 32767, 65045] 
 
 # --- example usage ---
 # if __name__ == '__main__':

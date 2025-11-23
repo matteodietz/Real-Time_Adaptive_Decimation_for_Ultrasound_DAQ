@@ -217,32 +217,49 @@ module linear_interp_crossing #(
             invalid_o <= invalid_pipe[3];
             
             if (valid_pipe[3] && !invalid_pipe[3]) begin
+                // s4_quotient already has the correct fractional alignment!
+                // No shifting needed.
+                
+                // Extend f1 to signed for addition
+                automatic logic signed [FREQ_WIDTH:0] result_calc;
+                result_calc = signed'({1'b0, s4_f1}) + s4_quotient[FREQ_WIDTH:0];
+                
+                // Saturation Logic (prevent underflow/overflow)
+                if (result_calc < 0) begin
+                    f_star_o <= '0; // Clamp to 0 Hz
+                end else if (result_calc > {1'b0, {FREQ_WIDTH{1'b1}}}) begin
+                    f_star_o <= {FREQ_WIDTH{1'b1}}; // Clamp to Max Freq
+                end else begin
+                    f_star_o <= result_calc[FREQ_WIDTH-1:0];
+                end
+
+
                 // Scale quotient back to frequency format
                 // quotient has (FREQ_FRAC_BITS + ACCUM_DB_FRAC) fractional bits
                 // We need FREQ_FRAC_BITS fractional bits
                 // Add with rounding
-                logic signed [MULT_WIDTH-1:0] scaled_quotient;
-                logic signed [FREQ_WIDTH:0] result_extended;
+                // logic signed [MULT_WIDTH-1:0] scaled_quotient;
+                // logic signed [FREQ_WIDTH:0] result_extended;
                 
                 // Round by adding 0.5 in the bit position we're truncating
-                if (ACCUM_DB_FRAC > 0) begin
-                    scaled_quotient = s4_quotient + (1 << (ACCUM_DB_FRAC - 1));
-                    scaled_quotient = scaled_quotient >>> ACCUM_DB_FRAC;
-                end else begin
-                    scaled_quotient = s4_quotient;
-                end
+                // if (ACCUM_DB_FRAC > 0) begin
+                //    scaled_quotient = s4_quotient + (1 << (ACCUM_DB_FRAC - 1));
+                //    scaled_quotient = scaled_quotient >>> ACCUM_DB_FRAC;
+                // end else begin
+                //    scaled_quotient = s4_quotient;
+                // end
                 
                 // Add to f1 (extend to handle overflow)
-                result_extended = signed'({1'b0, s4_f1}) + scaled_quotient[FREQ_WIDTH:0];
+                // result_extended = signed'({1'b0, s4_f1}) + scaled_quotient[FREQ_WIDTH:0];
                 
                 // Saturate if needed
-                if (result_extended > {1'b0, {FREQ_WIDTH{1'b1}}}) begin
-                    f_star_o <= {FREQ_WIDTH{1'b1}};
-                end else if (result_extended < '0) begin
-                    f_star_o <= '0;
-                end else begin
-                    f_star_o <= result_extended[FREQ_WIDTH-1:0];
-                end
+                // if (result_extended > {1'b0, {FREQ_WIDTH{1'b1}}}) begin
+                //    f_star_o <= {FREQ_WIDTH{1'b1}};
+                // end else if (result_extended < '0) begin
+                //    f_star_o <= '0;
+                // end else begin
+                //    f_star_o <= result_extended[FREQ_WIDTH-1:0];
+                // end
             end else if (valid_pipe[3]) begin
                 // Invalid input, output zero
                 f_star_o <= '0;

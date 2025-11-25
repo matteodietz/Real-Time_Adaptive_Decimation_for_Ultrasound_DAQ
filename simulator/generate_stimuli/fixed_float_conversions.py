@@ -1,3 +1,5 @@
+import numpy as np
+
 def float_to_fixed_point(value, int_bits, frac_bits, signed=True, zero_threshold=1e-10):
     """
     Convert floating point to fixed point representation.
@@ -56,7 +58,7 @@ def fixed_point_to_float(fixed_val, total_bits, frac_bits, signed=True):
         
     return float(signed_int) / (2**frac_bits)
 
-import numpy as np
+
 
 def adc_quantize_signed(value, bit_width=16, max_magnitude=1.0, return_as_unsigned_bit_representation=True):
     """

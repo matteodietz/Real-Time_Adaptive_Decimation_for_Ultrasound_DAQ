@@ -1,0 +1,201 @@
+# Test vectors for complex_to_log_power module
+# Format: Each test case consists of 2 lines:
+# Line 1: I_value Q_value (both 16-bit fixed-point integers)
+# Line 2: Expected_output (32-bit fixed-point integer with 16 fractional bits)
+# Lines starting with '#' are comments and should be skipped
+#
+# Test case: Both zero
+0 0
+0
+# Test case: I max positive, Q zero
+32767 0
+5898216
+# Test case: I max negative, Q zero
+32768 0
+5898240
+# Test case: I zero, Q max positive
+0 32767
+5898216
+# Test case: I zero, Q max negative
+0 32768
+5898240
+# Test case: Both max positive
+32767 32767
+6094824
+# Test case: Both max negative
+32768 32768
+6094848
+# Test case: I max pos, Q max neg
+32767 32768
+6094836
+# Test case: I max neg, Q max pos
+32768 32767
+6094836
+# Test case: Both minimum positive
+1 1
+196608
+# Test case: I minimum positive, Q zero
+1 0
+0
+# Test case: I zero, Q minimum positive
+0 1
+0
+# Test case: I quarter scale, Q zero
+16384 0
+5505024
+# Test case: I zero, Q quarter scale
+0 16384
+5505024
+# Test case: Both quarter scale
+16384 16384
+5701632
+# Test case: Random case 1
+49182 37182
+5897382
+# Test case: Random case 2
+63432 43491
+5667600
+# Test case: Random case 3
+9367 58627
+5310255
+# Test case: Random case 4
+47683 48728
+5725203
+# Test case: Random case 5
+26991 26949
+5968005
+# Test case: Random case 6
+44582 47197
+5788977
+# Test case: Random case 7
+23378 991
+5705529
+# Test case: Random case 8
+38804 64280
+5767293
+# Test case: Random case 9
+20707 1160
+5623449
+# Test case: Random case 10
+47978 47878
+5732106
+# Test case: Random case 11
+64035 35558
+5834955
+# Test case: Random case 12
+13333 49730
+5621598
+# Test case: Random case 13
+63520 46406
+5579427
+# Test case: Random case 14
+37297 65039
+5797146
+# Test case: Random case 15
+65197 57713
+5077854
+# Test case: Random case 16
+52239 32608
+5928699
+# Test case: Random case 17
+58275 51416
+5481090
+# Test case: Random case 18
+7011 37956
+5801583
+# Test case: Random case 19
+39826 33590
+6009531
+# Test case: Random case 20
+4168 9449
+5227668
+# Test case: Random case 21
+62598 30839
+5856465
+# Test case: Random case 22
+1630 44989
+5619573
+# Test case: Random case 23
+48789 13395
+5645247
+# Test case: Random case 24
+33758 45881
+5957274
+# Test case: Random case 25
+36345 37876
+5997747
+# Test case: Random case 26
+43475 63411
+5668182
+# Test case: Random case 27
+5191 28420
+5810679
+# Test case: Random case 28
+51985 10840
+5528973
+# Test case: Random case 29
+52556 54392
+5522772
+# Test case: Random case 30
+8165 14367
+5508423
+# Test case: Random case 31
+44497 12709
+5726271
+# Test case: Random case 32
+30842 34932
+6047304
+# Test case: Random case 33
+42522 11452
+5747013
+# Test case: Random case 34
+20488 62281
+5623614
+# Test case: Random case 35
+34753 33457
+6063567
+# Test case: Random case 36
+64356 57991
+5060307
+# Test case: Random case 37
+62984 42774
+5692659
+# Test case: Random case 38
+24568 46993
+5851983
+# Test case: Random case 39
+49230 4132
+5515659
+# Test case: Random case 40
+33665 18099
+5947602
+# Test case: Random case 41
+45707 55952
+5663670
+# Test case: Random case 42
+47703 31727
+5944176
+# Test case: Random case 43
+44999 8973
+5676297
+# Test case: Random case 44
+3515 23444
+5710824
+# Test case: Random case 45
+21192 62890
+5642475
+# Test case: Random case 46
+47416 55289
+5625798
+# Test case: Random case 47
+45973 4933
+5606544
+# Test case: Random case 48
+18227 4370
+5565729
+# Test case: Random case 49
+50764 61659
+5453472
+# Test case: Random case 50
+27209 49835
+5866419

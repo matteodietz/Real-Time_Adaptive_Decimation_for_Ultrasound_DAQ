@@ -86,11 +86,12 @@ module complex_to_log_power #(
                 msb_index_d = i[5:0];
                 is_zero_d   = 1'b0;
                 
+                // TODO: change this part here:
                 // Extract fractional part
                 if (i >= OUTPUT_FRAC) begin
                     frac_part_d = p_mag_sq_q[i-1 -: OUTPUT_FRAC];
                 end else if (i > 0) begin
-                    frac_part_d = p_mag_sq_q[i-1 : 0] << (OUTPUT_FRAC - i);
+                    frac_part_d = p_mag_sq_q[i-1 -: 0] << (OUTPUT_FRAC - i);
                 end else begin
                     frac_part_d = '0;
                 end

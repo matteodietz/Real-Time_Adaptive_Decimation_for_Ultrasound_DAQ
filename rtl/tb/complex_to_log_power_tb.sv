@@ -105,13 +105,8 @@ module complex_to_log_power_tb ();
             
             test_count++;
             
-            // Skip comment line if present (before next test case)
-            automatic int next_char = $fgetc(file);
-            if (next_char == "#") begin
-                void'($fgets(line, file));
-            end else if (next_char != -1) begin
-                void'($ungetc(next_char, file));
-            end
+            // Skip comment line (before next test case)
+            $fgets(line, file);
             
             $display("\n--- Test Case %0d ---", test_count);
             $display("Input: I = 0x%04h, Q = 0x%04h", in_i, in_q);

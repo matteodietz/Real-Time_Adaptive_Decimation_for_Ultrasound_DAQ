@@ -32,21 +32,29 @@ module complex_to_log_power #(
     // ---------------------------------------------------------
     // Stage 1: Square and Add (Mag Squared)
     // ---------------------------------------------------------
-    // Result width is 2*Input + 1 bit for addition
     localparam int SQ_WIDTH = (2 * INPUT_WIDTH) + 1;
     
-    logic signed [SQ_WIDTH-1:0] p_mag_sq;
-    logic                       s1_valid;
+    // Stage 1 - Combinational
+    logic signed [SQ_WIDTH-1:0] p_mag_sq_d;
     
+    // Stage 1 - Sequential
+    logic signed [SQ_WIDTH-1:0] p_mag_sq_q;
+    logic                       s1_valid_q;
+    
+    // Stage 1 combinational logic
+    always_comb begin
+        p_mag_sq_d = (i_data_i * i_data_i) + (q_data_i * q_data_i);
+    end
+    
+    // Stage 1 sequential logic
     always_ff @(posedge clk_i or negedge rst_ni) begin
         if (!rst_ni) begin
-            p_mag_sq <= '0;
-            s1_valid <= 1'b0;
+            p_mag_sq_q <= '0;
+            s1_valid_q <= 1'b0;
         end else begin
-            s1_valid <= valid_i;
+            s1_valid_q <= valid_i;
             if (valid_i) begin
-                // Standard signed multiplication inferred DSPs
-                p_mag_sq <= (i_data_i * i_data_i) + (q_data_i * q_data_i);
+                p_mag_sq_q <= p_mag_sq_d;
             end
         end
     end
@@ -54,83 +62,94 @@ module complex_to_log_power #(
     // ---------------------------------------------------------
     // Stage 2: Priority Encoder (Dynamic Log2)
     // ---------------------------------------------------------
-    // We need to find the position of the highest '1' bit.
-    // Since p_mag_sq is always positive (sum of squares), we treat as unsigned.
     
-    logic [5:0]  msb_index;   // Enough to count up to 64 bits (SQ_WIDTH)
-    logic [OUTPUT_FRAC-1:0] frac_part;
-    logic        is_zero;
-    logic        s2_valid;
+    // Stage 2 - Combinational
+    logic [5:0]             msb_index_d;
+    logic [OUTPUT_FRAC-1:0] frac_part_d;
+    logic                   is_zero_d;
     
+    // Stage 2 - Sequential
+    logic [5:0]             msb_index_q;
+    logic [OUTPUT_FRAC-1:0] frac_part_q;
+    logic                   is_zero_q;
+    logic                   s2_valid_q;
+    
+    // Stage 2 combinational logic - Priority encoder
+    always_comb begin
+        msb_index_d = '0;
+        is_zero_d   = 1'b1;
+        frac_part_d = '0;
+        
+        // Find the highest '1' bit (priority encoder)
+        for (int i = SQ_WIDTH-1; i >= 0; i--) begin
+            if (p_mag_sq_q[i] == 1'b1) begin
+                msb_index_d = i[5:0];
+                is_zero_d   = 1'b0;
+                
+                // Extract fractional part
+                if (i >= OUTPUT_FRAC) begin
+                    frac_part_d = p_mag_sq_q[i-1 -: OUTPUT_FRAC];
+                end else if (i > 0) begin
+                    frac_part_d = p_mag_sq_q[i-1 : 0] << (OUTPUT_FRAC - i);
+                end else begin
+                    frac_part_d = '0;
+                end
+                
+                break;
+            end
+        end
+    end
+    
+    // Stage 2 sequential logic
     always_ff @(posedge clk_i or negedge rst_ni) begin
         if (!rst_ni) begin
-            msb_index <= '0;
-            frac_part <= '0;
-            is_zero   <= 1'b0;
-            s2_valid  <= 1'b0;
+            msb_index_q <= '0;
+            frac_part_q <= '0;
+            is_zero_q   <= 1'b0;
+            s2_valid_q  <= 1'b0;
         end else begin
-            s2_valid <= s1_valid;
-            
-            if (s1_valid) begin
-                // SystemVerilog synthesis-friendly Leading One Detector
-                // We loop from top bit down to find the first 1.
-                msb_index = 0;
-                is_zero   = 1; 
-                frac_part = 0;
-                
-                for (int i = SQ_WIDTH-1; i >= 0; i--) begin
-                    if (p_mag_sq[i] == 1'b1) begin
-                        msb_index = i[5:0]; // The Integer Log2 value
-                        is_zero   = 0;
-                        
-                        // Extract Fractional Part:
-                        // Take the bits immediately following the MSB.
-                        // Use shifting to align them to OUTPUT_FRAC.
-                        // If we don't have enough bits below, shift left.
-                        if (i >= OUTPUT_FRAC)
-                            frac_part = p_mag_sq[i-1 -: OUTPUT_FRAC];
-                        else
-                            frac_part = p_mag_sq[i-1 : 0] << (OUTPUT_FRAC - i);
-                            
-                        break; // Stop after finding the first 1
-                    end
-                end
-            end
+            s2_valid_q  <= s1_valid_q;
+            msb_index_q <= msb_index_d;
+            frac_part_q <= frac_part_d;
+            is_zero_q   <= is_zero_d;
         end
     end
 
     // ---------------------------------------------------------
     // Stage 3: Log Construction and Scaling
     // ---------------------------------------------------------
-    // Formula: result = 3 * (integer_part.fractional_part)
     
+    // Stage 3 - Combinational
+    logic [OUTPUT_WIDTH-1:0] db_power_d;
+    logic                    valid_d;
+    
+    // Stage 3 combinational logic
+    always_comb begin
+        valid_d = s2_valid_q;
+        
+        if (is_zero_q) begin
+            // Log(0) is -inf. Clamp to minimal value
+            db_power_d = '0;
+        end else begin
+            // Construct fixed-point log2 value
+            logic [OUTPUT_WIDTH-1:0] log2_val;
+            
+            // Place integer part in upper bits, fraction in lower bits
+            log2_val = (msb_index_q << OUTPUT_FRAC) | frac_part_q;
+            
+            // Scale by 3: x * 3 = (x << 1) + x
+            db_power_d = (log2_val << 1) + log2_val;
+        end
+    end
+    
+    // Stage 3 sequential logic
     always_ff @(posedge clk_i or negedge rst_ni) begin
         if (!rst_ni) begin
             db_power_o <= '0;
             valid_o    <= 1'b0;
         end else begin
-            valid_o <= s2_valid;
-            
-            if (s2_valid) begin
-                if (is_zero) begin
-                    // Log(0) is -inf. We clamp to a minimal value (e.g. 0 or min int)
-                    db_power_o <= '0; 
-                end else begin
-                    // 1. Construct Fixed Point Log2 value
-                    //    Format: [Integer Index] . [Fractional Part]
-                    logic [OUTPUT_WIDTH-1:0] log2_val;
-                    
-                    // Place integer part in upper bits, fraction in lower bits
-                    log2_val = (msb_index << OUTPUT_FRAC) | frac_part;
-                    
-                    // 2. Scale by 3 (Approximation of x * 3.0103)
-                    //    x * 3 = (x << 1) + x
-                    //    We assume the output width is large enough to hold this sum.
-                    db_power_o <= (log2_val << 1) + log2_val;
-                end
-            end else begin
-                valid_o <= 1'b0; // Clear valid if pipe is empty
-            end
+            valid_o    <= valid_d;
+            db_power_o <= db_power_d;
         end
     end
 

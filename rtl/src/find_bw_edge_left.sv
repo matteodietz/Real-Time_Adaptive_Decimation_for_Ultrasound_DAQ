@@ -84,13 +84,13 @@ module find_bw_left_edge #(
     always_comb begin
         case ({L1_above_thresh, L2_above_thresh})
             2'b11: cross_state = S0;
-            2'b10: cross_state = S1;  // this is the crossing we want! NO, this should have been the error!
+            2'b10: cross_state = S1;  // this is NOT the crossing we want!
             2'b01: cross_state = S2;  // this is the crossing we want!
             2'b00: cross_state = S3;
         endcase
     end
     
-    assign crossing_found = (cross_state == S2); // changed cross_state from S1 to S2
+    assign crossing_found = (cross_state == S2);
     
     // next state logic
     always_comb begin

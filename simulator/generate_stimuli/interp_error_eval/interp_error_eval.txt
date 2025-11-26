@@ -1,0 +1,463 @@
+--- Test Case 1 ---
+Input: f1 = 0x00640000, f2 = 0x00c80000
+       L1 = 0xffe20000, L2 = 0xfff60000
+Expected: f_star = 0x00960000, invalid = 0
+SUCCESS: f_star match. Got: 0x00960000 (diff: 0)
+SUCCESS: Test case passed
+
+--- Test Case 2 ---
+Input: f1 = 0x00640000, f2 = 0x00c80000
+       L1 = 0xfff60000, L2 = 0xffe20000
+Expected: f_star = 0x00960000, invalid = 0
+SUCCESS: f_star match. Got: 0x00960000 (diff: 0)
+SUCCESS: Test case passed
+
+--- Test Case 3 ---
+Input: f1 = 0x03e80000, f2 = 0x07d00000
+       L1 = 0xffe70000, L2 = 0xfff10000
+Expected: f_star = 0x05dc0000, invalid = 0
+SUCCESS: f_star match. Got: 0x05dc0000 (diff: 0)
+SUCCESS: Test case passed
+
+--- Test Case 4 ---
+Input: f1 = 0x00640000, f2 = 0x00c80000
+       L1 = 0xffec0000, L2 = 0xfff60000
+Expected: f_star = 0x00640000, invalid = 0
+SUCCESS: f_star match. Got: 0x00640000 (diff: 0)
+SUCCESS: Test case passed
+
+--- Test Case 5 ---
+Input: f1 = 0x00640000, f2 = 0x00c80000
+       L1 = 0xffe20000, L2 = 0xffec0000
+Expected: f_star = 0x00c80000, invalid = 0
+SUCCESS: f_star match. Got: 0x00c80000 (diff: 0)
+SUCCESS: Test case passed
+
+--- Test Case 6 ---
+Input: f1 = 0x00640000, f2 = 0x00c80000
+       L1 = 0xffe20000, L2 = 0xffe70000
+Expected: f_star = 0x012c0000, invalid = 0
+SUCCESS: f_star match. Got: 0x012c0000 (diff: 0)
+SUCCESS: Test case passed
+
+--- Test Case 7 ---
+Input: f1 = 0x00640000, f2 = 0x00c80000
+       L1 = 0xfff10000, L2 = 0xfff60000
+Expected: f_star = 0x00000000, invalid = 0
+SUCCESS: f_star match. Got: 0x00000000 (diff: 0)
+SUCCESS: Test case passed
+
+--- Test Case 8 ---
+Input: f1 = 0x00640000, f2 = 0x00650000
+       L1 = 0xffe20000, L2 = 0xfff60000
+Expected: f_star = 0x00648000, invalid = 0
+SUCCESS: f_star match. Got: 0x00648000 (diff: 0)
+SUCCESS: Test case passed
+
+--- Test Case 9 ---
+Input: f1 = 0x00640000, f2 = 0x27100000
+       L1 = 0xffe20000, L2 = 0xfff60000
+Expected: f_star = 0x13ba0000, invalid = 0
+SUCCESS: f_star match. Got: 0x13ba0000 (diff: 0)
+SUCCESS: Test case passed
+
+--- Test Case 10 ---
+Input: f1 = 0x00640000, f2 = 0x00c80000
+       L1 = 0xffeb8000, L2 = 0xffec8000
+Expected: f_star = 0x00960000, invalid = 0
+SUCCESS: f_star match. Got: 0x00960000 (diff: 0)
+SUCCESS: Test case passed
+
+--- Test Case 11 ---
+Input: f1 = 0x00640000, f2 = 0x00c80000
+       L1 = 0xffce0000, L2 = 0xfffb0000
+Expected: f_star = 0x00a6aaab, invalid = 0
+SUCCESS: f_star match. Got: 0x00a6aaaa (diff: 1)
+SUCCESS: Test case passed
+
+--- Test Case 12 ---
+Input: f1 = 0x00000000, f2 = 0x03e80000
+       L1 = 0xffe20000, L2 = 0xfff60000
+Expected: f_star = 0x01f40000, invalid = 0
+SUCCESS: f_star match. Got: 0x01f40000 (diff: 0)
+SUCCESS: Test case passed
+
+--- Test Case 13 ---
+Input: f1 = 0x00640000, f2 = 0x00640000
+       L1 = 0xffe20000, L2 = 0xfff60000
+Expected: f_star = 0x00640000, invalid = 0
+SUCCESS: f_star match. Got: 0x00640000 (diff: 0)
+SUCCESS: Test case passed
+
+--- Test Case 14 ---
+Input: f1 = 0x00640000, f2 = 0x00c80000
+       L1 = 0xffec0000, L2 = 0xffec0000
+Expected: f_star = 0x00000000, invalid = 1
+INFO: Invalid case - f_star not checked
+SUCCESS: Test case passed
+
+--- Test Case 15 ---
+Input: f1 = 0x007b74bc, f2 = 0x00ea9127
+       L1 = 0xffe70000, L2 = 0xfff10000
+Expected: f_star = 0x00b302f2, invalid = 0
+SUCCESS: f_star match. Got: 0x00b302f1 (diff: 1)
+SUCCESS: Test case passed
+
+--- Test Case 16 ---
+Input: f1 = 0x00640000, f2 = 0x00c80000
+       L1 = 0xffe84000, L2 = 0xffefc000
+Expected: f_star = 0x00960000, invalid = 0
+SUCCESS: f_star match. Got: 0x00960000 (diff: 0)
+SUCCESS: Test case passed
+
+--- Test Case 17 ---
+Input: f1 = 0xc3500000, f2 = 0xea600000
+       L1 = 0xffe20000, L2 = 0xfff60000
+Expected: f_star = 0xd6d80000, invalid = 0
+SUCCESS: f_star match. Got: 0xd6d80000 (diff: 0)
+SUCCESS: Test case passed
+
+--- Test Case 18 ---
+Input: f1 = 0x01f40000, f2 = 0x05dc0000
+       L1 = 0xfff40000, L2 = 0xffe40000
+Expected: f_star = 0x03e80000, invalid = 0
+SUCCESS: f_star match. Got: 0x03e80000 (diff: 0)
+SUCCESS: Test case passed
+
+--- Test Case 19 ---
+Input: f1 = 0x084e72c6, f2 = 0x8cf2767d
+       L1 = 0xffe84a56, L2 = 0xfff8c875
+Expected: f_star = 0x26240aa5, invalid = 0
+ERROR: f_star mismatch. Expected: 0x26240aa5, Got: 0x26240868 (diff: 573)
+run 50000 ns
+
+--- Test Case 20 ---
+Input: f1 = 0x69154942, f2 = 0x78dea246
+       L1 = 0x0006cd3b, L2 = 0xffdeb9c5
+Expected: f_star = 0x73a405d2, invalid = 0
+SUCCESS: f_star match. Got: 0x73a405c3 (diff: 15)
+SUCCESS: Test case passed
+
+--- Test Case 21 ---
+Input: f1 = 0x5cc4b5a8, f2 = 0x882cdad5
+       L1 = 0xfff772d3, L2 = 0xffcbc3a5
+Expected: f_star = 0x6824eaca, invalid = 0
+SUCCESS: f_star match. Got: 0x6824eae1 (diff: 23)
+SUCCESS: Test case passed
+
+--- Test Case 22 ---
+Input: f1 = 0x274e150b, f2 = 0x8594c636
+       L1 = 0xffed4162, L2 = 0xffe16dcf
+Expected: f_star = 0x31500571, invalid = 0
+ERROR: f_star mismatch. Expected: 0x31500571, Got: 0x315006ac (diff: 315)
+
+--- Test Case 23 ---
+Input: f1 = 0x0c42c673, f2 = 0x7dfc62fd
+       L1 = 0xffd93599, L2 = 0xfff2a4de
+Expected: f_star = 0x60475acf, invalid = 0
+ERROR: f_star mismatch. Expected: 0x60475acf, Got: 0x60475bd8 (diff: 265)
+
+--- Test Case 24 ---
+Input: f1 = 0x139acdb2, f2 = 0x6ca07c7f
+       L1 = 0xffd71954, L2 = 0x00081822
+Expected: f_star = 0x3994b8fe, invalid = 0
+SUCCESS: f_star match. Got: 0x3994b8a0 (diff: 94)
+SUCCESS: Test case passed
+
+--- Test Case 25 ---
+Input: f1 = 0x24d98a70, f2 = 0x54068788
+       L1 = 0xffdc7c5b, L2 = 0x000276c5
+Expected: f_star = 0x381f09c8, invalid = 0
+SUCCESS: f_star match. Got: 0x381f09cf (diff: 7)
+SUCCESS: Test case passed
+
+--- Test Case 26 ---
+Input: f1 = 0x65434541, f2 = 0x7b5cbbad
+       L1 = 0xffcde236, L2 = 0xfffd7166
+Expected: f_star = 0x7341ca1a, invalid = 0
+SUCCESS: f_star match. Got: 0x7341ca2c (diff: 18)
+SUCCESS: Test case passed
+
+--- Test Case 27 ---
+Input: f1 = 0x14919fb6, f2 = 0x37071e21
+       L1 = 0xffe62dd0, L2 = 0x0001b42c
+Expected: f_star = 0x1bdb3887, invalid = 0
+ERROR: f_star mismatch. Expected: 0x1bdb3887, Got: 0x1bdb3903 (diff: 124)
+
+--- Test Case 28 ---
+Input: f1 = 0x6304e71b, f2 = 0x691e66aa
+       L1 = 0xfffefe97, L2 = 0xffdd952e
+Expected: f_star = 0x667c9c1f, invalid = 0
+SUCCESS: f_star match. Got: 0x667c9c34 (diff: 21)
+SUCCESS: Test case passed
+
+--- Test Case 29 ---
+Input: f1 = 0x15056805, f2 = 0x6fb83c85
+       L1 = 0xfff5cc7f, L2 = 0xffd48d51
+Expected: f_star = 0x2fc0ada7, invalid = 0
+ERROR: f_star mismatch. Expected: 0x2fc0ada7, Got: 0x2fc0ae75 (diff: 206)
+
+--- Test Case 30 ---
+Input: f1 = 0x67bcccd7, f2 = 0x90589f75
+       L1 = 0xffe0b7c0, L2 = 0xfff9b0c4
+Expected: f_star = 0x7a157213, invalid = 0
+SUCCESS: f_star match. Got: 0x7a15725d (diff: 74)
+SUCCESS: Test case passed
+
+--- Test Case 31 ---
+Input: f1 = 0x6fd42a5a, f2 = 0x922db8c3
+       L1 = 0x0003eff7, L2 = 0xffe14b01
+Expected: f_star = 0x879007f3, invalid = 0
+SUCCESS: f_star match. Got: 0x879007a1 (diff: 82)
+SUCCESS: Test case passed
+
+--- Test Case 32 ---
+Input: f1 = 0x0e0744b0, f2 = 0x2e6bdf33
+       L1 = 0xffe90f2e, L2 = 0xfff95ad6
+Expected: f_star = 0x13dfc240, invalid = 0
+SUCCESS: f_star match. Got: 0x13dfc209 (diff: 55)
+SUCCESS: Test case passed
+
+--- Test Case 33 ---
+Input: f1 = 0x2eba885c, f2 = 0x4305b67a
+       L1 = 0xffea133b, L2 = 0xfffcd2c7
+Expected: f_star = 0x30cfebc2, invalid = 0
+SUCCESS: f_star match. Got: 0x30cfebfe (diff: 60)
+SUCCESS: Test case passed
+
+--- Test Case 34 ---
+Input: f1 = 0x358f042f, f2 = 0x538771cc
+       L1 = 0xffd508ea, L2 = 0xfff82d13
+Expected: f_star = 0x492507b6, invalid = 0
+SUCCESS: f_star match. Got: 0x49250787 (diff: 47)
+SUCCESS: Test case passed
+
+--- Test Case 35 ---
+Input: f1 = 0x51d29e9b, f2 = 0x773ac52b
+       L1 = 0xfff5259e, L2 = 0xffe5242e
+Expected: f_star = 0x67333bc4, invalid = 0
+ERROR: f_star mismatch. Expected: 0x67333bc4, Got: 0x67333adb (diff: 233)
+
+--- Test Case 36 ---
+Input: f1 = 0x31d7d2f0, f2 = 0x503b08b3
+       L1 = 0xffee54b0, L2 = 0xffcb7a4f
+Expected: f_star = 0x33e00fc1, invalid = 0
+SUCCESS: f_star match. Got: 0x33e00fc6 (diff: 5)
+SUCCESS: Test case passed
+
+--- Test Case 37 ---
+Input: f1 = 0x47d750c2, f2 = 0x5836fe56
+       L1 = 0xffd79140, L2 = 0xfff7397f
+Expected: f_star = 0x5268c36b, invalid = 0
+SUCCESS: f_star match. Got: 0x5268c38e (diff: 35)
+SUCCESS: Test case passed
+
+--- Test Case 38 ---
+Input: f1 = 0x0bc6a93e, f2 = 0x976c7f97
+       L1 = 0xffd50ebd, L2 = 0x000909c6
+Expected: f_star = 0x4969651c, invalid = 0
+SUCCESS: f_star match. Got: 0x496964d0 (diff: 76)
+SUCCESS: Test case passed
+
+--- Test Case 39 ---
+Input: f1 = 0x0300cf20, f2 = 0x27bbb0c8
+       L1 = 0xfffad871, L2 = 0xffdc6a1f
+Expected: f_star = 0x14ebecf3, invalid = 0
+SUCCESS: f_star match. Got: 0x14ebecb9 (diff: 58)
+SUCCESS: Test case passed
+
+--- Test Case 40 ---
+Input: f1 = 0x1a0ac21a, f2 = 0x3b912ae7
+       L1 = 0xffea6291, L2 = 0xfffc5914
+Expected: f_star = 0x1d0e5e44, invalid = 0
+SUCCESS: f_star match. Got: 0x1d0e5e30 (diff: 20)
+SUCCESS: Test case passed
+
+--- Test Case 41 ---
+Input: f1 = 0x5ee1b31b, f2 = 0x791e2683
+       L1 = 0xffc844cb, L2 = 0x0006f490
+Expected: f_star = 0x6dd61140, invalid = 0
+SUCCESS: f_star match. Got: 0x6dd6114a (diff: 10)
+SUCCESS: Test case passed
+
+--- Test Case 42 ---
+Input: f1 = 0x018b86c2, f2 = 0x578c52af
+       L1 = 0xffdd42b7, L2 = 0x0006994b
+Expected: f_star = 0x2035c100, invalid = 0
+SUCCESS: f_star match. Got: 0x2035c124 (diff: 36)
+SUCCESS: Test case passed
+
+--- Test Case 43 ---
+Input: f1 = 0x2b98e5e4, f2 = 0x880a9592
+       L1 = 0xfffcb513, L2 = 0xffcebf76
+Expected: f_star = 0x4d33ed82, invalid = 0
+ERROR: f_star mismatch. Expected: 0x4d33ed82, Got: 0x4d33ecf8 (diff: 138)
+
+--- Test Case 44 ---
+Input: f1 = 0x464e69ba, f2 = 0x47fd764d
+       L1 = 0xffc53b8d, L2 = 0xfff9417e
+Expected: f_star = 0x478fa0cf, invalid = 0
+SUCCESS: f_star match. Got: 0x478fa0d0 (diff: 1)
+SUCCESS: Test case passed
+
+--- Test Case 45 ---
+Input: f1 = 0x40fac679, f2 = 0x62449951
+       L1 = 0xffead4f4, L2 = 0xfff8e21f
+Expected: f_star = 0x43bf3ac9, invalid = 0
+SUCCESS: f_star match. Got: 0x43bf3a75 (diff: 84)
+SUCCESS: Test case passed
+
+--- Test Case 46 ---
+Input: f1 = 0x353096fb, f2 = 0x5350f862
+       L1 = 0xffceb5eb, L2 = 0xfff775e3
+Expected: f_star = 0x4ad7f0d7, invalid = 0
+SUCCESS: f_star match. Got: 0x4ad7f0c3 (diff: 20)
+SUCCESS: Test case passed
+
+--- Test Case 47 ---
+Input: f1 = 0x43c32654, f2 = 0x78c838d1
+       L1 = 0xfff09e42, L2 = 0xffc47d5e
+Expected: f_star = 0x494f9daf, invalid = 0
+ERROR: f_star mismatch. Expected: 0x494f9daf, Got: 0x494f9e1d (diff: 110)
+
+--- Test Case 48 ---
+Input: f1 = 0x60ff1384, f2 = 0x62ba967f
+       L1 = 0xffd57dcf, L2 = 0x0007abcb
+Expected: f_star = 0x61c6048b, invalid = 0
+SUCCESS: f_star match. Got: 0x61c60487 (diff: 4)
+SUCCESS: Test case passed
+
+--- Test Case 49 ---
+Input: f1 = 0x6a99189f, f2 = 0x98fc987f
+       L1 = 0xfff6613a, L2 = 0xffce6a6a
+Expected: f_star = 0x76a57e88, invalid = 0
+SUCCESS: f_star match. Got: 0x76a57e63 (diff: 37)
+SUCCESS: Test case passed
+
+--- Test Case 50 ---
+Input: f1 = 0x21f628b4, f2 = 0x430f1a0b
+       L1 = 0xffe2c01b, L2 = 0xfff16801
+Expected: f_star = 0x36d998ca, invalid = 0
+ERROR: f_star mismatch. Expected: 0x36d998ca, Got: 0x36d9982e (diff: 156)
+
+--- Test Case 51 ---
+Input: f1 = 0x713e311f, f2 = 0x98b37487
+       L1 = 0xfff92787, L2 = 0xffe2fa6f
+Expected: f_star = 0x88a60953, invalid = 0
+ERROR: f_star mismatch. Expected: 0x88a60953, Got: 0x88a60a19 (diff: 198)
+
+--- Test Case 52 ---
+Input: f1 = 0x074b41b4, f2 = 0x2109ce51
+       L1 = 0xffcd4d6a, L2 = 0xfff73c4b
+Expected: f_star = 0x1a23f0e6, invalid = 0
+SUCCESS: f_star match. Got: 0x1a23f0ca (diff: 28)
+SUCCESS: Test case passed
+
+--- Test Case 53 ---
+Input: f1 = 0x51f8afa9, f2 = 0x79880c54
+       L1 = 0xffccc62c, L2 = 0x000340d9
+Expected: f_star = 0x68a5653d, invalid = 0
+SUCCESS: f_star match. Got: 0x68a5651a (diff: 35)
+SUCCESS: Test case passed
+
+--- Test Case 54 ---
+Input: f1 = 0x69a1e7a5, f2 = 0x75409eb2
+       L1 = 0xffc59dfd, L2 = 0xffeec10a
+Expected: f_star = 0x74797770, invalid = 0
+SUCCESS: f_star match. Got: 0x74797787 (diff: 23)
+SUCCESS: Test case passed
+
+--- Test Case 55 ---
+Input: f1 = 0x6f9a5b55, f2 = 0x7e9df834
+       L1 = 0xffc58da4, L2 = 0x0003286a
+Expected: f_star = 0x78f91c85, invalid = 0
+SUCCESS: f_star match. Got: 0x78f91c8e (diff: 9)
+SUCCESS: Test case passed
+
+--- Test Case 56 ---
+Input: f1 = 0x6431585a, f2 = 0x8b328bf7
+       L1 = 0x000372f5, L2 = 0xffc6297c
+Expected: f_star = 0x731dc9e7, invalid = 0
+SUCCESS: f_star match. Got: 0x731dc9c3 (diff: 36)
+SUCCESS: Test case passed
+
+--- Test Case 57 ---
+Input: f1 = 0x58553845, f2 = 0x916d9887
+       L1 = 0xfffcb247, L2 = 0xffcc2bbd
+Expected: f_star = 0x6bfa56c1, invalid = 0
+SUCCESS: f_star match. Got: 0x6bfa5718 (diff: 87)
+SUCCESS: Test case passed
+
+--- Test Case 58 ---
+Input: f1 = 0x5a9783d2, f2 = 0x67d9011d
+       L1 = 0xffcb981f, L2 = 0xfff26d53
+Expected: f_star = 0x65a75ce4, invalid = 0
+SUCCESS: f_star match. Got: 0x65a75cf0 (diff: 12)
+SUCCESS: Test case passed
+
+--- Test Case 59 ---
+Input: f1 = 0x4eac99cf, f2 = 0x813f0abd
+       L1 = 0x00092f2f, L2 = 0xffde03e0
+Expected: f_star = 0x70dcfae6, invalid = 0
+SUCCESS: f_star match. Got: 0x70dcfac5 (diff: 33)
+SUCCESS: Test case passed
+
+--- Test Case 60 ---
+Input: f1 = 0x55a92a11, f2 = 0x8ce1f632
+       L1 = 0xffda1039, L2 = 0x00015d67
+Expected: f_star = 0x6edcff1e, invalid = 0
+ERROR: f_star mismatch. Expected: 0x6edcff1e, Got: 0x6edcfeac (diff: 114)
+
+--- Test Case 61 ---
+Input: f1 = 0x0f70eeeb, f2 = 0x3eb1f8b5
+       L1 = 0xfffdf83c, L2 = 0xffc416c2
+Expected: f_star = 0x1e1c94ca, invalid = 0
+SUCCESS: f_star match. Got: 0x1e1c948b (diff: 63)
+SUCCESS: Test case passed
+
+--- Test Case 62 ---
+Input: f1 = 0x126aebac, f2 = 0x48fce921
+       L1 = 0xffe819d6, L2 = 0xfff72dde
+Expected: f_star = 0x20876a4b, invalid = 0
+SUCCESS: f_star match. Got: 0x20876a49 (diff: 2)
+SUCCESS: Test case passed
+
+--- Test Case 63 ---
+Input: f1 = 0x109afca7, f2 = 0x55740d2f
+       L1 = 0xffd11471, L2 = 0x00031655
+Expected: f_star = 0x35aaf930, invalid = 0
+SUCCESS: f_star match. Got: 0x35aaf931 (diff: 1)
+SUCCESS: Test case passed
+
+--- Test Case 64 ---
+Input: f1 = 0x028d70fc, f2 = 0x5d37e09c
+       L1 = 0xffff5844, L2 = 0xffc54a6a
+Expected: f_star = 0x20c39ed1, invalid = 0
+ERROR: f_star mismatch. Expected: 0x20c39ed1, Got: 0x20c39f39 (diff: 104)
+
+--- Test Case 65 ---
+Input: f1 = 0x72b6b890, f2 = 0x77aab1fa
+       L1 = 0xfff6ff8c, L2 = 0xffd1c044
+Expected: f_star = 0x742d1fc9, invalid = 0
+SUCCESS: f_star match. Got: 0x742d1fd0 (diff: 7)
+SUCCESS: Test case passed
+
+--- Test Case 66 ---
+Input: f1 = 0x266a28a5, f2 = 0x97eeaaa5
+       L1 = 0xffea3934, L2 = 0x00096fc3
+Expected: f_star = 0x2ce030cf, invalid = 0
+SUCCESS: f_star match. Got: 0x2ce03078 (diff: 87)
+SUCCESS: Test case passed
+
+--- Test Case 67 ---
+Input: f1 = 0x6425b96d, f2 = 0x91e0d653
+       L1 = 0xffe9f0bb, L2 = 0xfffe2eb8
+Expected: f_star = 0x68cced6a, invalid = 0
+SUCCESS: f_star match. Got: 0x68cced96 (diff: 44)
+SUCCESS: Test case passed
+
+--- Test Case 68 ---
+Input: f1 = 0x4b82e9a9, f2 = 0x8ed6d62e
+       L1 = 0xffc9ac2c, L2 = 0x000884d6
+Expected: f_star = 0x70496308, invalid = 0
+ERROR: f_star mismatch. Expected: 0x70496308, Got: 0x70496370 (diff: 104)

@@ -1,0 +1,352 @@
+# Test vectors for linear_interp_crossing module
+# FREQ_WIDTH = 32, FREQ_FRAC_BITS = 16
+# ACCUM_DB_WIDTH = 32, ACCUM_DB_FRAC = 16
+# THRESHOLD_DB = -20.0 dB
+#
+# Format: Each test case consists of 2 lines:
+# Line 1: f1_fixed f2_fixed L1_fixed L2_fixed (hex values)
+# Line 2: expected_f_star_fixed invalid_flag (hex and binary)
+# Lines starting with '#' are comments and should be skipped
+#
+# THRESHOLD_DB (fixed-point) = 0xffec0000
+#
+# Test case: Normal positive slope crossing
+# f1=100.000, f2=200.000, L1=-30.000dB, L2=-10.000dB
+# Expected f_star = 150.000 Hz
+00640000 00c80000 ffe20000 fff60000
+00960000 0
+# Test case: Normal negative slope crossing
+# f1=100.000, f2=200.000, L1=-10.000dB, L2=-30.000dB
+# Expected f_star = 150.000 Hz
+00640000 00c80000 fff60000 ffe20000
+00960000 0
+# Test case: Crossing at midpoint
+# f1=1000.000, f2=2000.000, L1=-25.000dB, L2=-15.000dB
+# Expected f_star = 1500.000 Hz
+03e80000 07d00000 ffe70000 fff10000
+05dc0000 0
+# Test case: Threshold equals L1
+# f1=100.000, f2=200.000, L1=-20.000dB, L2=-10.000dB
+# Expected f_star = 100.000 Hz
+00640000 00c80000 ffec0000 fff60000
+00640000 0
+# Test case: Threshold equals L2
+# f1=100.000, f2=200.000, L1=-30.000dB, L2=-20.000dB
+# Expected f_star = 200.000 Hz
+00640000 00c80000 ffe20000 ffec0000
+00c80000 0
+# Test case: Threshold above range
+# f1=100.000, f2=200.000, L1=-30.000dB, L2=-25.000dB
+# Expected f_star = 300.000 Hz
+00640000 00c80000 ffe20000 ffe70000
+012c0000 0
+# Test case: Threshold below range
+# f1=100.000, f2=200.000, L1=-15.000dB, L2=-10.000dB
+# Expected f_star = 0.000 Hz
+00640000 00c80000 fff10000 fff60000
+00000000 0
+# Test case: Small frequency difference
+# f1=100.000, f2=101.000, L1=-30.000dB, L2=-10.000dB
+# Expected f_star = 100.500 Hz
+00640000 00650000 ffe20000 fff60000
+00648000 0
+# Test case: Large frequency difference
+# f1=100.000, f2=10000.000, L1=-30.000dB, L2=-10.000dB
+# Expected f_star = 5050.000 Hz
+00640000 27100000 ffe20000 fff60000
+13ba0000 0
+# Test case: Small dB difference
+# f1=100.000, f2=200.000, L1=-20.500dB, L2=-19.500dB
+# Expected f_star = 150.000 Hz
+00640000 00c80000 ffeb8000 ffec8000
+00960000 0
+# Test case: Large dB difference
+# f1=100.000, f2=200.000, L1=-50.000dB, L2=-5.000dB
+# Expected f_star = 166.667 Hz
+00640000 00c80000 ffce0000 fffb0000
+00a6aaab 0
+# Test case: Zero start frequency
+# f1=0.000, f2=1000.000, L1=-30.000dB, L2=-10.000dB
+# Expected f_star = 500.000 Hz
+00000000 03e80000 ffe20000 fff60000
+01f40000 0
+# Test case: Same frequencies (invalid)
+# f1=100.000, f2=100.000, L1=-30.000dB, L2=-10.000dB
+# Expected f_star = 100.000 Hz
+00640000 00640000 ffe20000 fff60000
+00640000 0
+# Test case: Same dB levels (invalid)
+# f1=100.000, f2=200.000, L1=-20.000dB, L2=-20.000dB
+# Expected: INVALID (division by zero or NaN)
+00640000 00c80000 ffec0000 ffec0000
+00000000 1
+# Test case: Fractional frequencies
+# f1=123.456, f2=234.567, L1=-25.000dB, L2=-15.000dB
+# Expected f_star = 179.012 Hz
+007b74bc 00ea9127 ffe70000 fff10000
+00b302f2 0
+# Test case: Fractional dB values
+# f1=100.000, f2=200.000, L1=-23.750dB, L2=-16.250dB
+# Expected f_star = 150.000 Hz
+00640000 00c80000 ffe84000 ffefc000
+00960000 0
+# Test case: High frequency range
+# f1=50000.000, f2=60000.000, L1=-30.000dB, L2=-10.000dB
+# Expected f_star = 55000.000 Hz
+c3500000 ea600000 ffe20000 fff60000
+d6d80000 0
+# Test case: Negative slope interpolation
+# f1=500.000, f2=1500.000, L1=-12.000dB, L2=-28.000dB
+# Expected f_star = 1000.000 Hz
+01f40000 05dc0000 fff40000 ffe40000
+03e80000 0
+# Test case: Random valid rising crossing 1
+# f1=2126.448, f2=36082.463, L1=-23.710dB, L2=-7.217dB
+# Expected f_star = 9764.042 Hz
+084e72c6 8cf2767d ffe84a56 fff8c875
+26240aa5 0
+# Test case: Random valid falling crossing 2
+# f1=26901.286, f2=30942.634, L1=6.802dB, L2=-33.274dB
+# Expected f_star = 29604.023 Hz
+69154942 78dea246 0006cd3b ffdeb9c5
+73a405d2 0
+# Test case: Random valid falling crossing 3
+# f1=23748.710, f2=34860.855, L1=-8.551dB, L2=-52.236dB
+# Expected f_star = 26660.917 Hz
+5cc4b5a8 882cdad5 fff772d3 ffcbc3a5
+6824eaca 0
+# Test case: Random valid falling crossing 4
+# f1=10062.082, f2=34196.774, L1=-18.745dB, L2=-30.571dB
+# Expected f_star = 12624.021 Hz
+274e150b 8594c636 ffed4162 ffe16dcf
+31500571 0
+# Test case: Random valid rising crossing 5
+# f1=3138.775, f2=32252.387, L1=-38.791dB, L2=-13.356dB
+# Expected f_star = 24647.355 Hz
+0c42c673 7dfc62fd ffd93599 fff2a4de
+60475acf 0
+# Test case: Random valid rising crossing 6
+# f1=5018.804, f2=27808.486, L1=-40.901dB, L2=8.094dB
+# Expected f_star = 14740.723 Hz
+139acdb2 6ca07c7f ffd71954 00081822
+3994b8fe 0
+# Test case: Random valid rising crossing 7
+# f1=9433.541, f2=21510.529, L1=-35.514dB, L2=2.464dB
+# Expected f_star = 14367.038 Hz
+24d98a70 54068788 ffdc7c5b 000276c5
+381f09c8 0
+# Test case: Random valid rising crossing 8
+# f1=25923.271, f2=31580.733, L1=-50.116dB, L2=-2.557dB
+# Expected f_star = 29505.789 Hz
+65434541 7b5cbbad ffcde236 fffd7166
+7341ca1a 0
+# Test case: Random valid rising crossing 9
+# f1=5265.624, f2=14087.118, L1=-25.821dB, L2=1.704dB
+# Expected f_star = 7131.221 Hz
+14919fb6 37071e21 ffe62dd0 0001b42c
+1bdb3887 0
+# Test case: Random valid falling crossing 10
+# f1=25348.903, f2=26910.401, L1=-1.006dB, L2=-34.417dB
+# Expected f_star = 26236.610 Hz
+6304e71b 691e66aa fffefe97 ffdd952e
+667c9c1f 0
+# Test case: Random valid falling crossing 11
+# f1=5381.406, f2=28600.236, L1=-10.201dB, L2=-43.448dB
+# Expected f_star = 12224.678 Hz
+15056805 6fb83c85 fff5cc7f ffd48d51
+2fc0ada7 0
+# Test case: Random valid rising crossing 12
+# f1=26556.800, f2=36952.623, L1=-31.282dB, L2=-6.310dB
+# Expected f_star = 31253.446 Hz
+67bcccd7 90589f75 ffe0b7c0 fff9b0c4
+7a157213 0
+# Test case: Random valid falling crossing 13
+# f1=28628.165, f2=37421.722, L1=3.937dB, L2=-30.707dB
+# Expected f_star = 34704.031 Hz
+6fd42a5a 922db8c3 0003eff7 ffe14b01
+879007f3 0
+# Test case: Random valid rising crossing 14
+# f1=3591.268, f2=11883.872, L1=-22.941dB, L2=-6.645dB
+# Expected f_star = 5087.759 Hz
+0e0744b0 2e6bdf33 ffe90f2e fff95ad6
+13dfc240 0
+# Test case: Random valid rising crossing 15
+# f1=11962.533, f2=17157.713, L1=-21.925dB, L2=-3.177dB
+# Expected f_star = 12495.921 Hz
+2eba885c 4305b67a ffea133b fffcd2c7
+30cfebc2 0
+# Test case: Random valid rising crossing 16
+# f1=13711.016, f2=21383.445, L1=-42.965dB, L2=-7.824dB
+# Expected f_star = 18725.030 Hz
+358f042f 538771cc ffd508ea fff82d13
+492507b6 0
+# Test case: Random valid falling crossing 17
+# f1=20946.620, f2=30522.770, L1=-10.853dB, L2=-26.859dB
+# Expected f_star = 26419.233 Hz
+51d29e9b 773ac52b fff5259e ffe5242e
+67333bc4 0
+# Test case: Random valid falling crossing 18
+# f1=12759.824, f2=20539.034, L1=-17.669dB, L2=-52.522dB
+# Expected f_star = 13280.062 Hz
+31d7d2f0 503b08b3 ffee54b0 ffcb7a4f
+33e00fc1 0
+# Test case: Random valid rising crossing 19
+# f1=18391.315, f2=22582.994, L1=-40.433dB, L2=-8.775dB
+# Expected f_star = 21096.763 Hz
+47d750c2 5836fe56 ffd79140 fff7397f
+5268c36b 0
+# Test case: Random valid rising crossing 20
+# f1=3014.661, f2=38764.498, L1=-42.942dB, L2=9.038dB
+# Expected f_star = 18793.395 Hz
+0bc6a93e 976c7f97 ffd50ebd 000909c6
+4969651c 0
+# Test case: Random valid falling crossing 21
+# f1=768.809, f2=10171.691, L1=-5.155dB, L2=-35.585dB
+# Expected f_star = 5355.926 Hz
+0300cf20 27bbb0c8 fffad871 ffdc6a1f
+14ebecf3 0
+# Test case: Random valid rising crossing 22
+# f1=6666.758, f2=15249.168, L1=-21.615dB, L2=-3.652dB
+# Expected f_star = 7438.368 Hz
+1a0ac21a 3b912ae7 ffea6291 fffc5914
+1d0e5e44 0
+# Test case: Random valid rising crossing 23
+# f1=24289.700, f2=31006.150, L1=-55.731dB, L2=6.955dB
+# Expected f_star = 28118.067 Hz
+5ee1b31b 791e2683 ffc844cb 0006f490
+6dd61140 0
+# Test case: Random valid rising crossing 24
+# f1=395.526, f2=22412.323, L1=-34.739dB, L2=6.599dB
+# Expected f_star = 8245.754 Hz
+018b86c2 578c52af ffdd42b7 0006994b
+2035c100 0
+# Test case: Random valid falling crossing 25
+# f1=11160.898, f2=34826.584, L1=-3.293dB, L2=-49.252dB
+# Expected f_star = 19763.928 Hz
+2b98e5e4 880a9592 fffcb513 ffcebf76
+4d33ed82 0
+# Test case: Random valid rising crossing 26
+# f1=17998.413, f2=18429.462, L1=-58.767dB, L2=-6.744dB
+# Expected f_star = 18319.628 Hz
+464e69ba 47fd764d ffc53b8d fff9417e
+478fa0cf 0
+# Test case: Random valid rising crossing 27
+# f1=16634.775, f2=25156.599, L1=-21.168dB, L2=-7.117dB
+# Expected f_star = 17343.230 Hz
+40fac679 62449951 ffead4f4 fff8e21f
+43bf3ac9 0
+# Test case: Random valid rising crossing 28
+# f1=13616.590, f2=21328.970, L1=-49.289dB, L2=-8.540dB
+# Expected f_star = 19159.941 Hz
+353096fb 5350f862 ffceb5eb fff775e3
+4ad7f0d7 0
+# Test case: Random valid falling crossing 29
+# f1=17347.150, f2=30920.222, L1=-15.382dB, L2=-59.510dB
+# Expected f_star = 18767.616 Hz
+43c32654 78c838d1 fff09e42 ffc47d5e
+494f9daf 0
+# Test case: Random valid rising crossing 30
+# f1=24831.076, f2=25274.588, L1=-42.509dB, L2=7.671dB
+# Expected f_star = 25030.018 Hz
+60ff1384 62ba967f ffd57dcf 0007abcb
+61c6048b 0
+# Test case: Random valid falling crossing 31
+# f1=27289.096, f2=39164.596, L1=-9.620dB, L2=-49.584dB
+# Expected f_star = 30373.494 Hz
+6a99189f 98fc987f fff6613a ffce6a6a
+76a57e88 0
+# Test case: Random valid rising crossing 32
+# f1=8694.159, f2=17167.102, L1=-29.250dB, L2=-14.594dB
+# Expected f_star = 14041.597 Hz
+21f628b4 430f1a0b ffe2c01b fff16801
+36d998ca 0
+# Test case: Random valid falling crossing 33
+# f1=28990.192, f2=39091.455, L1=-6.846dB, L2=-29.022dB
+# Expected f_star = 34982.036 Hz
+713e311f 98b37487 fff92787 ffe2fa6f
+88a60953 0
+# Test case: Random valid rising crossing 34
+# f1=1867.257, f2=8457.806, L1=-50.698dB, L2=-8.764dB
+# Expected f_star = 6691.941 Hz
+074b41b4 2109ce51 ffcd4d6a fff73c4b
+1a23f0e6 0
+# Test case: Random valid rising crossing 35
+# f1=20984.686, f2=31112.048, L1=-51.226dB, L2=3.253dB
+# Expected f_star = 26789.395 Hz
+51f8afa9 79880c54 ffccc62c 000340d9
+68a5653d 0
+# Test case: Random valid rising crossing 36
+# f1=27041.905, f2=30016.620, L1=-58.383dB, L2=-17.246dB
+# Expected f_star = 29817.467 Hz
+69a1e7a5 75409eb2 ffc59dfd ffeec10a
+74797770 0
+# Test case: Random valid rising crossing 37
+# f1=28570.357, f2=32413.970, L1=-58.447dB, L2=3.158dB
+# Expected f_star = 30969.111 Hz
+6f9a5b55 7e9df834 ffc58da4 0003286a
+78f91c85 0
+# Test case: Random valid falling crossing 38
+# f1=25649.345, f2=35634.547, L1=3.449dB, L2=-57.838dB
+# Expected f_star = 29469.789 Hz
+6431585a 8b328bf7 000372f5 ffc6297c
+731dc9e7 0
+# Test case: Random valid falling crossing 39
+# f1=22613.220, f2=37229.596, L1=-3.304dB, L2=-51.829dB
+# Expected f_star = 27642.339 Hz
+58553845 916d9887 fffcb247 ffcc2bbd
+6bfa56c1 0
+# Test case: Random valid rising crossing 40
+# f1=23191.515, f2=26585.004, L1=-52.406dB, L2=-13.573dB
+# Expected f_star = 26023.363 Hz
+5a9783d2 67d9011d ffcb981f fff26d53
+65a75ce4 0
+# Test case: Random valid falling crossing 41
+# f1=20140.601, f2=33087.042, L1=9.184dB, L2=-33.985dB
+# Expected f_star = 28892.980 Hz
+4eac99cf 813f0abd 00092f2f ffde03e0
+70dcfae6 0
+# Test case: Random valid rising crossing 42
+# f1=21929.164, f2=36065.962, L1=-37.937dB, L2=1.365dB
+# Expected f_star = 28380.997 Hz
+55a92a11 8ce1f632 ffda1039 00015d67
+6edcff1e 0
+# Test case: Random valid falling crossing 43
+# f1=3952.933, f2=16049.972, L1=-2.030dB, L2=-59.911dB
+# Expected f_star = 7708.581 Hz
+0f70eeeb 3eb1f8b5 fffdf83c ffc416c2
+1e1c94ca 0
+# Test case: Random valid rising crossing 44
+# f1=4714.921, f2=18684.911, L1=-23.899dB, L2=-8.821dB
+# Expected f_star = 8327.415 Hz
+126aebac 48fce921 ffe819d6 fff72dde
+20876a4b 0
+# Test case: Random valid rising crossing 45
+# f1=4250.987, f2=21876.052, L1=-46.920dB, L2=3.087dB
+# Expected f_star = 13738.973 Hz
+109afca7 55740d2f ffd11471 00031655
+35aaf930 0
+# Test case: Random valid falling crossing 46
+# f1=653.441, f2=23863.877, L1=-0.655dB, L2=-58.709dB
+# Expected f_star = 8387.620 Hz
+028d70fc 5d37e09c ffff5844 ffc54a6a
+20c39ed1 0
+# Test case: Random valid falling crossing 47
+# f1=29366.721, f2=30634.695, L1=-9.002dB, L2=-46.249dB
+# Expected f_star = 29741.124 Hz
+72b6b890 77aab1fa fff6ff8c ffd1c044
+742d1fc9 0
+# Test case: Random valid rising crossing 48
+# f1=9834.159, f2=38894.667, L1=-21.777dB, L2=9.437dB
+# Expected f_star = 11488.191 Hz
+266a28a5 97eeaaa5 ffea3934 00096fc3
+2ce030cf 0
+# Test case: Random valid rising crossing 49
+# f1=25637.724, f2=37344.837, L1=-22.060dB, L2=-1.818dB
+# Expected f_star = 26828.927 Hz
+6425b96d 91e0d653 ffe9f0bb fffe2eb8
+68cced6a 0
+# Test case: Random valid rising crossing 50
+# f1=19330.913, f2=36566.837, L1=-54.327dB, L2=8.519dB
+# Expected f_star = 28745.387 Hz
+4b82e9a9 8ed6d62e ffc9ac2c 000884d6
+70496308 0

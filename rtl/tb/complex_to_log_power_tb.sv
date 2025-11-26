@@ -90,7 +90,7 @@ module complex_to_log_power_tb ();
         // Loop through all test cases in the file
         while (!$feof(file)) begin
             // Try to read I and Q values
-            automatic int scan_result = $fscanf(file, "%h %h\n", in_i, in_q);
+            automatic int scan_result = $fscanf(file, "%d %d\n", in_i, in_q);
             
             if (scan_result != 2) begin
                 // End of file or incomplete read
@@ -98,7 +98,7 @@ module complex_to_log_power_tb ();
             end
             
             // Read expected output
-            if ($fscanf(file, "%h\n", exp_db_power) != 1) begin
+            if ($fscanf(file, "%d\n", exp_db_power) != 1) begin
                 $display("ERROR: Failed to read expected output for test case %0d", test_count + 1);
                 break;
             end
@@ -125,7 +125,7 @@ module complex_to_log_power_tb ();
             // Check results
             check_result(exp_db_power, n_errs, test_count);
             
-            @(posedge clk);
+            // @(posedge clk); // Idle cycle before next tc starts
         end
 
         $fclose(file);

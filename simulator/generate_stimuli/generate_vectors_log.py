@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Stimulus Generation for complex_to_log_power module
 
@@ -10,10 +11,8 @@ import random
 import math
 
 # Add the parent directory to path to import fixed_float_conversions
-# SIMULATOR_ROOT = Path(__file__).resolve().parent
-# sys.path.append(str(SIMULATOR_ROOT))
 SIMULATOR_ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(SIMULATOR_ROOT / "src"))
+sys.path.append(str(SIMULATOR_ROOT))
 
 from fixed_float_conversions import float_to_fixed_point, fixed_point_to_float
 
@@ -24,7 +23,7 @@ OUTPUT_FRAC = 16   # Fractional bits in output
 
 def calculate_expected_log_power(i_val, q_val, input_width, output_width, output_frac):
     """
-    Calculate the expected log power output.
+    Calculate the expected log power output (integer log2 only).
     
     Args:
         i_val: I component (as fixed-point integer)
@@ -57,19 +56,8 @@ def calculate_expected_log_power(i_val, q_val, input_width, output_width, output
     # Find MSB position (integer log2)
     msb_pos = mag_sq.bit_length() - 1
     
-    # Extract fractional part
-    if msb_pos >= output_frac:
-        # Extract bits below MSB
-        frac_mask = (1 << output_frac) - 1
-        frac_part = (mag_sq >> (msb_pos - output_frac)) & frac_mask
-    elif msb_pos > 0:
-        # Shift left to fill fractional bits
-        frac_part = (mag_sq & ((1 << msb_pos) - 1)) << (output_frac - msb_pos)
-    else:
-        frac_part = 0
-    
-    # Construct log2 value: integer_part.fractional_part
-    log2_val = (msb_pos << output_frac) | frac_part
+    # Place integer log2 in fixed-point format (shift left by OUTPUT_FRAC)
+    log2_val = msb_pos << output_frac
     
     # Scale by 3: x * 3 = (x << 1) + x
     result = (log2_val << 1) + log2_val

@@ -1,9 +1,9 @@
 module dft_accumulation #(
     parameter integer IQ_WIDTH = 16,
     parameter integer WINDOW_WIDTH = 16,
-    parameter integer ACCUM_WIDTH = 48,
+    parameter integer ACCUM_WIDTH = 64,
     parameter integer NUM_BINS = 16,
-    parameter integer OSC_WIDTH = 27,
+    parameter integer OSC_WIDTH = 32,
     parameter integer PHASE_WIDTH = 32,
     parameter integer SAMPLE_COUNT_WIDTH = 16
     // CORDIC_LATENCY parameter is no longer needed for logic, 
@@ -18,7 +18,7 @@ module dft_accumulation #(
     input  logic last_sample_i,        // Indicates the last sample of the window
     
     // --- Oscillator Control (New) ---
-    // These must be driven by your controller ~19 cycles BEFORE sample_valid_i
+    // These must be driven by your controller ~35 cycles BEFORE sample_valid_i (cordic IP has latency 36)
     input  logic osc_reset_i,          // Resets Phase to 0. Pulse this early.
     input  logic osc_enable_i,         // Advances Phase. Hold high early + during window.
     

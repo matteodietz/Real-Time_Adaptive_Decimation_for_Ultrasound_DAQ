@@ -1,0 +1,5 @@
+vhdl xil_defaultlib  \
+"../../../../bw_estim.gen/sources_1/ip/cordic_0/sim/cordic_0.vhd" \
+
+# Do not sort compile order
+nosort

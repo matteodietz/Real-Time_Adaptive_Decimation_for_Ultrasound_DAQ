@@ -79,8 +79,9 @@ module oscillator_bank #(
             // between 111000.. and 001000...
             // TODO: don't we lose 2 bits of precision for the phase like this?
             // but it makes the entire system easier because we dont need to multiply with pi,
-            // the phase steps are represented perfectly in binary
-            // We use concatenation to force the sign extension explicitly.
+            // also we dont need to detect overflow (phase > pi)
+            // also, now the phase steps are represented perfectly in binary
+            // use concatenation to force the sign extension explicitly.
             logic [PHASE_WIDTH-1:0] phase_scaled;
             assign phase_scaled = { {2{phase_acc_q[k][PHASE_WIDTH-1]}}, phase_acc_q[k][PHASE_WIDTH-1:2] };
             

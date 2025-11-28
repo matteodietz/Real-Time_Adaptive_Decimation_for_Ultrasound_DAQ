@@ -35,3 +35,6 @@ simulator/src/ancient
 **/.xcl.*/
 **/vivado.jou
 **/vivado.log
+
+# stop tracking the entire vivado directory
+rtl/vivado/

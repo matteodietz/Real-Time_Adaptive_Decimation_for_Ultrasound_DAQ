@@ -45,7 +45,7 @@ module oscillator_bank #(
         end else if (enable_i) begin
             for (int k = 0; k < NUM_BINS; k++) begin
                 // TODO: probably able to remove overflow logic
-                // phases are accumulated from 0 to pi -> there should be no need to handle overflow
+                // phases are accumulated from 0 to pi -> there is no need to handle overflow
                 // if(phase_acc_q[k] + freq_steps_i[k] < PI_POS) begin
                     phase_acc_d[k] = phase_acc_q[k] + freq_steps_i[k];
                 // end else begin

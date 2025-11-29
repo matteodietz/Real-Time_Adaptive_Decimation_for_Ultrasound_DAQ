@@ -136,7 +136,7 @@ module dft_accumulation_cordic_tb ();
         $display("=== Starting DFT Accumulation with CORDIC Testbench ===");
         
         // Skip header lines
-        for (int i = 0; i < 15; i++) begin
+        for (int i = 0; i < 21; i++) begin
             status = $fgets(line, file);
         end
 
@@ -204,15 +204,19 @@ module dft_accumulation_cordic_tb ();
             status = $fgets(line, file);
             
             // Read expected A_real values
+            $display("\nExpected Accumulator Values (real) given by: \n");
             for (int k = 0; k < num_bins_read; k++) begin
                 status = $fscanf(file, "%h", exp_A_real[k]);
                 status = $fgets(line, file); // Consume newline
+                $display( " %h ", exp_A_real[k]);
             end
             
             // Read expected A_imag values
+            $display("\nExpected Accumulator Values (imag) given by: \n");
             for (int k = 0; k < num_bins_read; k++) begin
                 status = $fscanf(file, "%h", exp_A_imag[k]);
                 status = $fgets(line, file); // Consume newline
+                $display( " %h ", exp_A_imag[k]);
             end
             
             // Skip GOLDEN line

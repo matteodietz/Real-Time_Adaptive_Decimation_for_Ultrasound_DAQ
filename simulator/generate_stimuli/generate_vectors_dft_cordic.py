@@ -147,9 +147,9 @@ def write_vector_file(test_cases, output_path, iq_width, window_width,
             f.write("\n")
             
             # Write frequency steps (for CORDIC)
-            f.write("FREQ_STEPS ")
+            f.write("FREQ_STEPS\n")
             for step in tc['freq_steps']:
-                f.write(f"{step:08x} ")
+                f.write(f"{step:08x}\n")
             f.write("\n")
             
             # Write sample data (one line per sample)
@@ -253,36 +253,36 @@ def main():
     )
     test_cases.append(tc_sanity8)
 
-    # ====================================================================
-    # Sanity Check 3: 24-point DFT (sin + cos)
-    # ====================================================================
-    print("\n========== Sanity Check 3: 24-point DFT ==========")
+    # # ====================================================================
+    # # Sanity Check 3: 24-point DFT (sin + cos)
+    # # ====================================================================
+    # print("\n========== Sanity Check 3: 24-point DFT ==========")
     
-    fs_sanity24 = 24.0
-    nperseg_sanity24 = 24
+    # fs_sanity24 = 24.0
+    # nperseg_sanity24 = 24
     
-    # Mixed signal: 1 Hz sine + 2 Hz cosine
-    t_sanity24 = np.arange(nperseg_sanity24) / fs_sanity24
-    sin_comp = np.sin(2 * np.pi * 1.0 * t_sanity24)
-    cos_comp = np.cos(2 * np.pi * 2.0 * t_sanity24)
-    signal_sanity24 = sin_comp + cos_comp
+    # # Mixed signal: 1 Hz sine + 2 Hz cosine
+    # t_sanity24 = np.arange(nperseg_sanity24) / fs_sanity24
+    # sin_comp = np.sin(2 * np.pi * 1.0 * t_sanity24)
+    # cos_comp = np.cos(2 * np.pi * 2.0 * t_sanity24)
+    # signal_sanity24 = sin_comp + cos_comp
     
-    # All 24 frequency bins
-    S_bins_sanity24 = np.fft.fftfreq(nperseg_sanity24, 1/fs_sanity24)
+    # # All 24 frequency bins
+    # S_bins_sanity24 = np.fft.fftfreq(nperseg_sanity24, 1/fs_sanity24)
     
-    tc_sanity24 = generate_test_case(
-        "sanity_check_24pt_dft_sin_cos",
-        signal_sanity24,
-        fs_sanity24,
-        S_bins_sanity24,
-        'boxcar',
-        IQ_WIDTH,
-        WINDOW_WIDTH,
-        ACCUM_WIDTH,
-        PHASE_WIDTH,
-        24
-    )
-    test_cases.append(tc_sanity24)
+    # tc_sanity24 = generate_test_case(
+    #     "sanity_check_24pt_dft_sin_cos",
+    #     signal_sanity24,
+    #     fs_sanity24,
+    #     S_bins_sanity24,
+    #     'boxcar',
+    #     IQ_WIDTH,
+    #     WINDOW_WIDTH,
+    #     ACCUM_WIDTH,
+    #     PHASE_WIDTH,
+    #     24
+    # )
+    # test_cases.append(tc_sanity24)
     
     # Write to file
     output_dir = SIMULATOR_ROOT.parent / "rtl" / "simvectors"

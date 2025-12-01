@@ -110,7 +110,7 @@ module dft_accumulation_cordic #(
     // -------------------------------------------------------------------------
     // Sequential Logic
     // -------------------------------------------------------------------------
-    always_ff @(posedge clk_i or negedge rst_ni) begin
+    always_ff @(posedge clk_i) begin
         if (!rst_ni) begin
             state_q <= IDLE;
             sample_count_q <= '0;
@@ -153,19 +153,46 @@ module dft_accumulation_cordic #(
     // -------------------------------------------------------------------------
     // Combinational Logic: Stage 1 (Windowing)
     // -------------------------------------------------------------------------
-    always_comb begin
+    // always_comb begin
+    //     x_weighted_real_d = x_weighted_real_q;
+    //     x_weighted_imag_d = x_weighted_imag_q;
+    //     sample_valid_stage1_d = 1'b0; // before: sample_valid_stage1_q
+    //     last_sample_stage1_d = 1'b0;   // before: last_sample_stage1_q
+
+    //     if (sample_valid_i && (state_q == ACCUMULATE)) begin
+    //         x_weighted_real_d = $signed(i_sample_i) * $signed(window_coeff_i);
+    //         x_weighted_imag_d = $signed(q_sample_i) * $signed(window_coeff_i);
+    //         sample_valid_stage1_d = 1'b1;
+    //         last_sample_stage1_d = last_sample_i;
+    //     end else begin
+    //         sample_valid_stage1_d = 1'b0;
+    //         last_sample_stage1_d = 1'b0;
+    //     end
+    // end
+
+     always_comb begin
+        // Default
         x_weighted_real_d = x_weighted_real_q;
         x_weighted_imag_d = x_weighted_imag_q;
-        sample_valid_stage1_d = 1'b0;
+        sample_valid_stage1_d = sample_valid_stage1_q;
         last_sample_stage1_d = last_sample_stage1_q;
-
+        
+        // Compute windowed samples when new sample arrives
         if (sample_valid_i && (state_q == ACCUMULATE)) begin
+            // Multiply I and Q with window coefficient
             x_weighted_real_d = $signed(i_sample_i) * $signed(window_coeff_i);
             x_weighted_imag_d = $signed(q_sample_i) * $signed(window_coeff_i);
+            
+            // Pass control signals through pipeline
             sample_valid_stage1_d = 1'b1;
             last_sample_stage1_d = last_sample_i;
+            
+        end else begin
+            sample_valid_stage1_d = 1'b0;
+            last_sample_stage1_d = 1'b0;
         end
     end
+
 
     // -------------------------------------------------------------------------
     // Assertion: Window coefficient MSB check
@@ -188,7 +215,7 @@ module dft_accumulation_cordic #(
             prod_imag_d[k] = prod_imag_q[k];
         end
         sample_valid_stage2_d = 1'b0;
-        last_sample_stage2_d = last_sample_stage2_q;
+        last_sample_stage2_d = 1'b0;  // before: last_sample_stage2_q
 
         if (sample_valid_stage1_q) begin
             for (int k = 0; k < NUM_BINS; k++) begin
@@ -209,6 +236,9 @@ module dft_accumulation_cordic #(
             end
             sample_valid_stage2_d = 1'b1;
             last_sample_stage2_d = last_sample_stage1_q;
+        end else begin
+            sample_valid_stage2_d = 1'b0;
+            last_sample_stage2_d = 1'b0;
         end
     end
 

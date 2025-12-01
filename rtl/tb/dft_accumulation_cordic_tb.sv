@@ -180,12 +180,18 @@ module dft_accumulation_cordic_tb ();
             $display("  Frequencies: %s", line);
             
             // Read FREQ_STEPS line
-            status = $fgets(line, file); // Skip "FREQ_STEPS" keyword
+            $display("  Frequency Steps:");
+            // status = $fgets(line, file); // Skip "FREQ_STEPS" keyword
             for (int k = 0; k < num_bins_read; k++) begin
+                status = $fgets(line, file);
                 status = $fscanf(file, "%h", freq_steps[k]);
+                $display( " %h ", freq_steps[k]);
             end
+
             status = $fgets(line, file); // Consume newline
             $display("  Frequency steps configured");
+            
+            status = $fgets(line, file);
             
             // Read SAMPLES keyword
             status = $fgets(line, file);
@@ -195,6 +201,7 @@ module dft_accumulation_cordic_tb ();
                 // Read I, Q, window_coeff
                 status = $fscanf(file, "%h %h %h", 
                                i_samples[n], q_samples[n], window_coeffs[n]);
+                $display("%h %h %h", i_samples[n], q_samples[n], window_coeffs[n]);
                 status = $fgets(line, file); // Consume newline
             end
             
@@ -238,11 +245,14 @@ module dft_accumulation_cordic_tb ();
             @(posedge clk);
             osc_enable = 1'b1;
             osc_phase_tvalid = 1'b1;
+
             
             // Step 3: Wait for CORDIC latency minus windowing stage (35 cycles)
             $display("  Waiting %0d cycles for CORDIC pipeline...", OSC_EARLY_START);
-            repeat(OSC_EARLY_START) @(posedge clk);
-            
+            repeat(OSC_EARLY_START-3) @(posedge clk);
+            // we need the -3 because the assertion of the start signal introduces 2 more wait cycles
+            // and when we stream the samples we wait another clock cycle
+
             // Step 4: Start DFT accumulation
             $display("  Starting DFT accumulation...");
             @(posedge clk);

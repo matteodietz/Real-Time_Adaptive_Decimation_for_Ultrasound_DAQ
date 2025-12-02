@@ -30,7 +30,7 @@ module oscillator_bank #(
     // localparam signed [PHASE_WIDTH-1:0] PI_NEG = 32'b1001_1011_0111_1000_0001_0010_1010_1111; // - pi
 
     // Phase Accumulators
-    logic [PHASE_WIDTH-1:0] phase_acc[NUM_BINS];
+    // logic [PHASE_WIDTH-1:0] phase_acc[NUM_BINS];
 
 
     logic [PHASE_WIDTH-1:0] phase_acc_d[NUM_BINS];

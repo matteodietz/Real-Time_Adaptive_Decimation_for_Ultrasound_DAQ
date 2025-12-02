@@ -237,12 +237,15 @@ module dft_accumulation_cordic_tb ();
             
             // Step 1: Reset oscillator phase accumulators
             @(posedge clk);
+            #1;
             osc_reset = 1'b1;
             @(posedge clk);
+            #1;
             osc_reset = 1'b0;
             
             // Step 2: Start oscillator bank (enable and phase_tvalid)
             @(posedge clk);
+            #1;
             osc_enable = 1'b1;
             osc_phase_tvalid = 1'b1;
 
@@ -256,13 +259,16 @@ module dft_accumulation_cordic_tb ();
             // Step 4: Start DFT accumulation
             $display("  Starting DFT accumulation...");
             @(posedge clk);
+            #1;
             start = 1'b1;
             @(posedge clk);
+            #1;
             start = 1'b0;
             
             // Step 5: Stream samples
             for (int n = 0; n < num_samples_read; n++) begin
                 @(posedge clk);
+                #1;
                 
                 // Apply sample data
                 sample_valid = 1'b1;
@@ -281,6 +287,7 @@ module dft_accumulation_cordic_tb ();
             end
             
             @(posedge clk);
+            #1;
             sample_valid = 1'b0;
             last_sample = 1'b0;
             osc_enable = 1'b0;

@@ -1,6 +1,6 @@
 """
 Generate simulation vectors for find_bw_left_edge.sv module
-Updated to use ABSOLUTE power values (Unsigned) to match hardware architecture.
+Updated to scale input IQ data to full-scale fixed-point range before processing.
 """
 import numpy as np
 from scipy import signal
@@ -48,7 +48,7 @@ def convert_to_sorted_db_power_absolute(dft_bins):
     power_db = 10 * np.log10(powers + 1e-20)
     
     # Clamp negative values to 0 (Hardware is unsigned)
-    # Realistically, 16-bit inputs won't produce negative 10*log10 unless P < 1.
+    # With the pre-scaling applied, signals should be well above 0 dB.
     power_db = np.maximum(power_db, 0.0)
     
     # Sort by frequency
@@ -61,25 +61,52 @@ def convert_to_sorted_db_power_absolute(dft_bins):
 def generate_test_case(test_name, iq_data, fs, freq_bins, threshold_drop_db, 
                        accum_width, freq_bin_width, num_accums):
     """
-    Generate a single test case using Absolute Power logic.
+    Generate a single test case using Absolute Power logic with Input Scaling.
     """
     print(f"\n=== Generating test case: {test_name} ===")
     
-    # 1. Run DFT
-    dft_bins = streaming_dft_processor(iq_data, fs, freq_bins, window='hann')
+    # --- 1. Input Scaling (Matches DFT Module Logic) ---
+    # We assume Q2.14 format for the inputs (16-bit total, 14 fractional)
+    IQ_WIDTH = 16
+    IQ_FRAC_BITS = 14
+    IQ_INT_BITS = IQ_WIDTH - IQ_FRAC_BITS # 2 bits
     
-    # 2. Convert to Absolute dB (e.g., 80 dB, 90 dB...)
+    # Calculate max magnitude of the raw float data
+    max_magnitude = np.max(np.abs(iq_data))
+    
+    # Calculate target maximum value for Q2.14
+    # Max representable is slightly less than 2^(int_bits-1) = 2^1 = 2.0
+    target_max_val = 2.0 ** (IQ_INT_BITS - 1) 
+    
+    if max_magnitude > 0:
+        scale_factor = target_max_val / max_magnitude
+        print(f"  [Scaling] Input Max: {max_magnitude:.2e} -> Target: {target_max_val}")
+        print(f"  [Scaling] Scale Factor: {scale_factor:.4f}")
+    else:
+        scale_factor = 1.0
+        print("  [Scaling] Input is zero/empty.")
+
+    # Apply scaling to the floating point data
+    # This simulates the data filling the fixed-point range
+    iq_data_scaled = iq_data * scale_factor
+    
+    # --- 2. Run DFT on SCALED data ---
+    dft_bins = streaming_dft_processor(iq_data_scaled, fs, freq_bins, window='hann')
+    
+    # --- 3. Convert to Absolute dB ---
+    # Since inputs are now ~1.0 magnitude, the power will be ~1.0 or higher,
+    # resulting in positive dB values.
     freqs_sorted, power_db_sorted = convert_to_sorted_db_power_absolute(dft_bins)
     
-    # 3. Calculate Absolute Threshold
+    # --- 4. Calculate Absolute Threshold ---
     # Hardware logic: Threshold = Max_Power - Drop
     max_pwr = np.max(power_db_sorted)
     abs_threshold = max_pwr - threshold_drop_db
     
-    # Clamp threshold to 0 if negative (though unlikely with proper signals)
+    # Clamp threshold to 0 if negative
     if abs_threshold < 0: abs_threshold = 0
     
-    # 4. Find Edge using Absolute Threshold
+    # --- 5. Find Edge using Absolute Threshold ---
     f1_golden, f2_golden, L1_golden, L2_golden = find_left_edge_points(
         freqs_sorted, power_db_sorted, threshold_db=abs_threshold
     )
@@ -93,7 +120,7 @@ def generate_test_case(test_name, iq_data, fs, freq_bins, threshold_drop_db,
     else:
         print(f"  No crossing found!")
     
-    # 5. Convert to Hardware Fixed Point
+    # --- 6. Convert to Hardware Fixed Point ---
     
     # Frequency: Q(int).12 (e.g. +/- 8 MHz range)
     freq_frac_bits = 12
@@ -129,7 +156,7 @@ def generate_test_case(test_name, iq_data, fs, freq_bins, threshold_drop_db,
         'num_accums': len(freqs_sorted),
         'freq_bins': freq_bins_hw,
         'power_db': power_db_hw,
-        'threshold_hw': threshold_hw, # Writing the calculated ABSOLUTE threshold
+        'threshold_hw': threshold_hw, # Writing the CALCULATED ABS threshold
         'expected_f1': f1_hw,
         'expected_f2': f2_hw,
         'expected_L1': L1_hw,
@@ -145,6 +172,7 @@ def generate_synth_test_case(test_name, iq_data, db_data, fs, freq_bins, thresho
                        accum_width, freq_bin_width, num_accums):
     """
     Generate synthetic test case. db_data must be absolute.
+    Scaling is not applied here because db_data is already provided directly.
     """
     print(f"\n=== Generating test case: {test_name} ===")
     

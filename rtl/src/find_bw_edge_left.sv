@@ -169,3 +169,4 @@ module find_bw_left_edge #(
     assign busy_o = (state_q == PROCESS);
 
 endmodule
+

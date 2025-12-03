@@ -1,4 +1,4 @@
-module find_bw_left_edge_tb ();
+module find_bw_left_edge_absolute_tb ();
 
     timeunit 1ns;
     timeprecision 1ps;
@@ -43,7 +43,7 @@ module find_bw_left_edge_tb ();
     end
 
     // --- DUT Instantiation ---
-    find_bw_left_edge #(
+    find_bw_left_edge_absolute #(
         .ACCUM_WIDTH    (ACCUM_WIDTH),
         .FREQ_BIN_WIDTH (FREQ_BIN_WIDTH),
         .NUM_ACCUMS     (NUM_ACCUMS)

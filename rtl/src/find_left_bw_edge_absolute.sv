@@ -13,7 +13,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-module find_bw_left_edge #(
+module find_bw_left_edge_absolute #(
     parameter integer ACCUM_WIDTH = 16,     // Res of Power signal (e.g., 32 for Q16.16)
     parameter integer FREQ_BIN_WIDTH = 16,  // Res of Frequency bins
     parameter integer NUM_ACCUMS = 16       // Number of bins

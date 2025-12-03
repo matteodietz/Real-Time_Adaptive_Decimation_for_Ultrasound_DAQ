@@ -101,7 +101,7 @@ def generate_test_case(test_name, iq_data, fs, freq_bins, threshold_drop_db,
     # --- 4. Calculate Absolute Threshold ---
     # Hardware logic: Threshold = Max_Power - Drop
     max_pwr = np.max(power_db_sorted)
-    abs_threshold = max_pwr - threshold_drop_db
+    abs_threshold = threshold_drop_db # max_pwr - threshold_drop_db
     
     # Clamp threshold to 0 if negative
     if abs_threshold < 0: abs_threshold = 0

@@ -1,0 +1,199 @@
+
+////////////////////////////////////////////////////////////////////////////////
+//
+//  Module: find_bw_left_edge
+//
+//  Function: Scans frequency bins from center towards the left (DC) to find
+//            where the power signal drops below an absolute threshold.
+//
+//  Algorithm:
+//      Start at index (N/2 - 1).
+//      Decrement index until crossing is found or index 0 is reached.
+//      Crossing Condition: Right Bin (L2) > Threshold, Left Bin (L1) <= Threshold.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+module find_bw_right_edge_absolute #(
+    parameter integer ACCUM_WIDTH = 16,     // Res of Power signal (e.g., 32 for Q16.16)
+    parameter integer FREQ_BIN_WIDTH = 16,  // Res of Frequency bins
+    parameter integer NUM_ACCUMS = 16       // Number of bins
+)(
+    input  logic clk_i,
+    input  logic rst_ni,
+    input  logic start_i,
+
+    // Data Inputs
+    input  logic [ACCUM_WIDTH-1:0]       accumulator_val_i[NUM_ACCUMS], // Absolute dB (Unsigned)
+    input  logic [FREQ_BIN_WIDTH-1:0]    freq_bin_i[NUM_ACCUMS],
+    
+    // Threshold Input (Absolute Value)
+    input  logic [ACCUM_WIDTH-1:0]       abs_threshold_i,
+
+    // Outputs
+    output logic [FREQ_BIN_WIDTH-1:0]    f1_o, // Left bin (Below Threshold)
+    output logic [FREQ_BIN_WIDTH-1:0]    f2_o, // Right bin (Above Threshold)
+    output logic [ACCUM_WIDTH-1:0]       L1_o, // Power at f1
+    output logic [ACCUM_WIDTH-1:0]       L2_o, // Power at f2
+
+    output logic                         valid_o,
+    output logic                         busy_o
+);
+
+    // -------------------------------------------------------------------------
+    // State Machine
+    // -------------------------------------------------------------------------
+    typedef enum logic [1:0] {
+        IDLE = 2'b00,
+        PROCESS = 2'b01,
+        DONE = 2'b10
+    } state_t;
+
+    state_t state_q, state_d;
+    logic [$clog2(NUM_ACCUMS)-1:0] idx_q, idx_d;
+    
+    // -------------------------------------------------------------------------
+    // Crossing Logic
+    // -------------------------------------------------------------------------
+    // Crossing States:
+    // S0: Both > Thresh (Still inside signal bandwidth)
+    // S1: L1 > Thresh, L2 <= Thresh (Falling edge - wrong direction for Left search)
+    // S2: L1 <= Thresh, L2 > Thresh (Rising edge - THIS is the left edge!)
+    // S3: Both <= Thresh (Noise floor)
+    typedef enum logic [1:0] {
+        S0 = 2'b00,  // High, High
+        S1 = 2'b01,  // High, Low (crossing found!)
+        S2 = 2'b10,  // Low, High
+        S3 = 2'b11   // Low, Low
+    } crossing_state_t;
+
+    crossing_state_t cross_state;
+    logic crossing_found;
+    
+    // Internal signals
+    logic [ACCUM_WIDTH-1:0] L1, L2;
+    logic [FREQ_BIN_WIDTH-1:0] f1, f2;
+    logic L1_above_thresh, L2_above_thresh;
+    
+    // Output registers
+    logic [FREQ_BIN_WIDTH-1:0] f1_q, f1_d;
+    logic [FREQ_BIN_WIDTH-1:0] f2_q, f2_d;
+    logic [ACCUM_WIDTH-1:0] L1_q, L1_d;
+    logic [ACCUM_WIDTH-1:0] L2_q, L2_d;
+    logic crossing_valid_q, crossing_valid_d;
+    
+    // -------------------------------------------------------------------------
+    // Sequential Logic
+    // -------------------------------------------------------------------------
+    always_ff @(posedge clk_i or negedge rst_ni) begin
+        if (!rst_ni) begin
+            state_q <= IDLE;
+            idx_q <= '0;
+            f1_q <= '0; 
+            f2_q <= '0;
+            L1_q <= '0; 
+            L2_q <= '0;
+            crossing_valid_q <= 1'b0;
+        end else begin
+            state_q <= state_d;
+            idx_q <= idx_d;
+            f1_q <= f1_d; 
+            f2_q <= f2_d;
+            L1_q <= L1_d; 
+            L2_q <= L2_d;
+            crossing_valid_q <= crossing_valid_d;
+        end
+    end
+    
+    // -------------------------------------------------------------------------
+    // Threshold Comparison Logic
+    // -------------------------------------------------------------------------
+    // Assuming inputs are Unsigned Absolute dB (e.g., 60dB, 90dB)
+    // We simply compare against the unsigned abs_threshold_i
+    assign L1_above_thresh = (L1 > abs_threshold_i);
+    assign L2_above_thresh = (L2 > abs_threshold_i);
+    
+    always_comb begin
+        case ({L1_above_thresh, L2_above_thresh})
+            2'b11: cross_state = S0; // Signal Region
+            2'b10: cross_state = S1; // RIGHT EDGE FOUND (High -> Low)
+            2'b01: cross_state = S2;
+            2'b00: cross_state = S3; // Noise Region
+        endcase
+    end
+    
+    assign crossing_found = (cross_state == S1);
+    
+    // -------------------------------------------------------------------------
+    // Next State Logic
+    // -------------------------------------------------------------------------
+    always_comb begin
+        // Defaults
+        state_d = state_q;
+        idx_d = idx_q;
+        f1_d = f1_q; f2_d = f2_q;
+        L1_d = L1_q; L2_d = L2_q;
+        crossing_valid_d = crossing_valid_q;
+        
+        // Default internal signals
+        L1 = '0; L2 = '0;
+        f1 = '0; f2 = '0;
+        
+        case (state_q)
+            IDLE: begin
+                crossing_valid_d = 1'b0;
+                if (start_i) begin
+                    state_d = PROCESS;
+                    idx_d = (NUM_ACCUMS / 2);  // start from the middle
+                    f1_d = '0;
+                    f2_d = '0;
+                    L1_d = '0;
+                    L2_d = '0;
+                    crossing_valid_d = 1'b0;
+                end
+            end
+            
+            PROCESS: begin
+                // L2 is current (higher), L1 is previous (lower)
+                L2 = accumulator_val_i[idx_q];
+                L1 = accumulator_val_i[idx_q - 1];
+                f2 = freq_bin_i[idx_q];
+                f1 = freq_bin_i[idx_q - 1];
+                
+                // check for crossing
+                if (crossing_found) begin
+                    f1_d = f1;
+                    f2_d = f2;
+                    L1_d = L1;
+                    L2_d = L2;
+                    crossing_valid_d = 1'b1;
+                end
+                
+                // Stop if we just processed the last bin
+                if (idx_q == NUM_ACCUMS - 1) begin
+                    state_d = DONE;
+                end else begin
+                    idx_d = idx_q + 1;
+                end
+            end
+            
+            DONE: begin
+                state_d = IDLE;
+            end
+            
+            default: begin
+                state_d = IDLE;
+            end
+        endcase
+    end
+    
+    // -------------------------------------------------------------------------
+    // Output Assignments
+    // -------------------------------------------------------------------------
+    assign f1_o = f1_q;
+    assign f2_o = f2_q;
+    assign L1_o = L1_q;
+    assign L2_o = L2_q;
+    assign valid_o = (state_q == DONE);
+    assign busy_o = (state_q == PROCESS);
+
+endmodule

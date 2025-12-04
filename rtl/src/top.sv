@@ -72,6 +72,16 @@ module top #(
     output logic valid_o,
     output logic invalid_left_o,
     output logic invalid_right_o,
+
+    output logic [FREQ_WIDTH-1:0] f1_left_o,
+    output logic [FREQ_WIDTH-1:0] f2_left_o,
+    output logic [ACCUM_WIDTH-1:0] L1_left_o,
+    output logic [ACCUM_WIDTH-1:0] L2_left_o,
+
+    output logic [FREQ_WIDTH-1:0] f1_right_o,
+    output logic [FREQ_WIDTH-1:0] f2_right_o,
+    output logic [ACCUM_WIDTH-1:0] L1_right_o,
+    output logic [ACCUM_WIDTH-1:0] L2_right_o,
     
     // Status Outputs
     output logic dft_busy_o,
@@ -339,5 +349,15 @@ module top #(
     // Status outputs
     assign dft_busy_o = dft_busy;
     assign threshold_ok_o = threshold_ok;
+
+    assign f1_left_o = f1_left;
+    assign f2_left_o = f2_left;
+    assign L1_left_o = L1_left;
+    assign L2_left_o = L2_left;
+
+    assign f1_right_o = f1_right;
+    assign f2_right_o = f2_right;
+    assign L1_right_o = L1_right;
+    assign L2_right_o = L2_right;
 
 endmodule

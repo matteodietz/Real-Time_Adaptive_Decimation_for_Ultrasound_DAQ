@@ -91,25 +91,25 @@ def convert_to_sorted_db_power(dft_bins):
 
 
 
-def convert_to_sorted_db_power_absolute(dft_bins):
-    """
-    Converts complex accumulator values to sorted, normalized dB power.
-    This corresponds to a hardware block that does |A|^2, log, and normalization.
-    """
-    freqs = np.array(list(dft_bins.keys()))
-    accumulators = np.array(list(dft_bins.values()))
+# def convert_to_sorted_db_power_absolute(dft_bins):
+#     """
+#     Converts complex accumulator values to sorted, normalized dB power.
+#     This corresponds to a hardware block that does |A|^2, log, and normalization.
+#     """
+#     freqs = np.array(list(dft_bins.keys()))
+#     accumulators = np.array(list(dft_bins.values()))
 
-    powers = np.abs(accumulators)**2
-    if np.max(powers) == 0: return float('nan'), float('nan')
+#     powers = np.abs(accumulators)**2
+#     if np.max(powers) == 0: return float('nan'), float('nan')
 
-    power_db = 10 * np.log10(powers + 1e-20)
-    # power_db_norm = power_db - np.max(power_db)
-    # sort everything by frequency for the search functions
-    sort_indices = np.argsort(freqs)
-    freqs_sorted = freqs[sort_indices]
-    power_db_sorted = power_db[sort_indices]
+#     power_db = 10 * np.log10(powers + 1e-20)
+#     # power_db_norm = power_db - np.max(power_db)
+#     # sort everything by frequency for the search functions
+#     sort_indices = np.argsort(freqs)
+#     freqs_sorted = freqs[sort_indices]
+#     power_db_sorted = power_db[sort_indices]
 
-    return freqs_sorted, power_db_sorted
+#     return freqs_sorted, power_db_sorted
 
 # def convert_to_sorted_db_power(dft_results):
 #     """

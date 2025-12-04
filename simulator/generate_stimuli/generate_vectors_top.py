@@ -23,7 +23,7 @@ except ImportError:
     PICMUS_AVAILABLE = False
 
 def generate_test_case_data(test_name, iq_data_raw, fs, freq_bins, window_type,
-                            iq_width, window_width, accum_width, osc_width, num_bins):
+                            iq_width, window_width, accum_width, osc_width, num_bins, normalize=False, max_magnitude=1.0):
     """
     Takes raw (small magnitude) IQ data, scales it to full-scale fixed-point range,
     runs the Golden Model, and generates hex strings for the testbench.
@@ -32,6 +32,10 @@ def generate_test_case_data(test_name, iq_data_raw, fs, freq_bins, window_type,
     
     N = len(iq_data_raw)
     K = len(freq_bins)
+
+    print(f"  Sample length: {N}")
+    print(f"  Number of bins: {K}")
+    print(f"  Frequency bins: {freq_bins/1e6} MHz")
     
     # -------------------------------------------------------------------------
     # 1. Determine Scaling Factor

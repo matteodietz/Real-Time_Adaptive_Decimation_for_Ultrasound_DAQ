@@ -223,6 +223,7 @@ def main():
     ACCUM_WIDTH = 64        # Q8.56
     OSC_WIDTH = 32          # CORDIC output width
     PHASE_WIDTH = 32        # Phase accumulator width
+    NUM_BINS = 24           # Maximum
     
     test_cases = []
 

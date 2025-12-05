@@ -202,7 +202,7 @@ if __name__ == '__main__':
                    label=f'Est. Upper Edge ({f_right_final/1e6:.3f} MHz)')
     
     # Plot threshold line
-    threshold_normalized = threshold_db
+    threshold_normalized = -threshold_db
     plt.axhline(y=threshold_normalized, color='orange', linestyle=':', linewidth=2,
                label=f'{threshold_db} dB Threshold')
     

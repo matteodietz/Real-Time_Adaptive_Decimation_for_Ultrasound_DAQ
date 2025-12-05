@@ -63,23 +63,22 @@ def generate_test_case_edge_det(test_name, iq_data_raw, fs, freq_bins, threshold
     
     # Run Power Conversion
     # The output 'power_hw_db' is the INPUT STIMULUS for our DUT
+    # Assumes complete_system_model returns FLOATING POINT dB values
     freqs_sorted, power_hw_db = convert_to_hardware_db_power(
         dft_bins, accum_width=accum_width, accum_frac=40, 
         power_width=power_width, power_frac=power_frac
     )
     
-    print(f"  Max Power (Input to DUT): {np.max(power_hw_db)} (Fixed Point)")
+    print(f"  Max Power (Input to DUT): {np.max(power_hw_db):.2f} dB (Float)")
 
     # -------------------------------------------------------------------------
     # 2. Run DUT Logic Model (Golden Reference)
     # -------------------------------------------------------------------------
     
-    # Convert Threshold Drop to Fixed Point Integer
-    # thresh_drop_int = int(threshold_drop_db * (2**power_frac))
-    
     # A. Calculate Threshold (Internal to DUT)
+    # Pass float drop directly
     max_pwr, abs_threshold = calc_hardware_threshold(power_hw_db, threshold_drop_db)
-    print(f"  Calculated Threshold: {abs_threshold}")
+    print(f"  Calculated Threshold: {abs_threshold:.2f} dB")
     
     # B. Find Left Edge
     f1_L, f2_L, L1_L, L2_L = find_left_edge_hw(freqs_sorted, power_hw_db, abs_threshold)
@@ -108,9 +107,11 @@ def generate_test_case_edge_det(test_name, iq_data_raw, fs, freq_bins, threshold
         fb_val = float_to_fixed_point(f_mhz, fb_int, fb_frac, signed=True)
         freq_bins_hw.append(fb_val)
         
-    # Power Values (Already integers from convert_to_hardware_db_power)
-    # Just ensure they are masked to width
-    # power_vals_hw = [int(p) & ((1<<power_width)-1) for p in power_hw_db]
+    # Power Values Stimuli
+    # Convert floating point dB to Fixed Point Integer (e.g. Q16.16) for file writing
+    # Unsigned because power magnitude is positive
+    power_int_bits = power_width - power_frac
+    power_vals_hw = [float_to_fixed_point(p, power_int_bits, power_frac, signed=False) for p in power_hw_db]
 
     # -------------------------------------------------------------------------
     # 4. Format Expectations (Outputs from DUT)
@@ -122,7 +123,7 @@ def generate_test_case_edge_det(test_name, iq_data_raw, fs, freq_bins, threshold
     
     def fix_pwr(p): 
         if p is None: return 0
-        return int(p) & ((1<<power_width)-1)
+        return float_to_fixed_point(p, power_int_bits, power_frac, signed=False)
 
     return {
         'test_name': test_name,

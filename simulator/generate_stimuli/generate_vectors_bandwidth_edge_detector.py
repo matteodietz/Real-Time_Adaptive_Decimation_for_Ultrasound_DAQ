@@ -75,8 +75,8 @@ def generate_test_case_top(test_name, iq_data_raw, fs, freq_bins, threshold_drop
     )
     
     # C. Threshold Calculation
-    thresh_drop_int = int(threshold_drop_db * (2**power_frac))
-    max_pwr, abs_threshold = calc_hardware_threshold(power_hw_db, thresh_drop_int)
+    # thresh_drop_int = int(threshold_drop_db * (2**power_frac))
+    max_pwr, abs_threshold = calc_hardware_threshold(power_hw_db, thresh_drop_db)
     
     # D. Left Edge
     f1_L, f2_L, L1_L, L2_L = find_left_edge_hw(freqs_sorted, power_hw_db, abs_threshold)

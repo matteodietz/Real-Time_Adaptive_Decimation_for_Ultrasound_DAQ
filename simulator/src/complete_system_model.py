@@ -1,12 +1,18 @@
 import numpy as np
 from scipy import signal
+from pathlib import Path
+
+SIMULATOR_ROOT = Path(__file__).resolve().parent
+sys.path.append(str(SIMULATOR_ROOT))
+
+from fixed_float_conversions import float_to_fixed_point, fixed_point_to_float
 
 # ==============================================================================
-# 1. DFT Processor (Unchanged)
+# 1. DFT Processor
 # ==============================================================================
 def streaming_dft_processor(b, fs, freq_bins_to_calc, window='hann'):
     """
-    Simulates a one-pass, streaming, sparse DFT (Goertzel-like).
+    Simulates a one-pass, streaming, sparse DFT.
     Returns a dictionary of {frequency: complex_accumulator_value}.
     """
     N = len(b)
@@ -17,13 +23,14 @@ def streaming_dft_processor(b, fs, freq_bins_to_calc, window='hann'):
     W = np.ones(K, dtype=np.complex128)
     E = np.exp(-1j * 2 * np.pi * freq_bins_to_calc / fs)
 
-    # streaming DFT calculation
+    # Streaming DFT calculation
     for n in range(N):
         x_n = b[n]
         h_n = win[n]
         A += x_n * h_n * W
         W *= E
-        
+    
+    # Dictionary of frequency bins with their corresponding accumulator value (DFT)
     final_dft_bins = {freq: accumulator for freq, accumulator in zip(freq_bins_to_calc, A)}
     return final_dft_bins
 
@@ -32,55 +39,65 @@ def streaming_dft_processor(b, fs, freq_bins_to_calc, window='hann'):
 # ==============================================================================
 def calculate_single_bin_log_power(complex_val, accum_width, accum_frac, power_width, power_frac):
     """
-    Emulates the 'complex_to_log_power' SystemVerilog module.
-    1. Quantizes Complex Float -> Fixed Point Integer (simulating DFT output register)
-    2. Calculates Mag^2
-    3. Finds Integer Log2 (MSB)
-    4. Scales by 3
+    Calculate hardware-accurate dB power using integer log2.
+    Formula: db_power = 3 * int_log2(|complex_val|^2)
+    
+    This matches the complex_to_log_power.sv hardware module.
+    Inputs are floating-point, output is floating-point dB value.
+    
+    Args:
+        complex_val: Complex DFT accumulator value (floating point)
+        accum_width: Width of accumulator (e.g., 64)
+        accum_frac: Fractional bits in accumulator (e.g., 56)
+        power_width: Width of power output (e.g., 32)
+        power_frac: Fractional bits in power (e.g., 16)
+    
+    Returns:
+        Floating-point dB power value
     """
-    # 1. Quantize Input (DFT Output) to Fixed Point
-    # This mimics the data arriving at the power module input
-    scale_in = 2.0 ** accum_frac
-    
-    i_float = np.real(complex_val)
-    q_float = np.imag(complex_val)
-    
-    # Simple quantization
-    i_int = int(i_float * scale_in)
-    q_int = int(q_float * scale_in)
-    
-    # Handle wrapping/overflow if simulation exceeds widths (Optional safety)
-    # Mask to input width to simulate register behavior
-    mask_in = (1 << accum_width) - 1
-    i_int &= mask_in
-    q_int &= mask_in
-    
-    # Convert back to signed for arithmetic
-    if i_int & (1 << (accum_width - 1)): i_int -= (1 << accum_width)
-    if q_int & (1 << (accum_width - 1)): q_int -= (1 << accum_width)
-        
-    # 2. Magnitude Squared (Stage 1)
-    mag_sq = i_int * i_int + q_int * q_int
-    
-    if mag_sq == 0:
-        return 0
-        
-    # 3. Priority Encoder / Integer Log2 (Stage 2)
-    # bit_length() gives bits required to represent number. 
-    # e.g., 4 (100) -> 3. MSB index is bit_length - 1.
-    msb_index = mag_sq.bit_length() - 1
-    
-    # 4. Scale by 3 (Stage 3)
-    # Logic: (msb_index << POWER_FRAC) * 3
-    log2_fixed = msb_index << power_frac
-    db_power = (log2_fixed << 1) + log2_fixed
-    
-    # Output Mask
-    db_power &= (1 << power_width) - 1
-    
-    return db_power
 
-def convert_to_hardware_db_power(dft_bins, accum_width=48, accum_frac=40, power_width=32, power_frac=16):
+    # Extract real and imaginary parts
+    real_part = np.real(complex_val)
+    imag_part = np.imag(complex_val)
+    
+    # Convert to fixed-point (as hardware would see them)
+    accum_int_bits = accum_width - accum_frac
+    real_fixed = float_to_fixed_point(real_part, accum_int_bits, accum_frac, signed=True)
+    imag_fixed = float_to_fixed_point(imag_part, accum_int_bits, accum_frac, signed=True)
+    
+    # Calculate magnitude squared in fixed-point
+    # real^2 + imag^2 (this gives us 2*accum_frac fractional bits)
+    mag_squared_fixed = real_fixed * real_fixed + imag_fixed * imag_fixed
+    
+    # Handle zero/negative case
+    if mag_squared_fixed <= 0:
+        return 0.0  # Return minimum dB value
+    
+    # Integer log2: find position of MSB
+    int_log2_val = mag_squared_fixed.bit_length() - 1
+    
+    # Multiply by 3 to approximate dB
+    db_power_raw = 3 * int_log2_val
+    
+    # Adjust for fractional bit scaling
+    # The magnitude squared has 2*accum_frac fractional bits
+    # So we need to subtract the contribution of those fractional bits
+    db_power_adjusted = db_power_raw - (3 * 2 * accum_frac)
+    
+    # Convert to fixed-point in power format
+    power_int_bits = power_width - power_frac
+    db_power_fixed = db_power_adjusted * (2 ** power_frac)
+    
+    # Clamp to valid range
+    max_val = (1 << power_width) - 1
+    db_power_clamped = max(0, min(int(db_power_fixed), max_val))
+    
+    # Convert back to floating-point for golden reference
+    db_power_float = fixed_point_to_float(db_power_clamped, power_int_bits, power_frac, signed=True)
+    
+    return db_power_float
+
+def convert_to_hardware_db_power(dft_bins, accum_width=64, accum_frac=56, power_width=32, power_frac=16):
     """
     Takes DFT results and converts them to the sorted hardware-equivalent 
     unsigned integer power values.
@@ -108,13 +125,13 @@ def calc_hardware_threshold(power_values, threshold_drop_fixed):
     Emulates find_max_power.sv and calc_abs_threshold.sv modules.
     All inputs must be Integers (Fixed Point representations).
     """
-    # 1. Find Max (Emulates find_max_power module)
+    # Find Max (Emulates find_max_power module)
     if len(power_values) == 0:
         return 0, 0
         
     max_pwr = np.max(power_values)
     
-    # 2. Calculate Threshold (Emulates calc_abs_threshold module)
+    # Calculate Threshold (Emulates calc_abs_threshold module)
     # Logic: if max < drop, thresh = 0, else thresh = max - drop
     if max_pwr < threshold_drop_fixed:
         abs_threshold = 0

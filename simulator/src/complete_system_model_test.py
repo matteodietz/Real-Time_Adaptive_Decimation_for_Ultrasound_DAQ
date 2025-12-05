@@ -1,263 +1,218 @@
-"""
-Generate simulation vectors for bandwidth_edge_detector.sv module.
-
-Target Module: bandwidth_edge_detector
-Inputs:  Array of dB Power Values (Fixed Point), Array of Frequency Bins
-Outputs: Left Edge (f1, f2, L1, L2), Right Edge (f1, f2, L1, L2)
-
-This script generates the Power Spectrum inputs by running the pre-requisite
-signal processing steps (DFT + Power Conversion) in software.
-"""
 import numpy as np
 from scipy import signal
+import matplotlib.pyplot as plt
 from pathlib import Path
 import sys
 
-# 1. Setup Paths
-SIMULATOR_ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(SIMULATOR_ROOT / "src"))
+from afe_interface_rf import load_picmus_rf_data
+from virtual_afe import run_virtual_afe_processing
+from complete_system_model import (
+    streaming_dft_processor, 
+    convert_to_hardware_db_power,
+    calc_hardware_threshold,
+    find_left_edge_hw,
+    find_right_edge_points,
+    linear_interpolate_hw
+)
+from fixed_float_conversions import float_to_fixed_point
 
-# 2. Imports
-try:
-    from fixed_float_conversions import float_to_fixed_point
-    from complete_system_model import (
-        streaming_dft_processor,
-        convert_to_hardware_db_power,
-        calc_hardware_threshold,
-        find_left_edge_hw,
-        find_right_edge_points # Using the function name from your model
+# --- Main Test Script ---
+if __name__ == '__main__':
+    print("--- Running Hardware-Accurate System Model Test on REAL PICMUS Data ---")
+
+    # --- 1. Load PICMUS Data ---
+    try:
+        SIMULATOR_ROOT = Path(__file__).resolve().parent.parent
+    except NameError:
+        SIMULATOR_ROOT = Path.cwd().parent
+    
+    rf_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_dataset_rf.hdf5"
+    iq_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_dataset_iq.hdf5"
+    scan_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_scan.hdf5"
+    
+    adc_rate = 125e6
+    baseline_decimation = 4
+
+    try:
+        rf_data, angles, _, _, fs_picmus, mod_freq, _, _, _ = load_picmus_rf_data(rf_path, iq_path, scan_path)
+    except Exception as e:
+        print(f"Test failed: Could not load data. Error: {e}")
+        exit()
+
+    # --- 2. Get High-Fidelity Baseline I/Q Data ---
+    center_angle_index = np.argmin(np.abs(angles))
+    baseline_iq_data, _, fs_baseline = run_virtual_afe_processing(
+        rf_data=rf_data,
+        angle_index=center_angle_index,
+        fs_picmus=fs_picmus,
+        modulation_frequency=mod_freq,
+        decimation_factor=baseline_decimation,
+        adc_sample_rate=adc_rate
     )
-except ImportError as e:
-    print(f"Error importing models: {e}")
-    sys.exit(1)
-
-try:
-    from afe_interface_rf import load_picmus_rf_data
-    from virtual_afe import run_virtual_afe_processing
-    PICMUS_AVAILABLE = True
-except ImportError:
-    print("Warning: PICMUS data loading modules not available.")
-    PICMUS_AVAILABLE = False
-
-def generate_test_case_edge_det(test_name, iq_data_raw, fs, freq_bins, threshold_drop_db,
-                                iq_width, accum_width, 
-                                power_width, power_frac, 
-                                freq_bin_width):
-    """
-    Generates a single test case for the Bandwidth Edge Detector.
-    """
-    print(f"\n=== Generating test case: {test_name} ===")
     
-    # -------------------------------------------------------------------------
-    # 1. Pre-Processing (Emulating the previous hardware stages)
-    # -------------------------------------------------------------------------
+    # --- 3. Select ONE STFT Window to Analyze ---
+    nperseg = 256
+    channel_to_test = 64
+    window_num_to_test = 29 
+    hop = nperseg // 2
+
+    total_samples = baseline_iq_data.shape[0]
+    num_windows_total = int(np.floor((total_samples - nperseg) / hop)) + 1
     
-    # Scale Input to full range (Crucial for valid dB values)
-    iq_frac_bits = 14
-    max_val = np.max(np.abs(iq_data_raw))
+    print(f"\n--- STFT Analysis Setup ---")
+    print(f"Total samples in A-line: {total_samples}")
+    print(f"Window size (nperseg):   {nperseg}")
+    print(f"Hop size:                {hop}")
+    print(f"Total number of STFT windows available: {num_windows_total}")
+    
+    start_sample = window_num_to_test * hop
+    end_sample = start_sample + nperseg
+    
+    time_window_data_raw = baseline_iq_data[start_sample:end_sample, channel_to_test]
+    print(f"\n--- Analyzing STFT window #{window_num_to_test} from real data ---")
+
+    # Scaling
+    max_val = np.max(np.abs(time_window_data_raw))
     scale_factor = 1.5 / max_val if max_val > 0 else 1.0
-    iq_data_scaled = iq_data_raw * scale_factor
-    
-    # Run DFT
-    dft_bins = streaming_dft_processor(iq_data_scaled, fs, freq_bins, window='hann')
-    
-    # Run Power Conversion
-    # The output 'power_hw_db' is the INPUT STIMULUS for our DUT
-    freqs_sorted, power_hw_db = convert_to_hardware_db_power(
-        dft_bins, accum_width=accum_width, accum_frac=40, 
-        power_width=power_width, power_frac=power_frac
-    )
-    
-    print(f"  Max Power (Input to DUT): {np.max(power_hw_db)} (Fixed Point)")
+    time_window_data = time_window_data_raw * scale_factor
 
-    # -------------------------------------------------------------------------
-    # 2. Run DUT Logic Model (Golden Reference)
-    # -------------------------------------------------------------------------
-    
-    # TODO: this is not needed since complete system model takes float threshold db (positive) not fixed
-    # Convert Threshold Drop to Fixed Point Integer
-    # thresh_drop_int = int(threshold_drop_db * (2**power_frac))
-    
-    # A. Calculate Threshold (Internal to DUT)
-    max_pwr, abs_threshold = calc_hardware_threshold(power_hw_db, thresh_drop_db)
-    print(f"  Calculated Threshold: {abs_threshold}")
-    
-    # B. Find Left Edge
-    f1_L, f2_L, L1_L, L2_L = find_left_edge_hw(freqs_sorted, power_hw_db, abs_threshold)
-    
-    # C. Find Right Edge
-    f1_R, f2_R, L1_R, L2_R = find_right_edge_points(freqs_sorted, power_hw_db, abs_threshold)
-    
-    if f1_L is not None and f1_R is not None:
-        print(f"  Edges Found at bins: {f1_L/1e6:.2f}MHz / {f1_R/1e6:.2f}MHz")
-    else:
-        print("  Edges NOT Found")
+    # --- 4. Define Analysis Parameters ---
+    delta_f = 0.25e6 
+    half_bw_est = mod_freq / 2
 
-    # -------------------------------------------------------------------------
-    # 3. Format Stimuli (Inputs to DUT)
-    # -------------------------------------------------------------------------
-    
-    # Config: Frequency Bins
-    # Assuming Q(int).12 format for MHz representation inside the 32-bit word
-    fb_frac = 12 
-    fb_int = freq_bin_width - fb_frac
-    
-    freq_bins_hw = []
-    
-    for f_hz in freqs_sorted:
-        f_mhz = f_hz / 1e6
-        fb_val = float_to_fixed_point(f_mhz, fb_int, fb_frac, signed=True)
-        freq_bins_hw.append(fb_val)
-        
-    # Power Values (Already integers from convert_to_hardware_db_power)
-    # Just ensure they are masked to width
-    # power_vals_hw = [int(p) & ((1<<power_width)-1) for p in power_hw_db]
+    s_coarse = np.linspace(-mod_freq, mod_freq, 8)
+    s_fine_left = np.linspace(-half_bw_est - delta_f, -half_bw_est + delta_f, 8) 
+    s_fine_right = np.linspace(half_bw_est - delta_f, half_bw_est + delta_f, 8) 
+    S_bins = np.unique(np.concatenate([s_coarse, s_fine_left, s_fine_right]))
 
-    # -------------------------------------------------------------------------
-    # 4. Format Expectations (Outputs from DUT)
-    # -------------------------------------------------------------------------
-    
-    def fix_freq(f): 
-        if f is None: return 0
-        return float_to_fixed_point(f/1e6, fb_int, fb_frac, signed=True)
-    
-    def fix_pwr(p): 
-        if p is None: return 0
-        return int(p) & ((1<<power_width)-1)
+    print(f"Bins to calculate: {S_bins}")
 
-    return {
-        'test_name': test_name,
-        'K': len(freq_bins),
-        'power_vals_hw': power_vals_hw,
-        'freq_bins_hw': freq_bins_hw,
-        # Expected Output: Left
-        'exp_f1_L': fix_freq(f1_L), 'exp_f2_L': fix_freq(f2_L),
-        'exp_L1_L': fix_pwr(L1_L),  'exp_L2_L': fix_pwr(L2_L),
-        # Expected Output: Right
-        'exp_f1_R': fix_freq(f1_R), 'exp_f2_R': fix_freq(f2_R),
-        'exp_L1_R': fix_pwr(L1_R),  'exp_L2_R': fix_pwr(L2_R),
-        # Valid
-        'valid_expect': 1 if (f1_L is not None and f1_R is not None) else 0
-    }
-
-def write_vector_file(test_cases, output_path):
-    with open(output_path, 'w') as f:
-        f.write("# Simulation vectors for bandwidth_edge_detector.sv\n")
-        f.write("# Format:\n")
-        f.write("# TEST_NAME\n")
-        f.write("# NUM_BINS\n")
-        f.write("# FREQ_BINS (Array)\n")
-        f.write("# POWER_VALS (Array)\n")
-        f.write("# EXPECTED VALID\n")
-        f.write("# EXPECTED LEFT (f1 f2 L1 L2)\n")
-        f.write("# EXPECTED RIGHT (f1 f2 L1 L2)\n\n")
-        
-        for tc in test_cases:
-            f.write(f"{tc['test_name']}\n")
-            f.write(f"{tc['K']}\n")
-            
-            # 1. Frequency Bins Input
-            for fb in tc['freq_bins_hw']: f.write(f"{fb:08x} ")
-            f.write("\n")
-            
-            # 2. Power Values Input
-            for p in tc['power_vals_hw']: f.write(f"{p:08x} ")
-            f.write("\n")
-            
-            # 3. Expected Valid
-            f.write(f"{tc['valid_expect']}\n")
-            
-            # 4. Expected Left Edge
-            f.write(f"{tc['exp_f1_L']:08x} {tc['exp_f2_L']:08x} {tc['exp_L1_L']:08x} {tc['exp_L2_L']:08x}\n")
-            
-            # 5. Expected Right Edge
-            f.write(f"{tc['exp_f1_R']:08x} {tc['exp_f2_R']:08x} {tc['exp_L1_R']:08x} {tc['exp_L2_R']:08x}\n")
-            
-            f.write("\n")
-
-def main():
-    print("=== Generating Edge Detector Stimuli ===\n")
-    
-    # --- Hardware Parameters (Must Match DUT) ---
-    IQ_WIDTH = 16
-    WINDOW_WIDTH = 16
-    ACCUM_WIDTH = 48 
+    # Hardware parameters (must match your RTL)
+    ACCUM_WIDTH = 64
+    ACCUM_FRAC = 56
     POWER_WIDTH = 32
     POWER_FRAC = 16
-    FREQ_BIN_WIDTH = 32 # Updated to match your module definition
-    
-    THRESHOLD_DROP_DB = 30.0
-    
-    test_cases = []
-    
-    if PICMUS_AVAILABLE:
-        try:
-            print("Loading PICMUS...")
-            rf_path = SIMULATOR_ROOT.parent / "simulator/datasets/experiments/contrast_speckle/contrast_speckle_expe_dataset_rf.hdf5"
-            iq_path = SIMULATOR_ROOT.parent / "simulator/datasets/experiments/contrast_speckle/contrast_speckle_expe_dataset_iq.hdf5"
-            scan_path = SIMULATOR_ROOT.parent / "simulator/datasets/experiments/contrast_speckle/contrast_speckle_expe_scan.hdf5"
-            
-            rf_data, angles, _, _, fs_picmus, mod_freq, _, _, _ = load_picmus_rf_data(rf_path, iq_path, scan_path)
-            
-            adc_rate = 125e6
-            baseline_decimation = 4
-            
-            # Bins Definition
-            delta_f = 0.25e6
-            half_bw_est = mod_freq / 2
-            s_coarse = np.linspace(-mod_freq, mod_freq, 8)
-            s_fine_left = np.linspace(-half_bw_est - delta_f, -half_bw_est + delta_f, 8)
-            s_fine_right = np.linspace(half_bw_est - delta_f, half_bw_est + delta_f, 8)
-            S_bins = np.unique(np.concatenate([s_coarse, s_fine_left, s_fine_right]))
-            
-            configs = [
-                ("picmus_ang0_ch64_win29", 64, np.argmin(np.abs(angles)), 29),
-                ("picmus_ang0_ch32_win15", 32, np.argmin(np.abs(angles)), 15),
-                ("picmus_ang0_ch96_win30", 96, np.argmin(np.abs(angles)), 30),
-            ]
-            
-            processed_angles = {}
-            nperseg = 256
-            hop = nperseg // 2
+    threshold_db = 30.0  # dB drop from peak
 
-            for name, ch, ang_idx, win_idx in configs:
-                if ang_idx not in processed_angles:
-                    print(f"  Running AFE for Angle {ang_idx}...")
-                    iq_data_angle, _, fs_base = run_virtual_afe_processing(
-                        rf_data=rf_data, angle_index=ang_idx, fs_picmus=fs_picmus,
-                        modulation_frequency=mod_freq, decimation_factor=baseline_decimation,
-                        adc_sample_rate=adc_rate
-                    )
-                    processed_angles[ang_idx] = (iq_data_angle, fs_base)
-                
-                baseline_iq_data, fs_baseline = processed_angles[ang_idx]
-                
-                start = win_idx * hop
-                end = start + nperseg
-                if end > baseline_iq_data.shape[0]: continue
-                
-                time_window = baseline_iq_data[start:end, ch]
-                
-                tc = generate_test_case_edge_det(
-                    name, time_window, fs_baseline, S_bins, THRESHOLD_DROP_DB,
-                    IQ_WIDTH, ACCUM_WIDTH, 
-                    POWER_WIDTH, POWER_FRAC,
-                    FREQ_BIN_WIDTH
-                )
-                test_cases.append(tc)
-                
-        except Exception as e:
-            print(f"Error: {e}")
-            import traceback
-            traceback.print_exc()
-
-    # Write Output
-    output_dir = SIMULATOR_ROOT.parent / "rtl" / "simvectors"
-    output_dir.mkdir(parents=True, exist_ok=True)
-    output_path = output_dir / "edge_detector_vectors.txt"
+    # --- 5. Run the Hardware-Accurate Processing Pipeline ---
     
-    write_vector_file(test_cases, output_path)
-    print(f"\nStimuli generated at: {output_path}")
+    # Step 1: Core Streaming DFT Processor
+    print("\n--- Step 1: Streaming DFT ---")
+    dft_bins = streaming_dft_processor(time_window_data, fs_baseline, S_bins, window='hann')
+    print(f"DFT computed for {len(dft_bins)} bins")
 
-if __name__ == "__main__":
-    main()
+    # Step 2: Convert to Hardware dB Power (using integer log2)
+    print("\n--- Step 2: Convert to Hardware dB Power ---")
+    freqs_sorted, power_hw_db = convert_to_hardware_db_power(
+        dft_bins, ACCUM_WIDTH, ACCUM_FRAC, POWER_WIDTH, POWER_FRAC
+    )
+    print(f"Power values (dB): {power_hw_db}")
+    
+    # Step 3: Calculate Hardware Threshold
+    print("\n--- Step 3: Calculate Threshold ---")
+    threshold_drop_fixed = float_to_fixed_point(
+        threshold_db, POWER_WIDTH - POWER_FRAC, POWER_FRAC, signed=False
+    )
+    max_power_hw, abs_threshold_hw = calc_hardware_threshold(
+        power_hw_db, threshold_db
+    )
+    print(f"Max power: {max_power_hw} (fixed-point)")
+    print(f"Absolute threshold: {abs_threshold_hw} (fixed-point)")
+    
+    # Step 4: Find Left Edge Points
+    print("\n--- Step 4: Find Left Edge ---")
+    f1_left, f2_left, L1_left, L2_left = find_left_edge_hw(
+        freqs_sorted, power_hw_db, abs_threshold_hw
+    )
+    print(f"Left edge: f1={f1_left/1e6:.4f} MHz, f2={f2_left/1e6:.4f} MHz")
+    print(f"           L1={L1_left:.2f} dB, L2={L2_left:.2f} dB")
+    
+    # Step 5: Find Right Edge Points
+    print("\n--- Step 5: Find Right Edge ---")
+    f1_right, f2_right, L1_right, L2_right = find_right_edge_points(
+        freqs_sorted, power_hw_db, abs_threshold_hw
+    )
+    print(f"Right edge: f1={f1_right/1e6:.4f} MHz, f2={f2_right/1e6:.4f} MHz")
+    print(f"            L1={L1_right:.2f} dB, L2={L2_right:.2f} dB")
+
+    # Step 6: Interpolate to find final edges (this would be done by APU)
+    print("\n--- Step 6: Linear Interpolation ---")
+    f_left_final = linear_interpolate_hw(f1_left, f2_left, L1_left, L2_left, abs_threshold_hw)
+    f_right_final = linear_interpolate_hw(f1_right, f2_right, L1_right, L2_right, abs_threshold_hw)
+    
+    print(f"Hardware-Accurate Estimated Edges: [{f_left_final/1e6:.3f}, {f_right_final/1e6:.3f}] MHz")
+    print(f"Estimated Bandwidth: {(f_right_final - f_left_final)/1e6:.3f} MHz")
+    
+    # --- 6. Ground Truth and Visual Confirmation ---
+    print("\n--- Step 7: Generate Ground Truth for Comparison ---")
+    freqs_welch, psd_welch = signal.welch(
+        time_window_data, 
+        fs=fs_baseline, 
+        window='hann', 
+        nperseg=nperseg,
+        return_onesided=False, 
+        scaling='density'
+    )
+    freqs_welch_shifted = np.fft.fftshift(freqs_welch)
+    psd_welch_shifted = np.fft.fftshift(psd_welch)
+    psd_db_welch_norm = 10 * np.log10(psd_welch_shifted + 1e-20)
+    psd_db_welch_norm -= np.max(psd_db_welch_norm)
+
+    # --- 7. Plotting ---
+    plt.figure(figsize=(14, 7))
+    
+    # Ground truth PSD
+    plt.plot(freqs_welch_shifted / 1e6, psd_db_welch_norm, 'k-', 
+             label=f'Ground Truth PSD ({nperseg}-pt Welch)', alpha=0.6, linewidth=2)
+
+    # Calculate normalized PSD from DFT bins for plotting
+    win = signal.windows.get_window('hann', nperseg)
+    enbw_scaling = fs_baseline * np.sum(win**2)
+    
+    freqs1 = np.array(list(dft_bins.keys()))
+    powers1 = np.abs(np.array(list(dft_bins.values())))**2
+    psd1 = powers1 / enbw_scaling
+    db1_norm = 10 * np.log10(psd1 + 1e-20)
+    db1_norm = db1_norm - np.max(10 * np.log10(psd_welch_shifted + 1e-20))
+    
+    # Plot DFT bins
+    plt.plot(freqs1 / 1e6, db1_norm, 'bo', markersize=6, 
+             label=f'DFT Bins (PSD, |S|={len(S_bins)})', alpha=0.7)
+    
+    # Plot edge detection points
+    if f1_left is not None and f2_left is not None:
+        plt.plot([f1_left/1e6, f2_left/1e6], 
+                [L1_left - max_power_hw, L2_left - max_power_hw], 
+                'rs-', markersize=8, linewidth=2, 
+                label='Left Edge Points', alpha=0.8)
+    
+    if f1_right is not None and f2_right is not None:
+        plt.plot([f1_right/1e6, f2_right/1e6], 
+                [L1_right - max_power_hw, L2_right - max_power_hw], 
+                'gs-', markersize=8, linewidth=2, 
+                label='Right Edge Points', alpha=0.8)
+    
+    # Plot final interpolated edges
+    if not np.isnan(f_left_final):
+        plt.axvline(x=f_left_final/1e6, color='r', linestyle='--', linewidth=2,
+                   label=f'Est. Lower Edge ({f_left_final/1e6:.3f} MHz)')
+    
+    if not np.isnan(f_right_final):
+        plt.axvline(x=f_right_final/1e6, color='g', linestyle='--', linewidth=2,
+                   label=f'Est. Upper Edge ({f_right_final/1e6:.3f} MHz)')
+    
+    # Plot threshold line
+    threshold_normalized = -threshold_db
+    plt.axhline(y=threshold_normalized, color='orange', linestyle=':', linewidth=2,
+               label=f'{threshold_db} dB Threshold')
+    
+    plt.title(f'Hardware-Accurate Bandwidth Estimation (Window #{window_num_to_test}, Channel {channel_to_test})')
+    plt.xlabel('Frequency (MHz)')
+    plt.ylabel('Power (dB relative to peak)')
+    plt.legend(loc='best')
+    plt.grid(True, alpha=0.3)
+    plt.xlim([min(freqs_welch_shifted)/1e6, max(freqs_welch_shifted)/1e6])
+    plt.tight_layout()
+    plt.show()
+    
+    print("\n--- Test Complete ---")

@@ -1,10 +1,20 @@
 import numpy as np
 from scipy import signal
 from pathlib import Path
+import sys
+import math
 
-SIMULATOR_ROOT = Path(__file__).resolve().parent
+SIMULATOR_ROOT = Path(__file__).resolve().parent.parent
 sys.path.append(str(SIMULATOR_ROOT))
 
+# 3. Construct the path to the folder containing the file (.../simulator/generate_stimuli)
+TARGET_DIR = SIMULATOR_ROOT / "generate_stimuli"
+
+# 4. Add that specific directory to the python path
+if str(TARGET_DIR) not in sys.path:
+    sys.path.append(str(TARGET_DIR))
+
+# 5. Now Python can find the file inside that directory
 from fixed_float_conversions import float_to_fixed_point, fixed_point_to_float
 
 # ==============================================================================
@@ -38,64 +48,81 @@ def streaming_dft_processor(b, fs, freq_bins_to_calc, window='hann'):
 # 2. Hardware-Accurate Power Conversion
 # ==============================================================================
 def calculate_single_bin_log_power(complex_val, accum_width, accum_frac, power_width, power_frac):
-    """
-    Calculate hardware-accurate dB power using integer log2.
-    Formula: db_power = 3 * int_log2(|complex_val|^2)
+    power = np.abs(complex_val)**2
+    if np.max(power) == 0: return float('nan'), float('nan')
     
-    This matches the complex_to_log_power.sv hardware module.
-    Inputs are floating-point, output is floating-point dB value.
-    
-    Args:
-        complex_val: Complex DFT accumulator value (floating point)
-        accum_width: Width of accumulator (e.g., 64)
-        accum_frac: Fractional bits in accumulator (e.g., 56)
-        power_width: Width of power output (e.g., 32)
-        power_frac: Fractional bits in power (e.g., 16)
-    
-    Returns:
-        Floating-point dB power value
-    """
+    db_power_float = 10 * np.log10(power + 1e-20)
 
-    # Extract real and imaginary parts
-    real_part = np.real(complex_val)
-    imag_part = np.imag(complex_val)
+    # """
+    # Calculate hardware-accurate dB power using integer log2.
+    # Formula: db_power = 3 * int_log2(|complex_val|^2)
     
-    # Convert to fixed-point (as hardware would see them)
-    accum_int_bits = accum_width - accum_frac
-    real_fixed = float_to_fixed_point(real_part, accum_int_bits, accum_frac, signed=True)
-    imag_fixed = float_to_fixed_point(imag_part, accum_int_bits, accum_frac, signed=True)
+    # This matches the complex_to_log_power.sv hardware module.
+    # Inputs are floating-point, output is floating-point dB value.
     
-    # Calculate magnitude squared in fixed-point
-    # real^2 + imag^2 (this gives us 2*accum_frac fractional bits)
-    mag_squared_fixed = real_fixed * real_fixed + imag_fixed * imag_fixed
+    # Args:
+    #     complex_val: Complex DFT accumulator value (floating point)
+    #     accum_width: Width of accumulator (e.g., 64)
+    #     accum_frac: Fractional bits in accumulator (e.g., 56)
+    #     power_width: Width of power output (e.g., 32)
+    #     power_frac: Fractional bits in power (e.g., 16)
     
-    # Handle zero/negative case
-    if mag_squared_fixed <= 0:
-        return 0.0  # Return minimum dB value
+    # Returns:
+    #     Floating-point dB power value
+    # """
+
+    # # Extract real and imaginary parts
+    # real_part = np.real(complex_val)
+    # imag_part = np.imag(complex_val)
     
-    # Integer log2: find position of MSB
-    int_log2_val = mag_squared_fixed.bit_length() - 1
+    # # Convert to fixed-point (as hardware would see them)
+    # accum_int_bits = accum_width - accum_frac
+    # real_fixed = float_to_fixed_point(real_part, accum_int_bits, accum_frac, signed=True)
+    # imag_fixed = float_to_fixed_point(imag_part, accum_int_bits, accum_frac, signed=True)
     
-    # Multiply by 3 to approximate dB
-    db_power_raw = 3 * int_log2_val
+    # # Calculate magnitude squared in fixed-point
+    # # real^2 + imag^2 (this gives us 2*accum_frac fractional bits)
+    # mag_squared_fixed = real_fixed * real_fixed + imag_fixed * imag_fixed
     
-    # Adjust for fractional bit scaling
-    # The magnitude squared has 2*accum_frac fractional bits
-    # So we need to subtract the contribution of those fractional bits
-    db_power_adjusted = db_power_raw - (3 * 2 * accum_frac)
+    # # Handle zero/negative case
+    # if mag_squared_fixed <= 0:
+    #     return 0.0  # Return minimum dB value
     
-    # Convert to fixed-point in power format
-    power_int_bits = power_width - power_frac
-    db_power_fixed = db_power_adjusted * (2 ** power_frac)
+    # # Integer log2: find position of MSB
+    # int_log2_val = mag_squared_fixed.bit_length() - 1
     
-    # Clamp to valid range
-    max_val = (1 << power_width) - 1
-    db_power_clamped = max(0, min(int(db_power_fixed), max_val))
+    # # Multiply by 3 to approximate dB
+    # db_power_raw = 3 * int_log2_val
     
-    # Convert back to floating-point for golden reference
-    db_power_float = fixed_point_to_float(db_power_clamped, power_int_bits, power_frac, signed=True)
+    # # Adjust for fractional bit scaling
+    # # The magnitude squared has 2*accum_frac fractional bits
+    # # So we need to subtract the contribution of those fractional bits
+    # db_power_adjusted = db_power_raw - (3 * 2 * accum_frac)
+    
+    # # Convert to fixed-point in power format
+    # power_int_bits = power_width - power_frac
+    # db_power_fixed = db_power_adjusted * (2 ** power_frac)
+    
+    # # Clamp to valid range
+    # max_val = (1 << power_width) - 1
+    # db_power_clamped = max(0, min(int(db_power_fixed), max_val))
+    
+    # # Convert back to floating-point for golden reference
+    # db_power_float = fixed_point_to_float(db_power_clamped, power_int_bits, power_frac, signed=True)
     
     return db_power_float
+
+def ilog2_abs2(z: complex) -> int:
+    """
+    Returns 3 floor(log2(|z|^2)) for a complex number z = a + ib.
+    """
+    # squared magnitude = a^2 + b^2
+    mag2 = (z.real * z.real) + (z.imag * z.imag)
+
+    if mag2 == 0:
+        raise ValueError("log2(0) is undefined")
+
+    return 3 * math.floor(math.log2(mag2))
 
 def convert_to_hardware_db_power(dft_bins, accum_width=64, accum_frac=56, power_width=32, power_frac=16):
     """
@@ -112,7 +139,8 @@ def convert_to_hardware_db_power(dft_bins, accum_width=64, accum_frac=56, power_
     
     power_values = []
     for val in complex_sorted:
-        p_hw = calculate_single_bin_log_power(val, accum_width, accum_frac, power_width, power_frac)
+        # p_hw = calculate_single_bin_log_power(val, accum_width, accum_frac, power_width, power_frac)
+        p_hw = ilog2_abs2(val)
         power_values.append(p_hw)
         
     return freqs_sorted, np.array(power_values, dtype=object)

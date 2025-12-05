@@ -68,8 +68,13 @@ if __name__ == '__main__':
     start_sample = window_num_to_test * hop
     end_sample = start_sample + nperseg
     
-    time_window_data = baseline_iq_data[start_sample:end_sample, channel_to_test]
+    time_window_data_raw = baseline_iq_data[start_sample:end_sample, channel_to_test]
     print(f"\n--- Analyzing STFT window #{window_num_to_test} from real data ---")
+
+    # Scaling
+    max_val = np.max(np.abs(time_window_data_raw))
+    scale_factor = 1.5 / max_val if max_val > 0 else 1.0
+    time_window_data = time_window_data_raw * scale_factor
 
     # --- 4. Define Analysis Parameters ---
     delta_f = 0.25e6 
@@ -87,7 +92,7 @@ if __name__ == '__main__':
     ACCUM_FRAC = 56
     POWER_WIDTH = 32
     POWER_FRAC = 16
-    threshold_db = -30.0  # dB drop from peak
+    threshold_db = 30.0  # dB drop from peak
 
     # --- 5. Run the Hardware-Accurate Processing Pipeline ---
     
@@ -106,10 +111,10 @@ if __name__ == '__main__':
     # Step 3: Calculate Hardware Threshold
     print("\n--- Step 3: Calculate Threshold ---")
     threshold_drop_fixed = float_to_fixed_point(
-        threshold_db, POWER_WIDTH - POWER_FRAC, POWER_FRAC, signed=True
+        threshold_db, POWER_WIDTH - POWER_FRAC, POWER_FRAC, signed=False
     )
     max_power_hw, abs_threshold_hw = calc_hardware_threshold(
-        power_hw_db, threshold_drop_fixed
+        power_hw_db, threshold_db
     )
     print(f"Max power: {max_power_hw} (fixed-point)")
     print(f"Absolute threshold: {abs_threshold_hw} (fixed-point)")
@@ -167,8 +172,8 @@ if __name__ == '__main__':
     freqs1 = np.array(list(dft_bins.keys()))
     powers1 = np.abs(np.array(list(dft_bins.values())))**2
     psd1 = powers1 / enbw_scaling
-    db1 = 10 * np.log10(psd1 + 1e-20)
-    db1_norm = db1 - np.max(10 * np.log10(psd_welch_shifted + 1e-20))
+    db1_norm = 10 * np.log10(psd1 + 1e-20)
+    db1_norm = db1_norm - np.max(10 * np.log10(psd_welch_shifted + 1e-20))
     
     # Plot DFT bins
     plt.plot(freqs1 / 1e6, db1_norm, 'bo', markersize=6, 

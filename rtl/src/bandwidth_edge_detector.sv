@@ -19,9 +19,9 @@
 
 module bandwidth_edge_detector #(
     // Power and Threshold Parameters
-    parameter int POWER_WIDTH = 32,
-    parameter int POWER_FRAC = 16,
-    parameter logic [POWER_WIDTH-1:0] THRESHOLD_DROP = 32'h001E_0000,  // 30dB in Q16.16
+    parameter int POWER_WIDTH = 8,
+    parameter int POWER_FRAC = 0,
+    parameter logic [POWER_WIDTH-1:0] THRESHOLD_DROP = 8'h1E, // 30dB in Q8.0 // 32'h001E_0000,  // 30dB in Q16.16
     
     // Frequency and Bin Parameters
     parameter int FREQ_BIN_WIDTH = 32,

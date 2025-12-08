@@ -185,8 +185,8 @@ def main():
     IQ_WIDTH = 16
     WINDOW_WIDTH = 16
     ACCUM_WIDTH = 64 
-    POWER_WIDTH = 32
-    POWER_FRAC = 16
+    POWER_WIDTH = 8
+    POWER_FRAC = 0
     FREQ_BIN_WIDTH = 16
     
     THRESHOLD_DROP_DB = 30.0

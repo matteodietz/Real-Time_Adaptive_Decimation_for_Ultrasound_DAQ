@@ -91,8 +91,8 @@ if __name__ == '__main__':
     # Hardware parameters (must match your RTL)
     ACCUM_WIDTH = 64
     ACCUM_FRAC = 56
-    POWER_WIDTH = 32
-    POWER_FRAC = 16
+    POWER_WIDTH = 8 # 32
+    POWER_FRAC = 0 # 16
     threshold_db = 30.0  # dB drop from peak
 
     # --- 5. Run the Hardware-Accurate Processing Pipeline ---

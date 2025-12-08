@@ -163,7 +163,7 @@ def find_left_edge_hw(freqs_sorted, power_vals_sorted_db, abs_threshold_db):
     # Search from the center downwards into negative frequencies
     for i in range(start_search_idx, 0, -1):
         # Crossing condition is: power[i-1] < threshold <= power[i]
-        if power_vals_sorted_db[i-1] < abs_threshold_db <= power_vals_sorted_db[i]:
+        if power_vals_sorted_db[i-1] <= abs_threshold_db < power_vals_sorted_db[i]:
             L1, L2 = power_vals_sorted_db[i-1], power_vals_sorted_db[i]
             f1, f2 = freqs_sorted[i-1], freqs_sorted[i]
             

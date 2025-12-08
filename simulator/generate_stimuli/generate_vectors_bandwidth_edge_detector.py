@@ -5,262 +5,352 @@ Target Module: bandwidth_edge_detector
 Inputs:  Array of dB Power Values (Fixed Point), Array of Frequency Bins
 Outputs: Left Edge (f1, f2, L1, L2), Right Edge (f1, f2, L1, L2)
 
-This script generates the Power Spectrum inputs by running the pre-requisite
-signal processing steps (DFT + Power Conversion) in software.
+This script follows the exact processing flow from the complete system model.
 """
 import numpy as np
 from scipy import signal
 from pathlib import Path
 import sys
 
-# 1. Setup Paths
-SIMULATOR_ROOT = Path(__file__).resolve().parent.parent
+# --- Setup Paths ---
+try:
+    SIMULATOR_ROOT = Path(__file__).resolve().parent.parent
+except NameError:
+    SIMULATOR_ROOT = Path.cwd().parent
+
 sys.path.insert(0, str(SIMULATOR_ROOT / "src"))
 
-# 2. Imports
-try:
-    from fixed_float_conversions import float_to_fixed_point
-    from complete_system_model import (
-        streaming_dft_processor,
-        convert_to_hardware_db_power,
-        calc_hardware_threshold,
-        find_left_edge_hw,
-        find_right_edge_points # Using the function name from your model
-    )
-except ImportError as e:
-    print(f"Error importing models: {e}")
-    sys.exit(1)
-
+# --- Imports ---
 try:
     from afe_interface_rf import load_picmus_rf_data
     from virtual_afe import run_virtual_afe_processing
-    PICMUS_AVAILABLE = True
-except ImportError:
-    print("Warning: PICMUS data loading modules not available.")
-    PICMUS_AVAILABLE = False
-
-def generate_test_case_edge_det(test_name, iq_data_raw, fs, freq_bins, threshold_drop_db,
-                                iq_width, accum_width, 
-                                power_width, power_frac, 
-                                freq_bin_width):
-    """
-    Generates a single test case for the Bandwidth Edge Detector.
-    """
-    print(f"\n=== Generating test case: {test_name} ===")
-    
-    # -------------------------------------------------------------------------
-    # 1. Pre-Processing (Emulating the previous hardware stages)
-    # -------------------------------------------------------------------------
-    
-    # Scale Input to full range (Crucial for valid dB values)
-    iq_frac_bits = 14
-    max_val = np.max(np.abs(iq_data_raw))
-    scale_factor = 1.5 / max_val if max_val > 0 else 1.0
-    iq_data_scaled = iq_data_raw * scale_factor
-    
-    # Run DFT
-    dft_bins = streaming_dft_processor(iq_data_scaled, fs, freq_bins, window='hann')
-    
-    # Run Power Conversion
-    # The output 'power_hw_db' is the INPUT STIMULUS for our DUT
-    # Assumes complete_system_model returns FLOATING POINT dB values
-    freqs_sorted, power_hw_db = convert_to_hardware_db_power(
-        dft_bins, accum_width=accum_width, accum_frac=56, 
-        power_width=power_width, power_frac=power_frac
+    from complete_system_model import (
+        streaming_dft_processor, 
+        convert_to_hardware_db_power,
+        calc_hardware_threshold,
+        find_left_edge_hw,
+        find_right_edge_points
     )
-    
-    print(f"  Max Power (Input to DUT): {np.max(power_hw_db):.2f} dB (Float)")
+    from fixed_float_conversions import float_to_fixed_point
+except ImportError as e:
+    print(f"Error importing required modules: {e}")
+    sys.exit(1)
 
-    # -------------------------------------------------------------------------
-    # 2. Run DUT Logic Model (Golden Reference)
-    # -------------------------------------------------------------------------
+
+def generate_test_case(test_name, time_window_data_raw, fs_baseline, S_bins, 
+                       threshold_db, hw_params):
+    """
+    Generate a single test case following the exact flow from the complete system model.
     
-    # A. Calculate Threshold (Internal to DUT)
-    # Pass float drop directly
-    max_pwr, abs_threshold = calc_hardware_threshold(power_hw_db, threshold_drop_db)
-    print(f"  Calculated Threshold: {abs_threshold:.2f} dB")
+    Args:
+        test_name: Name identifier for this test case
+        time_window_data_raw: Raw IQ time domain data (256 samples)
+        fs_baseline: Sampling frequency
+        S_bins: Frequency bins to calculate DFT at
+        threshold_db: Threshold in dB (e.g., 30.0)
+        hw_params: Dictionary with hardware parameters
     
-    # B. Find Left Edge
-    f1_L, f2_L, L1_L, L2_L = find_left_edge_hw(freqs_sorted, power_hw_db, abs_threshold)
+    Returns:
+        Dictionary with test case data
+    """
+    print(f"\n=== Generating Test Case: {test_name} ===")
     
-    # C. Find Right Edge
-    f1_R, f2_R, L1_R, L2_R = find_right_edge_points(freqs_sorted, power_hw_db, abs_threshold)
+    # --- Extract Hardware Parameters ---
+    INPUT_WIDTH_LOG = hw_params['INPUT_WIDTH_LOG']
+    ACCUM_WIDTH = hw_params['ACCUM_WIDTH']
+    ACCUM_FRAC = hw_params['ACCUM_FRAC']
+    POWER_WIDTH = hw_params['POWER_WIDTH']
+    POWER_FRAC = hw_params['POWER_FRAC']
+    FREQ_BIN_WIDTH = hw_params['FREQ_BIN_WIDTH']
     
-    if f1_L is not None and f1_R is not None:
-        print(f"  Edges Found at bins: {f1_L/1e6:.2f}MHz / {f1_R/1e6:.2f}MHz")
+    # --- Step 1: Scaling (from complete_system_model) ---
+    max_val = np.max(np.abs(time_window_data_raw))
+    scale_factor = 1.5 / max_val if max_val > 0 else 1.0
+    time_window_data = time_window_data_raw * scale_factor
+    print(f"  Scaled data: max_val={max_val:.4f}, scale={scale_factor:.4f}")
+    
+    # --- Step 2: Core Streaming DFT Processor ---
+    print("  Step 2: Running streaming_dft_processor...")
+    dft_bins = streaming_dft_processor(time_window_data, fs_baseline, S_bins, window='hann')
+    print(f"  DFT computed for {len(dft_bins)} bins")
+    
+    # --- Step 3: Convert to Hardware dB Power ---
+    print("  Step 3: Converting to hardware dB power...")
+    freqs_sorted, power_hw_db = convert_to_hardware_db_power(
+        dft_bins, 
+        INPUT_WIDTH_LOG, 
+        INPUT_WIDTH_LOG - (ACCUM_WIDTH - ACCUM_FRAC), 
+        POWER_WIDTH, 
+        POWER_FRAC
+    )
+    print(f"  Power values (dB): min={np.min(power_hw_db):.2f}, max={np.max(power_hw_db):.2f}")
+    
+    # --- Step 4: Calculate Hardware Threshold ---
+    print("  Step 4: Calculating threshold...")
+    max_power_hw, abs_threshold_hw = calc_hardware_threshold(
+        power_hw_db, threshold_db
+    )
+    print(f"  Max power: {max_power_hw:.2f} (fixed-point)")
+    print(f"  Absolute threshold: {abs_threshold_hw:.2f} (fixed-point)")
+    
+    # --- Step 5: Find Left Edge Points ---
+    print("  Step 5: Finding left edge...")
+    f1_left, f2_left, L1_left, L2_left = find_left_edge_hw(
+        freqs_sorted, power_hw_db, abs_threshold_hw
+    )
+    if f1_left is not None:
+        print(f"  Left edge: f1={f1_left/1e6:.4f} MHz, f2={f2_left/1e6:.4f} MHz")
+        print(f"             L1={L1_left:.2f} dB, L2={L2_left:.2f} dB")
     else:
-        print("  Edges NOT Found")
-
-    # -------------------------------------------------------------------------
-    # 3. Format Stimuli (Inputs to DUT)
-    # -------------------------------------------------------------------------
+        print("  Left edge: NOT FOUND")
     
-    # Config: Frequency Bins
-    # Assuming Q(int).12 format for MHz representation inside the 32-bit word
-    fb_frac = 12 
-    fb_int = freq_bin_width - fb_frac
+    # --- Step 6: Find Right Edge Points ---
+    print("  Step 6: Finding right edge...")
+    f1_right, f2_right, L1_right, L2_right = find_right_edge_points(
+        freqs_sorted, power_hw_db, abs_threshold_hw
+    )
+    if f1_right is not None:
+        print(f"  Right edge: f1={f1_right/1e6:.4f} MHz, f2={f2_right/1e6:.4f} MHz")
+        print(f"              L1={L1_right:.2f} dB, L2={L2_right:.2f} dB")
+    else:
+        print("  Right edge: NOT FOUND")
+    
+    # --- Format Inputs (Stimuli for DUT) ---
+    
+    # Frequency bins: Convert Hz to MHz, then to fixed point
+    # Using signed representation for frequency (can be negative)
+    freq_bin_frac = 12  # Q(FREQ_BIN_WIDTH-12).12
+    freq_bin_int = FREQ_BIN_WIDTH - freq_bin_frac
     
     freq_bins_hw = []
-    
     for f_hz in freqs_sorted:
         f_mhz = f_hz / 1e6
-        fb_val = float_to_fixed_point(f_mhz, fb_int, fb_frac, signed=True)
+        fb_val = float_to_fixed_point(f_mhz, freq_bin_int, freq_bin_frac, signed=True)
         freq_bins_hw.append(fb_val)
-        
-    # # Power Values Stimuli
-    # # Convert floating point dB to Fixed Point Integer (e.g. Q16.16) for file writing
-    # # Unsigned because power magnitude is positive
-    # power_int_bits = power_width - power_frac
-    # power_vals_hw = [float_to_fixed_point(p, power_int_bits, power_frac, signed=False) for p in power_hw_db]
-
-    power_int_bits = power_width - power_frac
-    power_vals_hw = [float_to_fixed_point(p, power_width, 0, signed=False) for p in power_hw_db]
-
-    # -------------------------------------------------------------------------
-    # 4. Format Expectations (Outputs from DUT)
-    # -------------------------------------------------------------------------
     
-    def fix_freq(f): 
-        if f is None: return 0
-        return float_to_fixed_point(f/1e6, fb_int, fb_frac, signed=True)
+    # Power values: Already in fixed point representation from model
+    # Convert to unsigned fixed point integers for file writing
+    power_int_bits = POWER_WIDTH - POWER_FRAC
+    power_vals_hw = [
+        float_to_fixed_point(p, power_int_bits, POWER_FRAC, signed=False) 
+        for p in power_hw_db
+    ]
     
-    def fix_pwr(p): 
-        if p is None: return 0
-        return float_to_fixed_point(p, power_int_bits, power_frac, signed=False)
-
+    # --- Format Outputs (Expected from DUT) ---
+    
+    def fix_freq(f):
+        """Convert frequency in Hz to fixed point, return 0 if None"""
+        if f is None:
+            return 0
+        f_mhz = f / 1e6
+        return float_to_fixed_point(f_mhz, freq_bin_int, freq_bin_frac, signed=True)
+    
+    def fix_pwr(p):
+        """Convert power in dB to fixed point, return 0 if None"""
+        if p is None:
+            return 0
+        return float_to_fixed_point(p, power_int_bits, POWER_FRAC, signed=False)
+    
+    # Determine if both edges were found
+    valid_expect = 1 if (f1_left is not None and f1_right is not None) else 0
+    
     return {
         'test_name': test_name,
-        'K': len(freq_bins),
+        'K': len(S_bins),
+        # Inputs to DUT
         'power_vals_hw': power_vals_hw,
         'freq_bins_hw': freq_bins_hw,
-        # Expected Output: Left
-        'exp_f1_L': fix_freq(f1_L), 'exp_f2_L': fix_freq(f2_L),
-        'exp_L1_L': fix_pwr(L1_L),  'exp_L2_L': fix_pwr(L2_L),
-        # Expected Output: Right
-        'exp_f1_R': fix_freq(f1_R), 'exp_f2_R': fix_freq(f2_R),
-        'exp_L1_R': fix_pwr(L1_R),  'exp_L2_R': fix_pwr(L2_R),
-        # Valid
-        'valid_expect': 1 if (f1_L is not None and f1_R is not None) else 0
+        # Expected outputs from DUT - Left Edge
+        'exp_f1_left': fix_freq(f1_left),
+        'exp_f2_left': fix_freq(f2_left),
+        'exp_L1_left': fix_pwr(L1_left),
+        'exp_L2_left': fix_pwr(L2_left),
+        # Expected outputs from DUT - Right Edge
+        'exp_f1_right': fix_freq(f1_right),
+        'exp_f2_right': fix_freq(f2_right),
+        'exp_L1_right': fix_pwr(L1_right),
+        'exp_L2_right': fix_pwr(L2_right),
+        # Valid signal
+        'valid_expect': valid_expect
     }
 
+
 def write_vector_file(test_cases, output_path):
+    """Write test cases to file in format for SystemVerilog testbench"""
     with open(output_path, 'w') as f:
         f.write("# Simulation vectors for bandwidth_edge_detector.sv\n")
-        f.write("# Format:\n")
-        f.write("# TEST_NAME\n")
-        f.write("# NUM_BINS\n")
-        f.write("# FREQ_BINS (Array)\n")
-        f.write("# POWER_VALS (Array)\n")
-        f.write("# EXPECTED VALID\n")
-        f.write("# EXPECTED LEFT (f1 f2 L1 L2)\n")
-        f.write("# EXPECTED RIGHT (f1 f2 L1 L2)\n\n")
+        f.write("# Generated from complete_system_model with PICMUS data\n")
+        f.write("#\n")
+        f.write("# Format per test case:\n")
+        f.write("#   TEST_NAME\n")
+        f.write("#   NUM_BINS\n")
+        f.write("#   FREQ_BINS (space-separated hex values)\n")
+        f.write("#   POWER_VALS (space-separated hex values)\n")
+        f.write("#   EXPECTED_VALID (0 or 1)\n")
+        f.write("#   EXPECTED_LEFT (f1 f2 L1 L2 in hex)\n")
+        f.write("#   EXPECTED_RIGHT (f1 f2 L1 L2 in hex)\n")
+        f.write("#\n\n")
         
         for tc in test_cases:
             f.write(f"{tc['test_name']}\n")
             f.write(f"{tc['K']}\n")
             
-            # 1. Frequency Bins Input
-            for fb in tc['freq_bins_hw']: f.write(f"{fb:08x} ")
+            # Frequency bins (inputs)
+            for fb in tc['freq_bins_hw']:
+                f.write(f"{fb & 0xFFFFFFFF:08x} ")
             f.write("\n")
             
-            # 2. Power Values Input
-            for p in tc['power_vals_hw']: f.write(f"{p:08x} ")
+            # Power values (inputs)
+            for p in tc['power_vals_hw']:
+                f.write(f"{p & 0xFFFFFFFF:08x} ")
             f.write("\n")
             
-            # 3. Expected Valid
+            # Expected valid
             f.write(f"{tc['valid_expect']}\n")
             
-            # 4. Expected Left Edge
-            f.write(f"{tc['exp_f1_L']:08x} {tc['exp_f2_L']:08x} {tc['exp_L1_L']:08x} {tc['exp_L2_L']:08x}\n")
+            # Expected left edge outputs
+            f.write(f"{tc['exp_f1_left'] & 0xFFFFFFFF:08x} ")
+            f.write(f"{tc['exp_f2_left'] & 0xFFFFFFFF:08x} ")
+            f.write(f"{tc['exp_L1_left'] & 0xFFFFFFFF:08x} ")
+            f.write(f"{tc['exp_L2_left'] & 0xFFFFFFFF:08x}\n")
             
-            # 5. Expected Right Edge
-            f.write(f"{tc['exp_f1_R']:08x} {tc['exp_f2_R']:08x} {tc['exp_L1_R']:08x} {tc['exp_L2_R']:08x}\n")
+            # Expected right edge outputs
+            f.write(f"{tc['exp_f1_right'] & 0xFFFFFFFF:08x} ")
+            f.write(f"{tc['exp_f2_right'] & 0xFFFFFFFF:08x} ")
+            f.write(f"{tc['exp_L1_right'] & 0xFFFFFFFF:08x} ")
+            f.write(f"{tc['exp_L2_right'] & 0xFFFFFFFF:08x}\n")
             
             f.write("\n")
+    
+    print(f"\n✓ Test vectors written to: {output_path}")
+
 
 def main():
-    print("=== Generating Edge Detector Stimuli ===\n")
+    print("=" * 80)
+    print("Bandwidth Edge Detector Stimulus Generation")
+    print("Following exact flow from complete_system_model.py")
+    print("=" * 80)
     
-    # --- Hardware Parameters (Must Match DUT) ---
-    IQ_WIDTH = 16
-    WINDOW_WIDTH = 16
-    ACCUM_WIDTH = 64 
-    POWER_WIDTH = 8
-    POWER_FRAC = 0
-    FREQ_BIN_WIDTH = 16
+    # --- Hardware Parameters (from complete_system_model test script) ---
+    hw_params = {
+        'ACCUM_WIDTH': 64,
+        'ACCUM_FRAC': 56,
+        'INPUT_WIDTH_LOG': 32,
+        'POWER_WIDTH': 8,
+        'POWER_FRAC': 0,
+        'FREQ_BIN_WIDTH': 16,  # Updated to match module
+        'threshold_db': 30.0
+    }
     
-    THRESHOLD_DROP_DB = 30.0
+    print("\nHardware Parameters:")
+    for key, val in hw_params.items():
+        print(f"  {key}: {val}")
+    
+    # --- Load PICMUS Data ---
+    print("\n--- Loading PICMUS Data ---")
+    
+    rf_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_dataset_rf.hdf5"
+    iq_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_dataset_iq.hdf5"
+    scan_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_scan.hdf5"
+    
+    try:
+        rf_data, angles, _, _, fs_picmus, mod_freq, _, _, _ = load_picmus_rf_data(
+            rf_path, iq_path, scan_path
+        )
+        print(f"✓ Loaded PICMUS data")
+        print(f"  Modulation frequency: {mod_freq/1e6:.2f} MHz")
+        print(f"  PICMUS sample rate: {fs_picmus/1e6:.2f} MHz")
+    except Exception as e:
+        print(f"✗ Failed to load PICMUS data: {e}")
+        sys.exit(1)
+    
+    # --- AFE Processing Parameters ---
+    adc_rate = 125e6
+    baseline_decimation = 4
+    
+    # --- Define Frequency Bins (from complete_system_model) ---
+    delta_f = 0.25e6
+    half_bw_est = mod_freq / 2
+    
+    s_coarse = np.linspace(-mod_freq, mod_freq, 8)
+    s_fine_left = np.linspace(-half_bw_est - delta_f, -half_bw_est + delta_f, 8)
+    s_fine_right = np.linspace(half_bw_est - delta_f, half_bw_est + delta_f, 8)
+    S_bins = np.unique(np.concatenate([s_coarse, s_fine_left, s_fine_right]))
+    
+    print(f"\nFrequency bins: {len(S_bins)} bins")
+    print(f"  Range: [{S_bins[0]/1e6:.3f}, {S_bins[-1]/1e6:.3f}] MHz")
+    
+    # --- STFT Parameters (from complete_system_model) ---
+    nperseg = 256
+    hop = nperseg // 2
+    
+    # --- Generate Test Cases ---
+    print("\n--- Generating Test Cases ---")
+    
+    test_configs = [
+        ("picmus_ang0_ch64_win29", 64, 29),
+        ("picmus_ang0_ch32_win15", 32, 15),
+        ("picmus_ang0_ch96_win30", 96, 30),
+    ]
     
     test_cases = []
     
-    if PICMUS_AVAILABLE:
-        try:
-            print("Loading PICMUS...")
-            rf_path = SIMULATOR_ROOT.parent / "simulator/datasets/experiments/contrast_speckle/contrast_speckle_expe_dataset_rf.hdf5"
-            iq_path = SIMULATOR_ROOT.parent / "simulator/datasets/experiments/contrast_speckle/contrast_speckle_expe_dataset_iq.hdf5"
-            scan_path = SIMULATOR_ROOT.parent / "simulator/datasets/experiments/contrast_speckle/contrast_speckle_expe_scan.hdf5"
-            
-            rf_data, angles, _, _, fs_picmus, mod_freq, _, _, _ = load_picmus_rf_data(rf_path, iq_path, scan_path)
-            
-            adc_rate = 125e6
-            baseline_decimation = 4
-            
-            # Bins Definition
-            delta_f = 0.25e6
-            half_bw_est = mod_freq / 2
-            s_coarse = np.linspace(-mod_freq, mod_freq, 8)
-            s_fine_left = np.linspace(-half_bw_est - delta_f, -half_bw_est + delta_f, 8)
-            s_fine_right = np.linspace(half_bw_est - delta_f, half_bw_est + delta_f, 8)
-            S_bins = np.unique(np.concatenate([s_coarse, s_fine_left, s_fine_right]))
-            
-            configs = [
-                ("picmus_ang0_ch64_win29", 64, np.argmin(np.abs(angles)), 29),
-                ("picmus_ang0_ch32_win15", 32, np.argmin(np.abs(angles)), 15),
-                ("picmus_ang0_ch96_win30", 96, np.argmin(np.abs(angles)), 30),
-            ]
-            
-            processed_angles = {}
-            nperseg = 256
-            hop = nperseg // 2
-
-            for name, ch, ang_idx, win_idx in configs:
-                if ang_idx not in processed_angles:
-                    print(f"  Running AFE for Angle {ang_idx}...")
-                    iq_data_angle, _, fs_base = run_virtual_afe_processing(
-                        rf_data=rf_data, angle_index=ang_idx, fs_picmus=fs_picmus,
-                        modulation_frequency=mod_freq, decimation_factor=baseline_decimation,
-                        adc_sample_rate=adc_rate
-                    )
-                    processed_angles[ang_idx] = (iq_data_angle, fs_base)
-                
-                baseline_iq_data, fs_baseline = processed_angles[ang_idx]
-                
-                start = win_idx * hop
-                end = start + nperseg
-                if end > baseline_iq_data.shape[0]: continue
-                
-                time_window = baseline_iq_data[start:end, ch]
-                
-                tc = generate_test_case_edge_det(
-                    name, time_window, fs_baseline, S_bins, THRESHOLD_DROP_DB,
-                    IQ_WIDTH, ACCUM_WIDTH, 
-                    POWER_WIDTH, POWER_FRAC,
-                    FREQ_BIN_WIDTH
-                )
-                test_cases.append(tc)
-                
-        except Exception as e:
-            print(f"Error: {e}")
-            import traceback
-            traceback.print_exc()
-
-    # Write Output
+    # Get center angle
+    center_angle_index = np.argmin(np.abs(angles))
+    
+    # Run AFE processing once for center angle
+    print(f"\nRunning virtual AFE processing for angle {center_angle_index}...")
+    baseline_iq_data, _, fs_baseline = run_virtual_afe_processing(
+        rf_data=rf_data,
+        angle_index=center_angle_index,
+        fs_picmus=fs_picmus,
+        modulation_frequency=mod_freq,
+        decimation_factor=baseline_decimation,
+        adc_sample_rate=adc_rate
+    )
+    print(f"✓ AFE processing complete. fs_baseline = {fs_baseline/1e6:.2f} MHz")
+    
+    # Generate test cases
+    for test_name, channel, window_num in test_configs:
+        print(f"\n--- Processing: {test_name} ---")
+        print(f"  Channel: {channel}, Window: {window_num}")
+        
+        # Extract time window
+        start_sample = window_num * hop
+        end_sample = start_sample + nperseg
+        
+        if end_sample > baseline_iq_data.shape[0]:
+            print(f"  ✗ Skipping: window extends beyond data")
+            continue
+        
+        time_window_data_raw = baseline_iq_data[start_sample:end_sample, channel]
+        
+        # Generate test case
+        tc = generate_test_case(
+            test_name=test_name,
+            time_window_data_raw=time_window_data_raw,
+            fs_baseline=fs_baseline,
+            S_bins=S_bins,
+            threshold_db=hw_params['threshold_db'],
+            hw_params=hw_params
+        )
+        
+        test_cases.append(tc)
+        print(f"  ✓ Test case generated")
+    
+    # --- Write Output File ---
+    print("\n--- Writing Output File ---")
+    
     output_dir = SIMULATOR_ROOT.parent / "rtl" / "simvectors"
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / "edge_detector_vectors.txt"
     
     write_vector_file(test_cases, output_path)
-    print(f"\nStimuli generated at: {output_path}")
+    
+    print("\n" + "=" * 80)
+    print(f"SUCCESS: Generated {len(test_cases)} test cases")
+    print("=" * 80)
+
 
 if __name__ == "__main__":
     main()

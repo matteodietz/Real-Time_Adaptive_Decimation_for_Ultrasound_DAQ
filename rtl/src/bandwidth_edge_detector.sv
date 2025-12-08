@@ -82,9 +82,6 @@ module bandwidth_edge_detector #(
     logic right_edge_valid;
     logic right_edge_busy;
     
-    // Combined Valid Signal
-    logic both_edges_valid;
-    
     //--------------------------------------------------------------------------
     // Module Instantiations
     //--------------------------------------------------------------------------

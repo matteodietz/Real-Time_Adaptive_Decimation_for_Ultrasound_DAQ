@@ -11,6 +11,7 @@ import numpy as np
 from scipy import signal
 from pathlib import Path
 import sys
+import random
 
 # --- Setup Paths ---
 try:
@@ -287,11 +288,19 @@ def main():
     # --- Generate Test Cases ---
     print("\n--- Generating Test Cases ---")
     
-    test_configs = [
-        ("picmus_ang0_ch64_win29", 64, 29),
-        ("picmus_ang0_ch32_win15", 32, 15),
-        ("picmus_ang0_ch96_win30", 96, 30),
-    ]
+    # test_configs = [
+    #     ("picmus_ang0_ch64_win29", 64, 29),
+    #     ("picmus_ang0_ch32_win15", 32, 15),
+    #     ("picmus_ang0_ch96_win30", 96, 30),
+    # ]
+
+    test_configs = []
+
+    for _ in range(20):
+        ch = random.randint(1, 127)
+        win = random.randint(20, 37)
+        name = f"picmus_ang0_ch{ch}_win{win}"
+        test_configs.append((name, ch, win))
     
     test_cases = []
     

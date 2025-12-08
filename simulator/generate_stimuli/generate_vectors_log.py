@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Stimulus Generation for complex_to_log_power module
 
@@ -17,9 +16,9 @@ sys.path.append(str(SIMULATOR_ROOT))
 from fixed_float_conversions import float_to_fixed_point, fixed_point_to_float
 
 # Configuration parameters
-INPUT_WIDTH = 16   # Width of I and Q inputs
-OUTPUT_WIDTH = 32  # Width of output
-OUTPUT_FRAC = 16   # Fractional bits in output
+INPUT_WIDTH = 32   # Width of I and Q inputs
+OUTPUT_WIDTH = 8  # Width of output
+OUTPUT_FRAC = 0   # Fractional bits in output
 
 def calculate_expected_log_power(i_val, q_val, input_width, output_width, output_frac):
     """
@@ -57,7 +56,7 @@ def calculate_expected_log_power(i_val, q_val, input_width, output_width, output
     msb_pos = mag_sq.bit_length() - 1
     
     # Place integer log2 in fixed-point format (shift left by OUTPUT_FRAC)
-    log2_val = msb_pos # << output_frac
+    log2_val = msb_pos << output_frac
     
     # Scale by 3: x * 3 = (x << 1) + x
     result = (log2_val << 1) + log2_val

@@ -14,9 +14,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 module complex_to_log_power #(
-    parameter int INPUT_WIDTH   = 16, // Width of I and Q
-    parameter int OUTPUT_WIDTH  = 32, // Width of result
-    parameter int OUTPUT_FRAC   = 16  // Fractional bits in result (unused in integer-only version)
+    parameter int INPUT_WIDTH   = 32, // Width of I and Q
+    parameter int OUTPUT_WIDTH  = 8, // Width of result, Has to be at least $clog(3 * $clog(2 * (2**INPUT_WIDTH)**2))
+    parameter int OUTPUT_FRAC   = 0  // Fractional bits in result (unused in integer-only version)
 ) (
     input  logic                    clk_i,
     input  logic                    rst_ni,
@@ -32,6 +32,7 @@ module complex_to_log_power #(
     // Stage 1: Square and Add (Mag Squared)
     // ---------------------------------------------------------
     localparam int SQ_WIDTH = (2 * INPUT_WIDTH) + 1;
+    localparam int INDEX_WIDTH = $clog2(SQ_WIDTH);
     
     // Stage 1 - Combinational
     logic signed [SQ_WIDTH-1:0] p_mag_sq_d;
@@ -64,11 +65,11 @@ module complex_to_log_power #(
     // ---------------------------------------------------------
     
     // Stage 2 - Combinational
-    logic [5:0]  msb_index_d;
+    logic [INDEX_WIDTH-1:0]  msb_index_d;
     logic        is_zero_d;
     
     // Stage 2 - Sequential
-    logic [5:0]  msb_index_q;
+    logic [INDEX_WIDTH-1:0]  msb_index_q;
     logic        is_zero_q;
     logic        s2_valid_d, s2_valid_q;
     
@@ -81,7 +82,7 @@ module complex_to_log_power #(
         // Find the highest '1' bit (priority encoder)
         for (int i = SQ_WIDTH-1; i >= 0; i--) begin
             if (p_mag_sq_q[i] == 1'b1) begin
-                msb_index_d = i[5:0];  // This is the integer log2
+                msb_index_d = i[INDEX_WIDTH-1:0];  // This is the integer log2
                 is_zero_d   = 1'b0;
                 break;
             end
@@ -120,7 +121,7 @@ module complex_to_log_power #(
             // Scale integer log2 by 3: x * 3 = (x << 1) + x
             // Shift left by OUTPUT_FRAC to maintain fixed-point format
             logic [OUTPUT_WIDTH-1:0] log2_val;
-            log2_val = msb_index_q // << OUTPUT_FRAC;
+            log2_val = msb_index_q << OUTPUT_FRAC;
             db_power_d = (log2_val << 1) + log2_val;
         end
     end

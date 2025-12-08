@@ -7,9 +7,9 @@ module complex_to_log_power_tb ();
     localparam time CLK_PERIOD         = 10ns;
     localparam unsigned RST_CLK_CYCLES = 5;
     
-    localparam integer INPUT_WIDTH  = 16; // As per Python script
-    localparam integer OUTPUT_WIDTH = 32; // As per Python script
-    localparam integer OUTPUT_FRAC  = 16; // As per Python script
+    localparam integer INPUT_WIDTH  = 32; // As per Python script
+    localparam integer OUTPUT_WIDTH = 8; // As per Python script
+    localparam integer OUTPUT_FRAC  = 0; // As per Python script
 
     // --- Signals ---
     logic                                 clk;

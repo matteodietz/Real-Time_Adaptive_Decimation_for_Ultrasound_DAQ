@@ -296,9 +296,9 @@ def main():
 
     test_configs = []
 
-    for _ in range(20):
+    for _ in range(100):
         ch = random.randint(1, 127)
-        win = random.randint(20, 37)
+        win = random.randint(15, 37)
         name = f"picmus_ang0_ch{ch}_win{win}"
         test_configs.append((name, ch, win))
     

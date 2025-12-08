@@ -115,7 +115,7 @@ def convert_to_hardware_db_power(dft_bins, accum_width=64, accum_frac=56, power_
     power_values = []
     for val in complex_sorted:
         p_hw = calculate_hw_log_power(val, accum_frac=accum_frac, power_frac=power_frac)
-        p_hw = p_hw & ((1 << power_width) - 1) # mask to correct width
+        # p_hw = p_hw & ((1 << power_width) - 1) # mask to correct width
 
         # p_hw = ilog2_abs2(val)
         power_values.append(p_hw)

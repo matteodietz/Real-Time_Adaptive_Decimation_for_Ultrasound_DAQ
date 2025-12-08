@@ -107,11 +107,14 @@ def generate_test_case_edge_det(test_name, iq_data_raw, fs, freq_bins, threshold
         fb_val = float_to_fixed_point(f_mhz, fb_int, fb_frac, signed=True)
         freq_bins_hw.append(fb_val)
         
-    # Power Values Stimuli
-    # Convert floating point dB to Fixed Point Integer (e.g. Q16.16) for file writing
-    # Unsigned because power magnitude is positive
+    # # Power Values Stimuli
+    # # Convert floating point dB to Fixed Point Integer (e.g. Q16.16) for file writing
+    # # Unsigned because power magnitude is positive
+    # power_int_bits = power_width - power_frac
+    # power_vals_hw = [float_to_fixed_point(p, power_int_bits, power_frac, signed=False) for p in power_hw_db]
+
     power_int_bits = power_width - power_frac
-    power_vals_hw = [float_to_fixed_point(p, power_int_bits, power_frac, signed=False) for p in power_hw_db]
+    power_vals_hw = [float_to_fixed_point(p, power_width, 0, signed=False) for p in power_hw_db]
 
     # -------------------------------------------------------------------------
     # 4. Format Expectations (Outputs from DUT)

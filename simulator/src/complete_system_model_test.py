@@ -91,6 +91,7 @@ if __name__ == '__main__':
     # Hardware parameters (must match your RTL)
     ACCUM_WIDTH = 64
     ACCUM_FRAC = 56
+    INPUT_WIDTH_LOG = 32
     POWER_WIDTH = 8 # 32
     POWER_FRAC = 0 # 16
     threshold_db = 30.0  # dB drop from peak
@@ -104,8 +105,11 @@ if __name__ == '__main__':
 
     # Step 2: Convert to Hardware dB Power (using integer log2)
     print("\n--- Step 2: Convert to Hardware dB Power ---")
+    # freqs_sorted, power_hw_db = convert_to_hardware_db_power(
+    #     dft_bins, ACCUM_WIDTH, ACCUM_FRAC, POWER_WIDTH, POWER_FRAC
+    # )
     freqs_sorted, power_hw_db = convert_to_hardware_db_power(
-        dft_bins, ACCUM_WIDTH, ACCUM_FRAC, POWER_WIDTH, POWER_FRAC
+        dft_bins, INPUT_WIDTH_LOG, INPUT_WIDTH_LOG - (ACCUM_WIDTH - ACCUM_FRAC), POWER_WIDTH, POWER_FRAC
     )
     print(f"Power values (dB): {power_hw_db}")
     

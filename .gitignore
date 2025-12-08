@@ -38,3 +38,8 @@ simulator/src/ancient
 
 # stop tracking the entire vivado directory
 rtl/vivado/
+
+
+# remove python cache files
+__pycache__/
+*.pyc

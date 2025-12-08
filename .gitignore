@@ -43,3 +43,7 @@ rtl/vivado/
 # remove python cache files
 __pycache__/
 *.pyc
+
+
+# VSCode settings
+.vscode/

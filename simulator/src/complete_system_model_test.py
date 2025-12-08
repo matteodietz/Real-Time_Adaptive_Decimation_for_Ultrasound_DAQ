@@ -3,6 +3,7 @@ from scipy import signal
 import matplotlib.pyplot as plt
 from pathlib import Path
 import sys
+import math
 
 from afe_interface_rf import load_picmus_rf_data
 from virtual_afe import run_virtual_afe_processing
@@ -53,7 +54,7 @@ if __name__ == '__main__':
     # --- 3. Select ONE STFT Window to Analyze ---
     nperseg = 256
     channel_to_test = 64
-    window_num_to_test = 29 
+    window_num_to_test = 29
     hop = nperseg // 2
 
     total_samples = baseline_iq_data.shape[0]
@@ -172,8 +173,10 @@ if __name__ == '__main__':
     freqs1 = np.array(list(dft_bins.keys()))
     powers1 = np.abs(np.array(list(dft_bins.values())))**2
     psd1 = powers1 / enbw_scaling
-    db1_norm = 10 * np.log10(psd1 + 1e-20)
-    db1_norm = db1_norm - np.max(10 * np.log10(psd_welch_shifted + 1e-20))
+    db1_norm = 3 * np.ceil(np.log2(psd1))
+    # db1_norm = 10 * np.log10(psd1 + 1e-20)
+    db1_norm -= np.max(db1_norm)
+    # db1_norm = db1_norm - np.max(10 * np.log10(psd_welch_shifted + 1e-20))
     
     # Plot DFT bins
     plt.plot(freqs1 / 1e6, db1_norm, 'bo', markersize=6, 

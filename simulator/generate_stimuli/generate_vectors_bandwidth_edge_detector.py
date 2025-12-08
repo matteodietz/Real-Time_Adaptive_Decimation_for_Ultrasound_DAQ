@@ -65,7 +65,7 @@ def generate_test_case_edge_det(test_name, iq_data_raw, fs, freq_bins, threshold
     # The output 'power_hw_db' is the INPUT STIMULUS for our DUT
     # Assumes complete_system_model returns FLOATING POINT dB values
     freqs_sorted, power_hw_db = convert_to_hardware_db_power(
-        dft_bins, accum_width=accum_width, accum_frac=40, 
+        dft_bins, accum_width=accum_width, accum_frac=56, 
         power_width=power_width, power_frac=power_frac
     )
     
@@ -181,10 +181,10 @@ def main():
     # --- Hardware Parameters (Must Match DUT) ---
     IQ_WIDTH = 16
     WINDOW_WIDTH = 16
-    ACCUM_WIDTH = 48 
+    ACCUM_WIDTH = 64 
     POWER_WIDTH = 32
     POWER_FRAC = 16
-    FREQ_BIN_WIDTH = 32 # Updated to match your module definition
+    FREQ_BIN_WIDTH = 16
     
     THRESHOLD_DROP_DB = 30.0
     

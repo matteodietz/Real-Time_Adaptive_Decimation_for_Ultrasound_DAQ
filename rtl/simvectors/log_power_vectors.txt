@@ -9,31 +9,31 @@
 0
 # Test case: I max positive, Q zero
 32767 0
-5701632
+87
 # Test case: I max negative, Q zero
 32768 0
-5898240
+90
 # Test case: I zero, Q max positive
 0 32767
-5701632
+87
 # Test case: I zero, Q max negative
 0 32768
-5898240
+90
 # Test case: Both max positive
 32767 32767
-5898240
+90
 # Test case: Both max negative
 32768 32768
-6094848
+93
 # Test case: I max pos, Q max neg
 32767 32768
-5898240
+90
 # Test case: I max neg, Q max pos
 32768 32767
-5898240
+90
 # Test case: Both minimum positive
 1 1
-196608
+3
 # Test case: I minimum positive, Q zero
 1 0
 0
@@ -42,160 +42,160 @@
 0
 # Test case: I quarter scale, Q zero
 16384 0
-5505024
+84
 # Test case: I zero, Q quarter scale
 0 16384
-5505024
+84
 # Test case: Both quarter scale
 16384 16384
-5701632
+87
 # Test case: Random case 1
-19172 28688
-5898240
+5666 39227
+87
 # Test case: Random case 2
-47148 29097
-5898240
+41751 64908
+87
 # Test case: Random case 3
-23161 1868
-5701632
+53046 14941
+84
 # Test case: Random case 4
-10689 42563
-5701632
+23320 36820
+90
 # Test case: Random case 5
-53804 33716
-5898240
+54660 16081
+84
 # Test case: Random case 6
-5385 61717
-4915200
+13678 62249
+81
 # Test case: Random case 7
-4941 28022
-5701632
+60425 34242
+87
 # Test case: Random case 8
-55897 58092
-5308416
+28141 54109
+87
 # Test case: Random case 9
-21740 22266
-5701632
+48498 20225
+87
 # Test case: Random case 10
-57708 59762
-5111808
+21660 23908
+87
 # Test case: Random case 11
-3457 41840
-5701632
+42960 42078
+87
 # Test case: Random case 12
-2331 11242
-5111808
+51867 11685
+84
 # Test case: Random case 13
-1126 39967
-5701632
+16619 23574
+87
 # Test case: Random case 14
-56179 22943
-5701632
+32453 4736
+90
 # Test case: Random case 15
-7906 14064
-5308416
+28047 54787
+87
 # Test case: Random case 16
-57749 60122
-5111808
+58693 14116
+81
 # Test case: Random case 17
-39007 52939
-5701632
+5062 45885
+84
 # Test case: Random case 18
-38550 13162
-5701632
+55894 37525
+87
 # Test case: Random case 19
-25157 58542
-5701632
+13087 9740
+81
 # Test case: Random case 20
-12817 27451
-5701632
+45948 14493
+87
 # Test case: Random case 21
-43129 64480
-5505024
+56205 6558
+78
 # Test case: Random case 22
-37169 62314
-5701632
+17601 46702
+87
 # Test case: Random case 23
-8625 24684
-5701632
+1979 49443
+81
 # Test case: Random case 24
-4238 27069
-5701632
+19391 61889
+84
 # Test case: Random case 25
-12387 26067
-5701632
+16278 17089
+87
 # Test case: Random case 26
-59419 42390
-5701632
+53353 59395
+81
 # Test case: Random case 27
-60132 21718
-5505024
+17870 46806
+87
 # Test case: Random case 28
-48268 10883
-5505024
+41498 52100
+87
 # Test case: Random case 29
-9207 6300
-5111808
+10885 50478
+84
 # Test case: Random case 30
-34028 23042
-5898240
+44660 24267
+87
 # Test case: Random case 31
-22140 64129
-5505024
+49783 37943
+87
 # Test case: Random case 32
-24240 52594
-5701632
+34812 49005
+90
 # Test case: Random case 33
-27907 14896
-5701632
+1562 31258
+87
 # Test case: Random case 34
-17596 23033
-5701632
+35460 33242
+90
 # Test case: Random case 35
-9079 1623
-5111808
+51861 24443
+87
 # Test case: Random case 36
-5589 55199
-5308416
+41351 39501
+90
 # Test case: Random case 37
-36793 62951
-5701632
+19499 34599
+90
 # Test case: Random case 38
-40638 50655
-5701632
+63682 38385
+87
 # Test case: Random case 39
-42389 54236
-5701632
+2432 23817
+87
 # Test case: Random case 40
-58349 31515
-5701632
+17956 63361
+84
 # Test case: Random case 41
-9287 3497
-5111808
+48983 26913
+87
 # Test case: Random case 42
-8120 10695
-5308416
+53958 49886
+84
 # Test case: Random case 43
-60699 11452
-5308416
+27220 37290
+90
 # Test case: Random case 44
-41985 43243
-5701632
+10577 59076
+81
 # Test case: Random case 45
-18393 44403
-5701632
+16896 53765
+84
 # Test case: Random case 46
-2906 27130
-5701632
+48675 23907
+87
 # Test case: Random case 47
-21242 55980
-5701632
+56260 4237
+78
 # Test case: Random case 48
-48522 27668
-5701632
+24733 43855
+90
 # Test case: Random case 49
-13449 24151
-5701632
+55741 15932
+84
 # Test case: Random case 50
-58006 36166
-5701632
+46655 6575
+84

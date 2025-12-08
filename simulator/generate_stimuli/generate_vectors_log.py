@@ -57,7 +57,7 @@ def calculate_expected_log_power(i_val, q_val, input_width, output_width, output
     msb_pos = mag_sq.bit_length() - 1
     
     # Place integer log2 in fixed-point format (shift left by OUTPUT_FRAC)
-    log2_val = msb_pos << output_frac
+    log2_val = msb_pos # << output_frac
     
     # Scale by 3: x * 3 = (x << 1) + x
     result = (log2_val << 1) + log2_val

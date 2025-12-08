@@ -120,7 +120,7 @@ module complex_to_log_power #(
             // Scale integer log2 by 3: x * 3 = (x << 1) + x
             // Shift left by OUTPUT_FRAC to maintain fixed-point format
             logic [OUTPUT_WIDTH-1:0] log2_val;
-            log2_val = msb_index_q << OUTPUT_FRAC;
+            log2_val = msb_index_q // << OUTPUT_FRAC;
             db_power_d = (log2_val << 1) + log2_val;
         end
     end

@@ -28,7 +28,8 @@ try:
     from virtual_afe import run_virtual_afe_processing
     from complete_system_model import (
         streaming_dft_processor, 
-        convert_to_hardware_db_power
+        convert_to_hardware_db_power,
+        calculate_hw_log_power
     )
     from fixed_float_conversions import float_to_fixed_point, fixed_point_to_float
 except ImportError as e:
@@ -176,20 +177,21 @@ def generate_test_case(test_name, baseline_iq_data, fs_baseline, S_bins,
     for freq in freqs_sorted:
         complex_val = dft_bins_clipped[freq]
         
-        # Scale from Q8.56 to Q8.24 (shift right by 32 bits)
-        # In floating point, this is division by 2^32
-        i_scaled = complex_val.real / (2.0 ** 32)
-        q_scaled = complex_val.imag / (2.0 ** 32)
+        # # Scale from Q8.56 to Q8.24 (shift right by 32 bits)
+        # # In floating point, this is division by 2^32
+        # i_scaled = complex_val.real / (2.0 ** 32)
+        # q_scaled = complex_val.imag / (2.0 ** 32)
         
         # Convert to fixed point Q8.24 for hardware input
-        i_fixed = float_to_fixed_point(i_scaled, 8, 24, signed=True)
-        q_fixed = float_to_fixed_point(q_scaled, 8, 24, signed=True)
+        i_fixed = float_to_fixed_point(complex_val.real, 8, 24, signed=True)
+        q_fixed = float_to_fixed_point(complex_val.imag, 8, 24, signed=True)
         
         # Convert back to float for calculation
         i_float = fixed_point_to_float(i_fixed, 8, 24, signed=True)
         q_float = fixed_point_to_float(q_fixed, 8, 24, signed=True)
         
         # Calculate log power using hardware model
+        # I could also take complex_val.real and complex_val.imag here (minor difference)
         power_db = complex_magnitude_to_log_power(i_float, q_float)
         expected_power_db.append(power_db)
     

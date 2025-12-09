@@ -166,36 +166,46 @@ def generate_test_case(test_name, baseline_iq_data, fs_baseline, S_bins,
     for freq, complex_val in dft_bins.items():
         clipped_val = clip_accumulator_to_32bit(complex_val, ACCUM_FRAC)
         dft_bins_clipped[freq] = clipped_val
+
+    print("  Converting to hardware dB power...")
+    freqs_sorted, power_hw_db = convert_to_hardware_db_power(
+        dft_bins_clipped, 
+        INPUT_WIDTH_LOG, 
+        INPUT_WIDTH_LOG - (ACCUM_WIDTH - ACCUM_FRAC), 
+        POWER_WIDTH, 
+        POWER_FRAC
+    )
+    print(f"  Power values (dB): min={np.min(power_hw_db):.2f}, max={np.max(power_hw_db):.2f}")
     
-    # --- Step 6: Calculate Expected dB Power (Hardware Model) ---
-    print("  Calculating expected dB power values...")
-    expected_power_db = []
+    # # --- Step 6: Calculate Expected dB Power (Hardware Model) ---
+    # print("  Calculating expected dB power values...")
+    # expected_power_db = []
     
-    # Sort frequencies to match hardware order
-    freqs_sorted = sorted(dft_bins_clipped.keys())
+    # # Sort frequencies to match hardware order
+    # freqs_sorted = sorted(dft_bins_clipped.keys())
     
-    for freq in freqs_sorted:
-        complex_val = dft_bins_clipped[freq]
+    # for freq in freqs_sorted:
+    #     complex_val = dft_bins_clipped[freq]
         
-        # # Scale from Q8.56 to Q8.24 (shift right by 32 bits)
-        # # In floating point, this is division by 2^32
-        # i_scaled = complex_val.real / (2.0 ** 32)
-        # q_scaled = complex_val.imag / (2.0 ** 32)
+    #     # # Scale from Q8.56 to Q8.24 (shift right by 32 bits)
+    #     # # In floating point, this is division by 2^32
+    #     # i_scaled = complex_val.real / (2.0 ** 32)
+    #     # q_scaled = complex_val.imag / (2.0 ** 32)
         
-        # Convert to fixed point Q8.24 for hardware input
-        i_fixed = float_to_fixed_point(complex_val.real, 8, 24, signed=True)
-        q_fixed = float_to_fixed_point(complex_val.imag, 8, 24, signed=True)
+    #     # Convert to fixed point Q8.24 for hardware input
+    #     i_fixed = float_to_fixed_point(complex_val.real, 8, 24, signed=True)
+    #     q_fixed = float_to_fixed_point(complex_val.imag, 8, 24, signed=True)
         
-        # Convert back to float for calculation
-        i_float = fixed_point_to_float(i_fixed, 8, 24, signed=True)
-        q_float = fixed_point_to_float(q_fixed, 8, 24, signed=True)
+    #     # Convert back to float for calculation
+    #     i_float = fixed_point_to_float(i_fixed, 8, 24, signed=True)
+    #     q_float = fixed_point_to_float(q_fixed, 8, 24, signed=True)
         
-        # Calculate log power using hardware model
-        # I could also take complex_val.real and complex_val.imag here (minor difference)
-        power_db = complex_magnitude_to_log_power(i_float, q_float)
-        expected_power_db.append(power_db)
+    #     # Calculate log power using hardware model
+    #     # I could also take complex_val.real and complex_val.imag here (minor difference)
+    #     power_db = complex_magnitude_to_log_power(i_float, q_float)
+    #     expected_power_db.append(power_db)
     
-    print(f"  Expected power (dB): min={np.min(expected_power_db):.2f}, max={np.max(expected_power_db):.2f}")
+    # print(f"  Expected power (dB): min={np.min(expected_power_db):.2f}, max={np.max(expected_power_db):.2f}")
     
     # --- Format Stimuli ---
     
@@ -223,7 +233,7 @@ def generate_test_case(test_name, baseline_iq_data, fs_baseline, S_bins,
     
     # Expected power values (8-bit unsigned Q8.0)
     power_vals_expected = []
-    for power_db in expected_power_db:
+    for power_db in power_hw_db:
         p_val = float_to_fixed_point(power_db, POWER_WIDTH, POWER_FRAC, signed=False)
         power_vals_expected.append(p_val)
     

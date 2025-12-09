@@ -214,7 +214,7 @@ module spectral_power_estimator #(
     always_comb begin
         all_bins_valid = 1'b1;
         for (int i = 0; i < NUM_BINS; i++) begin
-            all_bins_valid = all_bins_valid && power_valid[i];
+            all_bins_valid = all_bins_valid & power_valid[i];
         end
     end
     

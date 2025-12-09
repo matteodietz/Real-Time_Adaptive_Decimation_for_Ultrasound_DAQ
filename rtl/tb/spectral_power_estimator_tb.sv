@@ -146,8 +146,8 @@ module spectral_power_estimator_tb();
 
         $display("=== Starting Spectral Power Estimator Testbench ===");
         
-        // Skip header lines (11 lines)
-        for (int i = 0; i < 11; i++) begin
+        // Skip header lines (12 lines)
+        for (int i = 0; i < 12; i++) begin
             status = $fgets(line, file);
         end
 
@@ -257,6 +257,7 @@ module spectral_power_estimator_tb();
             $display("  Streaming %0d samples...", num_samples_read);
             
             for (int n = 0; n < num_samples_read; n++) begin
+                automatic int window_idx;
                 @(negedge clk);
                 
                 // Apply sample data
@@ -267,7 +268,7 @@ module spectral_power_estimator_tb();
                 // Calculate which window coefficient to use
                 // The timing controller will handle when to actually process
                 // We need to cycle through window coefficients for each window
-                automatic int window_idx = n % window_size_read;
+                window_idx = n % window_size_read;
                 window_coeff = window_coeffs[window_idx];
                 
                 // Mark last sample of the target window
@@ -287,7 +288,7 @@ module spectral_power_estimator_tb();
             @(negedge clk);
             sample_valid = 1'b0;
             last_sample = 1'b0;
-            enable = 1'b0;
+            
             
             $display("  All samples streamed, waiting for valid_o...");
             
@@ -297,6 +298,9 @@ module spectral_power_estimator_tb();
                 @(posedge clk);
                 timeout_counter++;
             end
+
+            @(negedge clk);
+            enable = 1'b0;
             
             if (timeout_counter >= TIMEOUT_CYCLES) begin
                 $display("  ERROR: Timeout waiting for valid_o after %0d cycles", TIMEOUT_CYCLES);

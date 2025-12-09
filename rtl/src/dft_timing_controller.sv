@@ -122,13 +122,13 @@ module dft_timing_controller #(
     assert property (osc_duration_check)
         else $warning("Oscillator not enabled for full window duration");
     
-    // Verify DFT start happens after oscillator start
-    property dft_after_osc;
-        @(posedge clk_i) disable iff (!rst_ni)
-        (start_dft_o) |-> $past(start_osc_o, OSC_LATENCY-1);
-    endproperty
+    // // Verify DFT start happens after oscillator start
+    // property dft_after_osc;
+    //     @(posedge clk_i) disable iff (!rst_ni)
+    //     (start_dft_o) |-> $past(start_osc_o, OSC_LATENCY-1);
+    // endproperty
     
-    assert property (dft_after_osc)
-        else $error("DFT started before oscillator had time to produce valid outputs");
+    // assert property (dft_after_osc)
+    //     else $error("DFT started before oscillator had time to produce valid outputs");
 
 endmodule

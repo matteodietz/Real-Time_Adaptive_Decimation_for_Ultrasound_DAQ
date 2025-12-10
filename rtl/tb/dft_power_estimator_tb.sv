@@ -141,8 +141,8 @@ module dft_power_estimator_tb();
 
         $display("=== Starting DFT Power Estimator Testbench ===");
         
-        // Skip header lines (21 lines based on the format)
-        for (int i = 0; i < 21; i++) begin
+        // Skip header lines (23 lines based on the format)
+        for (int i = 0; i < 23; i++) begin
             status = $fgets(line, file);
         end
 

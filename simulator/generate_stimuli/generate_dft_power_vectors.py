@@ -11,7 +11,7 @@ import sys
 SIMULATOR_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(SIMULATOR_ROOT / "src"))
 
-from golden_model_floating_point import streaming_dft_processor
+from complete_system_model import streaming_dft_processor, convert_to_hardware_db_power
 from fixed_float_conversions import float_to_fixed_point, fixed_point_to_float
 
 # Import data loading functions
@@ -52,56 +52,6 @@ def clip_accumulator_to_32bit(accum_val_64bit, accum_frac_64=56):
         imag_part = 0.0
     
     return complex(real_part, imag_part)
-
-def convert_to_hardware_db_power(dft_bins_clipped, input_width, input_frac, 
-                                 output_width, output_frac):
-    """
-    Convert clipped DFT bins to hardware dB power values.
-    Emulates the complex_to_log_power module behavior.
-    
-    Args:
-        dft_bins_clipped: Dictionary of {freq: complex_value} after clipping
-        input_width: Input bit width (32)
-        input_frac: Input fractional bits (24)
-        output_width: Output bit width (8)
-        output_frac: Output fractional bits (0)
-    
-    Returns:
-        freqs_sorted: Sorted frequency array
-        power_hw_db: Hardware dB power values (as integers)
-    """
-    freqs = np.array(list(dft_bins_clipped.keys()))
-    values = np.array(list(dft_bins_clipped.values()))
-    
-    # Sort by frequency
-    sort_indices = np.argsort(freqs)
-    freqs_sorted = freqs[sort_indices]
-    values_sorted = values[sort_indices]
-    
-    power_hw_db = []
-    
-    for val in values_sorted:
-        # Calculate power: |val|^2 = real^2 + imag^2
-        power_linear = abs(val)**2
-        
-        # Handle zero/near-zero case
-        if power_linear < 1e-20:
-            db_val = 0  # Minimum representable
-        else:
-            # Convert to dB: 10*log10(power)
-            db_float = 10.0 * np.log10(power_linear)
-            
-            # Clamp to output range
-            # For 8-bit unsigned with 0 fractional bits: 0 to 255 dB
-            max_db = (2**output_width) - 1
-            db_clamped = np.clip(db_float, 0, max_db)
-            
-            # Convert to integer
-            db_val = int(round(db_clamped))
-        
-        power_hw_db.append(db_val)
-    
-    return freqs_sorted, np.array(power_hw_db)
 
 def generate_test_case(test_name, iq_data, fs, freq_bins, window_type,
                        iq_width, window_width, accum_width, phase_width, 

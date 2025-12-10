@@ -110,9 +110,6 @@ def generate_test_case(test_name, baseline_iq_data, fs_baseline, S_bins,
     """
     print(f"\n=== Generating Test Case: {test_name} ===")
     print(f"  Window number: {window_number}")
-
-    N = len(baseline_iq_data)
-    K = len(S_bins)
     
     # --- Extract Hardware Parameters ---
     INPUT_WIDTH_LOG = hw_params['INPUT_WIDTH_LOG']
@@ -150,22 +147,13 @@ def generate_test_case(test_name, baseline_iq_data, fs_baseline, S_bins,
     
     # --- Step 3: Calculate Frequency Steps for Oscillators ---
     # freq_step = (target_freq / fs) * 2^PHASE_WIDTH
-    # freq_steps = []
-    # for freq in S_bins:
-    #     normalized_freq = freq / fs_baseline
-    #     freq_step = int(normalized_freq * (2 ** PHASE_WIDTH)) & ((1 << PHASE_WIDTH) - 1)
-    #     freq_steps.append(freq_step)
-
-    # freq_steps = np.zeros(K, dtype=np.uint32)
     freq_steps = []
-    for k in range(K):
-        normalized_freq = freqs_sorted[k] / fs_baseline
-        # Map to phase accumulator range (0 to 2^PHASE_WIDTH represents 0 to 2*pi)
-        step_real = normalized_freq * (2.0 ** PHASE_WIDTH)
-        # Handle wrap-around for negative frequencies
-        if step_real < 0:
-            step_real += (2.0 ** PHASE_WIDTH)
-        freq_steps.append(int(step_real) & ((1 << PHASE_WIDTH) - 1))
+    for freq in S_bins:
+        normalized_freq = freq / fs_baseline
+        freq_step = int(normalized_freq * (2 ** PHASE_WIDTH)) 
+        if freq_step < 0:
+            freq_step += (2.0 ** PHASE_WIDTH)
+        freq_steps.append(freq_step & ((1 << PHASE_WIDTH) - 1))
     
     print(f"  Calculated {len(freq_steps)} frequency steps for oscillators")
     

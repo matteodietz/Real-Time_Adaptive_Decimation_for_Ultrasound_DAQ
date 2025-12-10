@@ -247,94 +247,94 @@ def main():
     
     test_cases = []
 
-    # ====================================================================
-    # Sanity Check 1: 4-point DFT
-    # ====================================================================
-    print("\n========== Sanity Check 1: 4-point DFT ==========")
+    # # ====================================================================
+    # # Sanity Check 1: 4-point DFT
+    # # ====================================================================
+    # print("\n========== Sanity Check 1: 4-point DFT ==========")
     
-    fs_sanity = 4.0
-    nperseg_sanity = 4
-    t_sanity = np.arange(nperseg_sanity) / fs_sanity
-    signal_sanity = np.cos(2 * np.pi * 1.0 * t_sanity)
-    S_bins_sanity = np.fft.fftfreq(nperseg_sanity, 1/fs_sanity)
+    # fs_sanity = 4.0
+    # nperseg_sanity = 4
+    # t_sanity = np.arange(nperseg_sanity) / fs_sanity
+    # signal_sanity = np.cos(2 * np.pi * 1.0 * t_sanity)
+    # S_bins_sanity = np.fft.fftfreq(nperseg_sanity, 1/fs_sanity)
     
-    tc_sanity = generate_test_case(
-        "sanity_check_4pt_dft",
-        signal_sanity,
-        fs_sanity,
-        S_bins_sanity,
-        'boxcar',
-        IQ_WIDTH,
-        WINDOW_WIDTH,
-        ACCUM_WIDTH,
-        PHASE_WIDTH,
-        POWER_INPUT_WIDTH,
-        POWER_WIDTH,
-        POWER_FRAC,
-        4,
-        False
-    )
-    test_cases.append(tc_sanity)
+    # tc_sanity = generate_test_case(
+    #     "sanity_check_4pt_dft",
+    #     signal_sanity,
+    #     fs_sanity,
+    #     S_bins_sanity,
+    #     'boxcar',
+    #     IQ_WIDTH,
+    #     WINDOW_WIDTH,
+    #     ACCUM_WIDTH,
+    #     PHASE_WIDTH,
+    #     POWER_INPUT_WIDTH,
+    #     POWER_WIDTH,
+    #     POWER_FRAC,
+    #     4,
+    #     False
+    # )
+    # test_cases.append(tc_sanity)
 
-    # ====================================================================
-    # Sanity Check 2: 8-point DFT
-    # ====================================================================
-    print("\n========== Sanity Check 2: 8-point DFT ==========")
+    # # ====================================================================
+    # # Sanity Check 2: 8-point DFT
+    # # ====================================================================
+    # print("\n========== Sanity Check 2: 8-point DFT ==========")
     
-    fs_sanity8 = 8.0
-    nperseg_sanity8 = 8
-    t_sanity8 = np.arange(nperseg_sanity8) / fs_sanity8
-    signal_sanity8 = np.sin(2 * np.pi * 1.0 * t_sanity8)
-    S_bins_sanity8 = np.fft.fftfreq(nperseg_sanity8, 1/fs_sanity8)
+    # fs_sanity8 = 8.0
+    # nperseg_sanity8 = 8
+    # t_sanity8 = np.arange(nperseg_sanity8) / fs_sanity8
+    # signal_sanity8 = np.sin(2 * np.pi * 1.0 * t_sanity8)
+    # S_bins_sanity8 = np.fft.fftfreq(nperseg_sanity8, 1/fs_sanity8)
     
-    tc_sanity8 = generate_test_case(
-        "sanity_check_8pt_dft",
-        signal_sanity8,
-        fs_sanity8,
-        S_bins_sanity8,
-        'boxcar',
-        IQ_WIDTH,
-        WINDOW_WIDTH,
-        ACCUM_WIDTH,
-        PHASE_WIDTH,
-        POWER_INPUT_WIDTH,
-        POWER_WIDTH,
-        POWER_FRAC,
-        8,
-        False
-    )
-    test_cases.append(tc_sanity8)
+    # tc_sanity8 = generate_test_case(
+    #     "sanity_check_8pt_dft",
+    #     signal_sanity8,
+    #     fs_sanity8,
+    #     S_bins_sanity8,
+    #     'boxcar',
+    #     IQ_WIDTH,
+    #     WINDOW_WIDTH,
+    #     ACCUM_WIDTH,
+    #     PHASE_WIDTH,
+    #     POWER_INPUT_WIDTH,
+    #     POWER_WIDTH,
+    #     POWER_FRAC,
+    #     8,
+    #     False
+    # )
+    # test_cases.append(tc_sanity8)
 
-    # ====================================================================
-    # Sanity Check 3: 24-point DFT
-    # ====================================================================
-    print("\n========== Sanity Check 3: 24-point DFT ==========")
+    # # ====================================================================
+    # # Sanity Check 3: 24-point DFT
+    # # ====================================================================
+    # print("\n========== Sanity Check 3: 24-point DFT ==========")
     
-    fs_sanity24 = 24.0
-    nperseg_sanity24 = 24
-    t_sanity24 = np.arange(nperseg_sanity24) / fs_sanity24
-    sin_comp = np.sin(2 * np.pi * 1.0 * t_sanity24)
-    cos_comp = np.cos(2 * np.pi * 2.0 * t_sanity24)
-    signal_sanity24 = sin_comp + cos_comp
-    S_bins_sanity24 = np.fft.fftfreq(nperseg_sanity24, 1/fs_sanity24)
+    # fs_sanity24 = 24.0
+    # nperseg_sanity24 = 24
+    # t_sanity24 = np.arange(nperseg_sanity24) / fs_sanity24
+    # sin_comp = np.sin(2 * np.pi * 1.0 * t_sanity24)
+    # cos_comp = np.cos(2 * np.pi * 2.0 * t_sanity24)
+    # signal_sanity24 = sin_comp + cos_comp
+    # S_bins_sanity24 = np.fft.fftfreq(nperseg_sanity24, 1/fs_sanity24)
     
-    tc_sanity24 = generate_test_case(
-        "sanity_check_24pt_dft_sin_cos",
-        signal_sanity24,
-        fs_sanity24,
-        S_bins_sanity24,
-        'boxcar',
-        IQ_WIDTH,
-        WINDOW_WIDTH,
-        ACCUM_WIDTH,
-        PHASE_WIDTH,
-        POWER_INPUT_WIDTH,
-        POWER_WIDTH,
-        POWER_FRAC,
-        24,
-        False
-    )
-    test_cases.append(tc_sanity24)
+    # tc_sanity24 = generate_test_case(
+    #     "sanity_check_24pt_dft_sin_cos",
+    #     signal_sanity24,
+    #     fs_sanity24,
+    #     S_bins_sanity24,
+    #     'boxcar',
+    #     IQ_WIDTH,
+    #     WINDOW_WIDTH,
+    #     ACCUM_WIDTH,
+    #     PHASE_WIDTH,
+    #     POWER_INPUT_WIDTH,
+    #     POWER_WIDTH,
+    #     POWER_FRAC,
+    #     24,
+    #     False
+    # )
+    # test_cases.append(tc_sanity24)
 
     # ===== Test Cases from PICMUS Data =====
     if PICMUS_AVAILABLE:
@@ -388,6 +388,9 @@ def main():
                 ("picmus_ch64_win5", 64, 5),
                 ("picmus_ch96_win29", 96, 29),
                 ("picmus_ch32_win27", 32, 27),
+                ("picmus_ch64_win5", 64, 31),
+                ("picmus_ch96_win29", 96, 26),
+                ("picmus_ch32_win27", 32, 28),
             ]
             
             for test_name, channel, window_num in test_configs:

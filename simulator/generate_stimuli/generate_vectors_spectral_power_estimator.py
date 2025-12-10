@@ -147,11 +147,21 @@ def generate_test_case(test_name, baseline_iq_data, fs_baseline, S_bins,
     
     # --- Step 3: Calculate Frequency Steps for Oscillators ---
     # freq_step = (target_freq / fs) * 2^PHASE_WIDTH
-    freq_steps = []
-    for freq in S_bins:
-        normalized_freq = freq / fs_baseline
-        freq_step = int(normalized_freq * (2 ** PHASE_WIDTH)) & ((1 << PHASE_WIDTH) - 1)
-        freq_steps.append(freq_step)
+    # freq_steps = []
+    # for freq in S_bins:
+    #     normalized_freq = freq / fs_baseline
+    #     freq_step = int(normalized_freq * (2 ** PHASE_WIDTH)) & ((1 << PHASE_WIDTH) - 1)
+    #     freq_steps.append(freq_step)
+
+    freq_steps = np.zeros(K, dtype=np.uint32)
+    for k in range(K):
+        normalized_freq = freqs_sorted[k] / fs
+        # Map to phase accumulator range (0 to 2^PHASE_WIDTH represents 0 to 2*pi)
+        step_real = normalized_freq * (2.0 ** phase_width)
+        # Handle wrap-around for negative frequencies
+        if step_real < 0:
+            step_real += (2.0 ** phase_width)
+        freq_steps[k] = int(step_real) & ((1 << phase_width) - 1)
     
     print(f"  Calculated {len(freq_steps)} frequency steps for oscillators")
     

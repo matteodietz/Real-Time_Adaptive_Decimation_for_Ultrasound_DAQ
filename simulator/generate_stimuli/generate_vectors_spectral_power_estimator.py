@@ -150,10 +150,10 @@ def generate_test_case(test_name, baseline_iq_data, fs_baseline, S_bins,
     freq_steps = []
     for freq in S_bins:
         normalized_freq = freq / fs_baseline
-        freq_step = int(normalized_freq * (2 ** PHASE_WIDTH)) 
+        freq_step = normalized_freq * (2 ** PHASE_WIDTH)
         if freq_step < 0:
             freq_step += (2.0 ** PHASE_WIDTH)
-        freq_steps.append(freq_step & ((1 << PHASE_WIDTH) - 1))
+        freq_steps.append(int(freq_step) & ((1 << PHASE_WIDTH) - 1))
     
     print(f"  Calculated {len(freq_steps)} frequency steps for oscillators")
     

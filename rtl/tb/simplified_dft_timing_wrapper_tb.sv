@@ -1,4 +1,16 @@
-module dft_accumulation_cordic_tb ();
+////////////////////////////////////////////////////////////////////////////////
+//
+//  Testbench: simplified_dft_timing_wrapper_tb
+//
+//  Description:
+//      Tests the simplified_dft_timing_wrapper module which integrates
+//      the timing controller with DFT accumulation. This testbench streams
+//      all samples (padding + signal) continuously and lets the timing
+//      controller handle when to start the DFT window.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+module simplified_dft_timing_wrapper_tb ();
 
     timeunit 1ns;
     timeprecision 1ps;
@@ -17,35 +29,34 @@ module dft_accumulation_cordic_tb ();
     localparam integer OSC_WIDTH_FRAC = 30;
     localparam integer PHASE_WIDTH = 32;
     localparam integer NUM_BINS = 24;
+    localparam integer COUNTER_WIDTH = 16;
     localparam integer SAMPLE_COUNT_WIDTH = 16;
     
-    // Timing constants
-    localparam integer CORDIC_LATENCY = 36;
-    localparam integer WINDOWING_LATENCY = 1;
-    localparam integer OSC_EARLY_START = CORDIC_LATENCY - WINDOWING_LATENCY; // 35 cycles
+    // Maximum window size
+    localparam integer MAX_WINDOW_SIZE = 4;
     
-    // Maximum samples per test
-    localparam integer MAX_SAMPLES = 256;
+    // Maximum total samples (padding + signal)
+    localparam integer MAX_SAMPLES = 512;
 
     // --- Signals ---
     logic clk;
     logic rst_n;
-    logic start;
-    logic sample_valid;
-    logic last_sample;
     
-    // Oscillator control signals
-    logic osc_reset;
-    logic osc_enable;
-    logic osc_phase_tvalid;
+    // Control signals
+    logic enable;
+    logic clear;
+    logic [COUNTER_WIDTH-1:0] delay_cycles;
     
-    // Frequency steps for oscillator bank
+    // Configuration
     logic [PHASE_WIDTH-1:0] freq_steps[NUM_BINS];
     
+    // Data input
+    logic sample_valid;
     logic signed [IQ_WIDTH-1:0] i_sample;
     logic signed [IQ_WIDTH-1:0] q_sample;
     logic signed [WINDOW_WIDTH-1:0] window_coeff;
     
+    // Outputs
     logic signed [ACCUM_WIDTH-1:0] act_A_real[NUM_BINS];
     logic signed [ACCUM_WIDTH-1:0] act_A_imag[NUM_BINS];
     logic act_valid;
@@ -64,7 +75,7 @@ module dft_accumulation_cordic_tb ();
     end
 
     // --- DUT Instantiation ---
-    dft_accumulation_cordic #(
+    simplified_dft_timing_wrapper #(
         .IQ_WIDTH(IQ_WIDTH),
         .IQ_WIDTH_FRAC(IQ_WIDTH_FRAC),
         .WINDOW_WIDTH(WINDOW_WIDTH),
@@ -75,17 +86,18 @@ module dft_accumulation_cordic_tb ();
         .OSC_WIDTH(OSC_WIDTH),
         .OSC_WIDTH_FRAC(OSC_WIDTH_FRAC),
         .PHASE_WIDTH(PHASE_WIDTH),
+        .WINDOW_SIZE(MAX_WINDOW_SIZE),
+        .OSC_LATENCY(35),
+        .COUNTER_WIDTH(COUNTER_WIDTH),
         .SAMPLE_COUNT_WIDTH(SAMPLE_COUNT_WIDTH)
     ) dut (
         .clk_i(clk),
         .rst_ni(rst_n),
-        .start_i(start),
-        .sample_valid_i(sample_valid),
-        .last_sample_i(last_sample),
-        .osc_reset_i(osc_reset),
-        .osc_enable_i(osc_enable),
-        .osc_phase_tvalid_i(osc_phase_tvalid),
+        .enable_i(enable),
+        .clear_i(clear),
+        .delay_cycles_i(delay_cycles),
         .freq_steps_i(freq_steps),
+        .sample_valid_i(sample_valid),
         .i_sample_i(i_sample),
         .q_sample_i(q_sample),
         .window_coeff_i(window_coeff),
@@ -107,18 +119,17 @@ module dft_accumulation_cordic_tb ();
     initial begin: checker_block
         integer file, status;
         string line, test_name;
-        integer num_samples_read, num_bins_read;
-        real fs_read;
+        integer num_samples_read, num_bins_read, window_size_read;
+        integer delay_cycles_read, osc_latency_read;
         static integer n_errs = 0;
         static integer test_count = 0;
+        logic valid_captured;
         
         // Initialize signals
-        start = 1'b0;
+        enable = 1'b0;
+        clear = 1'b0;
+        delay_cycles = '0;
         sample_valid = 1'b0;
-        last_sample = 1'b0;
-        osc_reset = 1'b0;
-        osc_enable = 1'b0;
-        osc_phase_tvalid = 1'b0;
         i_sample = '0;
         q_sample = '0;
         window_coeff = '0;
@@ -127,16 +138,16 @@ module dft_accumulation_cordic_tb ();
         end
 
         // Open the vector file
-        file = $fopen("/home/bsc25h10/mdietz/bachelors_thesis/rtl/simvectors/dft_cordic_vectors.txt", "r");
+        file = $fopen("/home/bsc25h10/mdietz/bachelors_thesis/rtl/simvectors/simplified_dft_timing_vectors.txt", "r");
         if (file == 0) begin
             $display("ERROR: Could not open vector file.");
             $finish;
         end
 
-        $display("=== Starting DFT Accumulation with CORDIC Testbench ===");
+        $display("=== Starting Simplified DFT Timing Wrapper Testbench ===");
         
-        // Skip header lines
-        for (int i = 0; i < 21; i++) begin
+        // Skip header lines (22 lines)
+        for (int i = 0; i < 22; i++) begin
             status = $fgets(line, file);
         end
 
@@ -159,9 +170,14 @@ module dft_accumulation_cordic_tb ();
             $display("=== Test Case %0d: %s ===", test_count, test_name);
             $display("========================================");
             
-            // Read num_samples, num_bins, fs
-            status = $fscanf(file, "%d %d %e\n", num_samples_read, num_bins_read, fs_read);
-            $display("  Samples: %0d, Bins: %0d, Fs: %e Hz", num_samples_read, num_bins_read, fs_read);
+            // Read: num_bins num_samples window_size delay_cycles osc_latency
+            status = $fscanf(file, "%d %d %d %d %d\n", 
+                           num_bins_read, num_samples_read, window_size_read,
+                           delay_cycles_read, osc_latency_read);
+            $display("  Bins: %0d, Total Samples: %0d, Window Size: %0d", 
+                    num_bins_read, num_samples_read, window_size_read);
+            $display("  Delay Cycles: %0d, OSC Latency: %0d", 
+                    delay_cycles_read, osc_latency_read);
             
             if (num_samples_read > MAX_SAMPLES) begin
                 $display("ERROR: num_samples (%0d) exceeds MAX_SAMPLES (%0d)", 
@@ -175,155 +191,156 @@ module dft_accumulation_cordic_tb ();
                 $finish;
             end
             
-            // Read FREQ_BINS line (skip it, just reference)
-            status = $fgets(line, file);
-            $display("  Frequencies: %s", line);
-            
-            // Read FREQ_STEPS line
-            $display("  Frequency Steps:");
-            // status = $fgets(line, file); // Skip "FREQ_STEPS" keyword
-            for (int k = 0; k < num_bins_read; k++) begin
-                status = $fgets(line, file);
-                status = $fscanf(file, "%h", freq_steps[k]);
-                $display( " %h ", freq_steps[k]);
+            if (window_size_read > MAX_WINDOW_SIZE) begin
+                $display("ERROR: window_size (%0d) exceeds MAX_WINDOW_SIZE (%0d)", 
+                        window_size_read, MAX_WINDOW_SIZE);
+                $finish;
             end
-
-            status = $fgets(line, file); // Consume newline
+            
+            // Read frequency steps (newline separated)
+            $display("  Reading frequency steps...");
+            for (int k = 0; k < num_bins_read; k++) begin
+                status = $fscanf(file, "%h\n", freq_steps[k]);
+            end
             $display("  Frequency steps configured");
             
-            status = $fgets(line, file);
-            
-            // Read SAMPLES keyword
-            status = $fgets(line, file);
-            
-            // Read all sample data
+            // Read window coefficients (space-separated, one line)
+            $display("  Reading window coefficients...");
             for (int n = 0; n < num_samples_read; n++) begin
-                // Read I, Q, window_coeff
-                status = $fscanf(file, "%h %h %h", 
-                               i_samples[n], q_samples[n], window_coeffs[n]);
-                $display("%h %h %h", i_samples[n], q_samples[n], window_coeffs[n]);
-                status = $fgets(line, file); // Consume newline
+                status = $fscanf(file, "%h", window_coeffs[n]);
             end
+            status = $fgets(line, file); // Consume newline
+            $display("  Window coefficients loaded");
             
-            $display("  Loaded %0d samples", num_samples_read);
+            // Read I samples (space-separated, one line)
+            $display("  Reading I samples...");
+            for (int n = 0; n < num_samples_read; n++) begin
+                status = $fscanf(file, "%h", i_samples[n]);
+            end
+            status = $fgets(line, file); // Consume newline
+            $display("  I samples loaded");
             
-            // Read EXPECTED keyword
-            status = $fgets(line, file);
+            // Read Q samples (space-separated, one line)
+            $display("  Reading Q samples...");
+            for (int n = 0; n < num_samples_read; n++) begin
+                status = $fscanf(file, "%h", q_samples[n]);
+            end
+            status = $fgets(line, file); // Consume newline
+            $display("  Q samples loaded");
+            $display("  Total %0d samples loaded (padding + signal)", num_samples_read);
             
-            // Read expected A_real values
-            $display("\nExpected Accumulator Values (real) given by: \n");
+            // Read expected A_real values (newline separated)
+            $display("  Reading expected A_real...");
             for (int k = 0; k < num_bins_read; k++) begin
-                status = $fscanf(file, "%h", exp_A_real[k]);
-                status = $fgets(line, file); // Consume newline
-                $display( " %h ", exp_A_real[k]);
+                status = $fscanf(file, "%h\n", exp_A_real[k]);
             end
             
-            // Read expected A_imag values
-            $display("\nExpected Accumulator Values (imag) given by: \n");
+            // Read expected A_imag values (newline separated)
+            $display("  Reading expected A_imag...");
             for (int k = 0; k < num_bins_read; k++) begin
-                status = $fscanf(file, "%h", exp_A_imag[k]);
-                status = $fgets(line, file); // Consume newline
-                $display( " %h ", exp_A_imag[k]);
+                status = $fscanf(file, "%h\n", exp_A_imag[k]);
             end
-            
-            // Skip GOLDEN line
-            status = $fgets(line, file);
             
             // Skip blank line
-            status = $fgets(line, file);
+            // status = $fgets(line, file);
             
-            // --- Drive DUT with proper timing ---
-            $display("  Starting oscillator bank (35 cycles early)...");
+            // --- Drive DUT with timing controller ---
+            $display("\n  Configuring timing controller...");
+            $display("    delay_cycles = %0d", delay_cycles_read);
             
-            // Step 1: Reset oscillator phase accumulators
+            // Set delay_cycles
+            delay_cycles = delay_cycles_read;
+            
+            // Assert enable and clear to start timing sequence
             @(posedge clk);
-            //#1;
-            @(negedge clk);
-            osc_reset = 1'b1;
-            // @(posedge clk);
-            // #1;
-            @(negedge clk);
-            osc_reset = 1'b0;
+            #1;
+            enable = 1'b1;
+            clear = 1'b1;
             
-            // Step 2: Start oscillator bank (enable and phase_tvalid)
-            // @(posedge clk);
-            // #1;
-            @(negedge clk);
-            osc_enable = 1'b1;
-            osc_phase_tvalid = 1'b1;
-
-            
-            // Step 3: Wait for CORDIC latency minus windowing stage (35 cycles)
-            $display("  Waiting %0d cycles for CORDIC pipeline...", OSC_EARLY_START);
-            repeat(OSC_EARLY_START-3) @(posedge clk);
-            // we need the -3 because the assertion of the start signal introduces 2 more wait cycles
-            // and when we stream the samples we wait another clock cycle
-
-            // Step 4: Start DFT accumulation
-            $display("  Starting DFT accumulation...");
             @(posedge clk);
-            // #1;
-            @(negedge clk);
-            start = 1'b1;
-            // @(posedge clk);
-            // #1;
-            @(negedge clk);
-            start = 1'b0;
+            #1;
+            clear = 1'b0;
             
-            // Step 5: Stream samples
+            $display("  Timing controller started, streaming samples...");
+            
+            // Stream all samples continuously (padding + signal)
+            // The timing controller will automatically:
+            //   1. Reset oscillators at the right time
+            //   2. Start oscillators early
+            //   3. Start DFT at delay_cycles
+            //   4. Gate sample_valid during DFT window
+            //   5. Assert last_sample at the end
+            
+            valid_captured = 1'b0;
+            
             for (int n = 0; n < num_samples_read; n++) begin
                 @(posedge clk);
-                #1;
+                //#1;
                 
-                // Apply sample data
+                // Stream sample
                 sample_valid = 1'b1;
                 i_sample = i_samples[n];
                 q_sample = q_samples[n];
                 window_coeff = window_coeffs[n];
                 
-                // Assert last_sample on final sample
-                if (n == num_samples_read - 1) begin
-                    last_sample = 1'b1;
+                // Check if valid has been asserted during streaming
+                if (act_valid && !valid_captured) begin
+                    $display("  Valid signal received at sample %0d", n);
+                    valid_captured = 1'b1;
+                    
+                    // Check results immediately
+                    @(posedge clk); // Let outputs settle
+                    check_result(num_bins_read, exp_A_real, exp_A_imag, n_errs);
+                    
+                    // Can break early since result is captured
+                    break;
                 end
                 
-                if (n % 64 == 0) begin
-                    $display("    Processing sample %0d/%0d...", n, num_samples_read);
+                if (n % 16 == 0) begin
+                    $display("    Streaming sample %0d/%0d...", n, num_samples_read);
                 end
             end
             
+            // Deassert sample_valid
             @(posedge clk);
-            // #1;
-            @(negedge clk);
+            #1;
             sample_valid = 1'b0;
-            last_sample = 1'b0;
-            osc_enable = 1'b0;
-            osc_phase_tvalid = 1'b0;
             
-            $display("  All samples streamed, waiting for valid...");
-            
-            // Wait for valid signal with timeout
-            fork
-                begin
-                    wait (act_valid);
-                    $display("  Valid signal received");
+            // If valid not captured during streaming, wait for it
+            if (!valid_captured) begin
+                $display("  All samples streamed, waiting for valid...");
+                
+                fork
+                    begin
+                        wait (act_valid);
+                        $display("  Valid signal received");
+                        valid_captured = 1'b1;
+                    end
+                    begin
+                        repeat(1000) @(posedge clk);
+                        if (!valid_captured) begin
+                            $display("  ERROR: Timeout waiting for valid signal");
+                            n_errs++;
+                        end
+                    end
+                join_any
+                disable fork;
+                
+                // Check results
+                if (valid_captured) begin
+                    @(posedge clk); // Let outputs settle
+                    check_result(num_bins_read, exp_A_real, exp_A_imag, n_errs);
                 end
-                begin
-                    repeat(1000) @(posedge clk);
-                    $display("  ERROR: Timeout waiting for valid signal");
-                    n_errs++;
-                end
-            join_any
-            disable fork;
-            
-            // Check results
-            if (act_valid) begin
-                @(posedge clk); // Let outputs settle
-                check_result(num_bins_read, exp_A_real, exp_A_imag, n_errs);
             end
             
-            // Wait 50 cycles before next test case to allow oscillator reset
-            $display("  Waiting 50 cycles before next test...");
-            repeat(50) @(posedge clk);
+            // Disable timing controller
+            @(posedge clk);
+            #1;
+            enable = 1'b0;
+            
+            // Wait between test cases
+            $display("  Waiting 100 cycles before next test...");
+            repeat(100) @(posedge clk);
         end
 
         $fclose(file);
@@ -354,7 +371,6 @@ module dft_accumulation_cordic_tb ();
         automatic real error_real_float, error_imag_float;
         
         // Define tolerance (adjust based on expected quantization error)
-        // For now, allow small rounding errors
         automatic longint tolerance = 2; // Allow ±2 LSBs of error
         
         $display("  Checking results...");

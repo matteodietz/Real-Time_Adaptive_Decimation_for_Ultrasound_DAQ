@@ -70,26 +70,26 @@ def clip_accumulator_to_32bit(accum_val_64bit, accum_frac_64=56):
     return complex(real_part, imag_part)
 
 
-def complex_magnitude_to_log_power(i_val, q_val):
-    """
-    Software model of complex_to_log_power hardware module.
-    Calculates: Power_dB ≈ 3 * log2(I^2 + Q^2)
+# def complex_magnitude_to_log_power(i_val, q_val):
+#     """
+#     Software model of complex_to_log_power hardware module.
+#     Calculates: Power_dB ≈ 3 * log2(I^2 + Q^2)
     
-    This matches the hardware's integer-only approximation.
-    """
-    # Step 1: Magnitude squared
-    mag_sq = (i_val * i_val) + (q_val * q_val)
+#     This matches the hardware's integer-only approximation.
+#     """
+#     # Step 1: Magnitude squared
+#     mag_sq = (i_val * i_val) + (q_val * q_val)
     
-    # Step 2: Integer log2 (find MSB position)
-    if mag_sq == 0:
-        return 0.0  # Log(0) clamped to minimum
+#     # Step 2: Integer log2 (find MSB position)
+#     if mag_sq == 0:
+#         return 0.0  # Log(0) clamped to minimum
     
-    log2_val = np.floor(np.log2(mag_sq))
+#     log2_val = np.floor(np.log2(mag_sq))
     
-    # Step 3: Scale by 3
-    db_power = 3.0 * log2_val
+#     # Step 3: Scale by 3
+#     db_power = 3.0 * log2_val
     
-    return db_power
+#     return db_power
 
 
 def generate_test_case(test_name, baseline_iq_data, fs_baseline, S_bins, 

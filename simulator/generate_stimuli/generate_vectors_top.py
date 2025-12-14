@@ -267,7 +267,7 @@ def generate_test_case(test_name, baseline_iq_data, fs_baseline, S_bins,
     L2_right_expected = fix_pwr(L2_right)
     
     threshold_ok_expected = 1 if threshold_ok else 0
-    
+
     return {
         'test_name': test_name,
         'num_bins': len(S_bins),
@@ -276,6 +276,9 @@ def generate_test_case(test_name, baseline_iq_data, fs_baseline, S_bins,
         'delay_cycles': delay_cycles,
         'osc_latency': OSC_LATENCY,
         'threshold_drop': THRESHOLD_DROP,
+        'angle': 0,  # Always angle 0 (center angle)
+        'channel': int(test_name.split('_ch')[1].split('_')[0]),  # Extract from test_name
+        'window_num': window_number,
         # Inputs
         'i_samples_hw': i_samples_hw,
         'q_samples_hw': q_samples_hw,
@@ -293,7 +296,92 @@ def generate_test_case(test_name, baseline_iq_data, fs_baseline, S_bins,
         'L1_right_expected': L1_right_expected,
         'L2_right_expected': L2_right_expected
     }
+    
+    # return {
+    #     'test_name': test_name,
+    #     'num_bins': len(S_bins),
+    #     'num_samples': len(baseline_iq_data),
+    #     'window_size': WINDOW_SIZE,
+    #     'delay_cycles': delay_cycles,
+    #     'osc_latency': OSC_LATENCY,
+    #     'threshold_drop': THRESHOLD_DROP,
+    #     # Inputs
+    #     'i_samples_hw': i_samples_hw,
+    #     'q_samples_hw': q_samples_hw,
+    #     'window_coeffs_hw': window_coeffs_hw,
+    #     'freq_steps_hw': freq_steps_hw,
+    #     'freq_bins_hw': freq_bins_hw,
+    #     # Expected outputs
+    #     'threshold_ok_expected': threshold_ok_expected,
+    #     'f1_left_expected': f1_left_expected,
+    #     'f2_left_expected': f2_left_expected,
+    #     'L1_left_expected': L1_left_expected,
+    #     'L2_left_expected': L2_left_expected,
+    #     'f1_right_expected': f1_right_expected,
+    #     'f2_right_expected': f2_right_expected,
+    #     'L1_right_expected': L1_right_expected,
+    #     'L2_right_expected': L2_right_expected
+    # }
 
+
+# def write_vector_file(test_cases, output_path):
+#     """Write test cases to file in format for SystemVerilog testbench"""
+#     with open(output_path, 'w') as f:
+#         f.write("# Simulation vectors for top.sv\n")
+#         f.write("# Generated from spectral_power_estimator + bandwidth_edge_detector\n")
+#         f.write("# Using exact functions from complete_system_model.py\n")
+#         f.write("#\n")
+#         f.write("# Format per test case:\n")
+#         f.write("#   TEST_NAME\n")
+#         f.write("#   NUM_BINS NUM_SAMPLES WINDOW_SIZE DELAY_CYCLES OSC_LATENCY THRESHOLD_DROP\n")
+#         f.write("#   FREQ_STEPS (hex, space-separated)\n")
+#         f.write("#   FREQ_BINS (hex, space-separated)\n")
+#         f.write("#   WINDOW_COEFFS (hex, space-separated)\n")
+#         f.write("#   I_SAMPLES (hex, space-separated, full frame)\n")
+#         f.write("#   Q_SAMPLES (hex, space-separated, full frame)\n")
+#         f.write("#   EXPECTED_OUTPUTS: threshold_ok f1_left f2_left L1_left L2_left f1_right f2_right L1_right L2_right\n")
+#         f.write("#\n\n")
+        
+#         for tc in test_cases:
+#             f.write(f"{tc['test_name']}\n")
+#             f.write(f"{tc['num_bins']} {tc['num_samples']} {tc['window_size']} ")
+#             f.write(f"{tc['delay_cycles']} {tc['osc_latency']} {tc['threshold_drop']}\n")
+            
+#             # Frequency steps
+#             for fs in tc['freq_steps_hw']:
+#                 f.write(f"{fs & 0xFFFFFFFF:08x} ")
+#             f.write("\n")
+            
+#             # Frequency bins
+#             for fb in tc['freq_bins_hw']:
+#                 f.write(f"{fb & 0xFFFF:04x} ")
+#             f.write("\n")
+            
+#             # Window coefficients
+#             for wc in tc['window_coeffs_hw']:
+#                 f.write(f"{wc & 0xFFFF:04x} ")
+#             f.write("\n")
+            
+#             # I samples (full frame)
+#             for i_s in tc['i_samples_hw']:
+#                 f.write(f"{i_s & 0xFFFF:04x} ")
+#             f.write("\n")
+            
+#             # Q samples (full frame)
+#             for q_s in tc['q_samples_hw']:
+#                 f.write(f"{q_s & 0xFFFF:04x} ")
+#             f.write("\n")
+            
+#             # Expected outputs
+#             f.write(f"{tc['threshold_ok_expected']} ")
+#             f.write(f"{tc['f1_left_expected']:04x} {tc['f2_left_expected']:04x} ")
+#             f.write(f"{tc['L1_left_expected']:02x} {tc['L2_left_expected']:02x} ")
+#             f.write(f"{tc['f1_right_expected']:04x} {tc['f2_right_expected']:04x} ")
+#             f.write(f"{tc['L1_right_expected']:02x} {tc['L2_right_expected']:02x}\n")
+            
+#             f.write("\n")
+    
+#     print(f"\n✓ Test vectors written to: {output_path}")
 
 def write_vector_file(test_cases, output_path):
     """Write test cases to file in format for SystemVerilog testbench"""
@@ -304,7 +392,7 @@ def write_vector_file(test_cases, output_path):
         f.write("#\n")
         f.write("# Format per test case:\n")
         f.write("#   TEST_NAME\n")
-        f.write("#   NUM_BINS NUM_SAMPLES WINDOW_SIZE DELAY_CYCLES OSC_LATENCY THRESHOLD_DROP\n")
+        f.write("#   NUM_BINS NUM_SAMPLES WINDOW_SIZE DELAY_CYCLES OSC_LATENCY THRESHOLD_DROP ANGLE CHANNEL WINDOW_NUM\n")
         f.write("#   FREQ_STEPS (hex, space-separated)\n")
         f.write("#   FREQ_BINS (hex, space-separated)\n")
         f.write("#   WINDOW_COEFFS (hex, space-separated)\n")
@@ -316,7 +404,8 @@ def write_vector_file(test_cases, output_path):
         for tc in test_cases:
             f.write(f"{tc['test_name']}\n")
             f.write(f"{tc['num_bins']} {tc['num_samples']} {tc['window_size']} ")
-            f.write(f"{tc['delay_cycles']} {tc['osc_latency']} {tc['threshold_drop']}\n")
+            f.write(f"{tc['delay_cycles']} {tc['osc_latency']} {tc['threshold_drop']} ")
+            f.write(f"{tc['angle']} {tc['channel']} {tc['window_num']}\n")
             
             # Frequency steps
             for fs in tc['freq_steps_hw']:

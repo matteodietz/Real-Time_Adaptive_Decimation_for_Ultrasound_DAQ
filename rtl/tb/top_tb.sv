@@ -185,8 +185,8 @@ module top_tb();
 
         $display("=== Starting Top Module Testbench ===");
         
-        // Skip header lines (13 lines)
-        for (int i = 0; i < 13; i++) begin
+        // Skip header lines (14 lines)
+        for (int i = 0; i < 14; i++) begin
             status = $fgets(line, file);
         end
 

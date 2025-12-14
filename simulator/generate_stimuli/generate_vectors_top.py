@@ -758,7 +758,7 @@ def generate_test_case(test_name, baseline_iq_data, fs_baseline, S_bins,
     # --- Format Stimuli ---
     
     # Calculate DELAY_CYCLES
-    delay_cycles = start_sample + OSC_LATENCY
+    delay_cycles = start_sample
     
     # IQ samples (full frame, normalized and scaled, 16-bit fixed point Q2.14)
     i_samples_hw = []

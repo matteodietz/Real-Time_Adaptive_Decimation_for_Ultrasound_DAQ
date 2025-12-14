@@ -114,7 +114,7 @@ def generate_test_case(test_name, iq_data, fs, freq_bins, window_type,
         'num_bins': K,
         'window_size': window_size,
         'delay_cycles': delay_cycles,
-        'osc_latency': 35,  # Fixed CORDIC latency
+        'osc_latency': 36,  # Fixed CORDIC latency
         'fs': fs,
         'freq_bins': freqs_sorted,
         'freq_steps': freq_steps,

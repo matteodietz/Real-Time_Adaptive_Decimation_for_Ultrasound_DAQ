@@ -627,8 +627,8 @@ def generate_test_case(test_name, baseline_iq_data, fs_baseline, S_bins,
     # --- Format Stimuli ---
     
     # Calculate DELAY_CYCLES: when DFT should start
-    # This is the sample index where our window starts, plus the OSC_LATENCY
-    delay_cycles = start_sample + OSC_LATENCY
+    # This is the sample index where our window starts
+    delay_cycles = start_sample
     
     # IQ samples (full frame, normalized and scaled, 16-bit fixed point Q2.14)
     i_samples_hw = []
@@ -740,7 +740,7 @@ def main():
         'POWER_WIDTH': 8,
         'POWER_FRAC': 0,
         'PHASE_WIDTH': 32,
-        'OSC_LATENCY': 35,
+        'OSC_LATENCY': 36,
         'WINDOW_SIZE': 256
     }
     

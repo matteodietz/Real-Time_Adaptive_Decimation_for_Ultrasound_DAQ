@@ -155,7 +155,7 @@
 
 //     // --- Test Sequencer and Checker ---
 //     initial begin: checker_block
-//         integer file, status;
+//         integer file, status, csv_file;
 //         string line, test_name;
 //         integer num_bins_read, num_samples_read, window_size_read;
 //         integer delay_cycles_read, osc_latency_read, threshold_drop_read;
@@ -184,6 +184,22 @@
 //             $finish;
 //         end
 
+//         // Open CSV results file
+//         csv_file = $fopen("/home/bsc25h10/mdietz/bachelors_thesis/rtl/sim_results/top_results.csv", "w");
+//         if (csv_file == 0) begin
+//             $display("ERROR: Could not open CSV results file.");
+//             $fclose(file);
+//             $finish;
+//         end
+
+//         // Write CSV header
+//         $fwrite(csv_file, "channel,angle,window,");
+//         $fwrite(csv_file, "exp_f1_left,exp_f2_left,exp_L1_left,exp_L2_left,");
+//         $fwrite(csv_file, "exp_f1_right,exp_f2_right,exp_L1_right,exp_L2_right,");
+//         $fwrite(csv_file, "act_f1_left,act_f2_left,act_L1_left,act_L2_left,");
+//         $fwrite(csv_file, "act_f1_right,act_f2_right,act_L1_right,act_L2_right,");
+//         $fwrite(csv_file, "warning,error\n");
+
 //         $display("=== Starting Top Module Testbench ===");
         
 //         // Skip header lines (14 lines)
@@ -210,7 +226,7 @@
 //             $display("Test Case %0d: %s", test_count, test_name);
 //             $display("========================================");
             
-//             // Read: NUM_BINS NUM_SAMPLES WINDOW_SIZE DELAY_CYCLES OSC_LATENCY THRESHOLD_DROP
+//             // Read: NUM_BINS NUM_SAMPLES WINDOW_SIZE DELAY_CYCLES OSC_LATENCY THRESHOLD_DROP ANGLE CHANNEL WINDOW_NUM
 //             status = $fscanf(file, "%d %d %d %d %d %d %d %d %d\n", 
 //                            num_bins_read, num_samples_read, window_size_read, 
 //                            delay_cycles_read, osc_latency_read, threshold_drop_read,
@@ -222,6 +238,7 @@
 //             $display("  DELAY_CYCLES: %0d", delay_cycles_read);
 //             $display("  OSC_LATENCY: %0d", osc_latency_read);
 //             $display("  THRESHOLD_DROP: %0d dB", threshold_drop_read);
+//             $display("  ANGLE: %0d, CHANNEL: %0d, WINDOW: %0d", angle, channel, window_number);
             
 //             // Set delay_cycles for this test
 //             delay_cycles = delay_cycles_read[15:0];
@@ -333,7 +350,7 @@
                     
 //                     // Immediately check results while valid is still high
 //                     @(posedge clk);
-//                     check_result(exp_threshold_ok,
+//                     check_result(csv_file, angle, channel, window_number,
 //                                exp_f1_left, exp_f2_left, exp_L1_left, exp_L2_left,
 //                                exp_f1_right, exp_f2_right, exp_L1_right, exp_L2_right,
 //                                n_errs);
@@ -376,7 +393,7 @@
 //                 // Check results
 //                 if (valid_captured) begin
 //                     @(posedge clk); // Let outputs settle
-//                     check_result(exp_threshold_ok,
+//                     check_result(csv_file, angle, channel, window_number,
 //                                exp_f1_left, exp_f2_left, exp_L1_left, exp_L2_left,
 //                                exp_f1_right, exp_f2_right, exp_L1_right, exp_L2_right,
 //                                n_errs);
@@ -394,6 +411,7 @@
 //         end
 
 //         $fclose(file);
+//         $fclose(csv_file);
         
 //         $display("\n========================================");
 //         $display("Test Summary");
@@ -413,7 +431,10 @@
 
 //     // --- Checking Task ---
 //     task check_result(
-//         input logic expected_threshold_ok,
+//         input integer csv_file,
+//         input integer angle,
+//         input integer channel,
+//         input integer window_num,
 //         input logic [FREQ_BIN_WIDTH-1:0] expected_f1_left,
 //         input logic [FREQ_BIN_WIDTH-1:0] expected_f2_left,
 //         input logic [POWER_WIDTH-1:0] expected_L1_left,
@@ -424,158 +445,83 @@
 //         input logic [POWER_WIDTH-1:0] expected_L2_right,
 //         inout integer error_count
 //     );
-//         automatic logic mismatch = 1'b0;
+//         automatic logic has_error = 1'b0;
+//         automatic logic has_warning = 1'b0;
 //         automatic integer L1_left_error, L2_left_error;
 //         automatic integer L1_right_error, L2_right_error;
-//         automatic integer power_tolerance = 3;  // Allow ±3 dB for power values
+//         automatic integer power_tolerance = 3;  // Allow +/-3 dB for power values
         
-//         $display("\n--- Checking Bandwidth Edge Detection Results ---");
+//         // Check frequencies (zero tolerance)
+//         if (f1_left !== expected_f1_left) has_error = 1'b1;
+//         if (f2_left !== expected_f2_left) has_error = 1'b1;
+//         if (f1_right !== expected_f1_right) has_error = 1'b1;
+//         if (f2_right !== expected_f2_right) has_error = 1'b1;
         
-//         // Check threshold_ok
-//         if (threshold_ok !== expected_threshold_ok) begin
-//             $display("  ERROR: threshold_ok mismatch");
-//             $display("    Expected: %b", expected_threshold_ok);
-//             $display("    Got:      %b", threshold_ok);
-//             mismatch = 1'b1;
-//         end else begin
-//             $display("  OK: threshold_ok = %b", threshold_ok);
-//         end
-        
-//         // Check left edge - frequencies (zero tolerance)
-//         $display("\n  Left Edge:");
-//         if (f1_left !== expected_f1_left) begin
-//             $display("    ERROR: f1_left mismatch");
-//             $display("      Expected: 0x%04h", expected_f1_left);
-//             $display("      Got:      0x%04h", f1_left);
-//             mismatch = 1'b1;
-//         end else begin
-//             $display("    OK: f1_left = 0x%04h", f1_left);
-//         end
-        
-//         if (f2_left !== expected_f2_left) begin
-//             $display("    ERROR: f2_left mismatch");
-//             $display("      Expected: 0x%04h", expected_f2_left);
-//             $display("      Got:      0x%04h", f2_left);
-//             mismatch = 1'b1;
-//         end else begin
-//             $display("    OK: f2_left = 0x%04h", f2_left);
-//         end
-        
-//         // Check left edge - powers (±3 dB tolerance)
-//         // Calculate absolute error for L1_left
+//         // Check powers (±3 dB tolerance)
+//         // L1_left
 //         if (L1_left > expected_L1_left) begin
 //             L1_left_error = L1_left - expected_L1_left;
 //         end else begin
 //             L1_left_error = expected_L1_left - L1_left;
 //         end
-        
 //         if (L1_left_error > power_tolerance) begin
-//             $display("    ERROR: L1_left mismatch exceeds tolerance");
-//             $display("      Expected: 0x%02h (%0d dB)", expected_L1_left, expected_L1_left);
-//             $display("      Got:      0x%02h (%0d dB)", L1_left, L1_left);
-//             $display("      Error:    %0d dB (tolerance: ±%0d dB)", L1_left_error, power_tolerance);
-//             mismatch = 1'b1;
+//             has_error = 1'b1;
 //         end else if (L1_left_error > 0) begin
-//             $display("    WARNING: L1_left has minor error within tolerance");
-//             $display("      Expected: 0x%02h (%0d dB)", expected_L1_left, expected_L1_left);
-//             $display("      Got:      0x%02h (%0d dB)", L1_left, L1_left);
-//             $display("      Error:    %0d dB (within ±%0d dB tolerance)", L1_left_error, power_tolerance);
-//         end else begin
-//             $display("    OK: L1_left = 0x%02h (%0d dB)", L1_left, L1_left);
+//             has_warning = 1'b1;
 //         end
         
-//         // Calculate absolute error for L2_left
+//         // L2_left
 //         if (L2_left > expected_L2_left) begin
 //             L2_left_error = L2_left - expected_L2_left;
 //         end else begin
 //             L2_left_error = expected_L2_left - L2_left;
 //         end
-        
 //         if (L2_left_error > power_tolerance) begin
-//             $display("    ERROR: L2_left mismatch exceeds tolerance");
-//             $display("      Expected: 0x%02h (%0d dB)", expected_L2_left, expected_L2_left);
-//             $display("      Got:      0x%02h (%0d dB)", L2_left, L2_left);
-//             $display("      Error:    %0d dB (tolerance: ±%0d dB)", L2_left_error, power_tolerance);
-//             mismatch = 1'b1;
+//             has_error = 1'b1;
 //         end else if (L2_left_error > 0) begin
-//             $display("    WARNING: L2_left has minor error within tolerance");
-//             $display("      Expected: 0x%02h (%0d dB)", expected_L2_left, expected_L2_left);
-//             $display("      Got:      0x%02h (%0d dB)", L2_left, L2_left);
-//             $display("      Error:    %0d dB (within ±%0d dB tolerance)", L2_left_error, power_tolerance);
-//         end else begin
-//             $display("    OK: L2_left = 0x%02h (%0d dB)", L2_left, L2_left);
+//             has_warning = 1'b1;
 //         end
         
-//         // Check right edge - frequencies (zero tolerance)
-//         $display("\n  Right Edge:");
-//         if (f1_right !== expected_f1_right) begin
-//             $display("    ERROR: f1_right mismatch");
-//             $display("      Expected: 0x%04h", expected_f1_right);
-//             $display("      Got:      0x%04h", f1_right);
-//             mismatch = 1'b1;
-//         end else begin
-//             $display("    OK: f1_right = 0x%04h", f1_right);
-//         end
-        
-//         if (f2_right !== expected_f2_right) begin
-//             $display("    ERROR: f2_right mismatch");
-//             $display("      Expected: 0x%04h", expected_f2_right);
-//             $display("      Got:      0x%04h", f2_right);
-//             mismatch = 1'b1;
-//         end else begin
-//             $display("    OK: f2_right = 0x%04h", f2_right);
-//         end
-        
-//         // Check right edge - powers (±3 dB tolerance)
-//         // Calculate absolute error for L1_right
+//         // L1_right
 //         if (L1_right > expected_L1_right) begin
 //             L1_right_error = L1_right - expected_L1_right;
 //         end else begin
 //             L1_right_error = expected_L1_right - L1_right;
 //         end
-        
 //         if (L1_right_error > power_tolerance) begin
-//             $display("    ERROR: L1_right mismatch exceeds tolerance");
-//             $display("      Expected: 0x%02h (%0d dB)", expected_L1_right, expected_L1_right);
-//             $display("      Got:      0x%02h (%0d dB)", L1_right, L1_right);
-//             $display("      Error:    %0d dB (tolerance: ±%0d dB)", L1_right_error, power_tolerance);
-//             mismatch = 1'b1;
+//             has_error = 1'b1;
 //         end else if (L1_right_error > 0) begin
-//             $display("    WARNING: L1_right has minor error within tolerance");
-//             $display("      Expected: 0x%02h (%0d dB)", expected_L1_right, expected_L1_right);
-//             $display("      Got:      0x%02h (%0d dB)", L1_right, L1_right);
-//             $display("      Error:    %0d dB (within ±%0d dB tolerance)", L1_right_error, power_tolerance);
-//         end else begin
-//             $display("    OK: L1_right = 0x%02h (%0d dB)", L1_right, L1_right);
+//             has_warning = 1'b1;
 //         end
         
-//         // Calculate absolute error for L2_right
+//         // L2_right
 //         if (L2_right > expected_L2_right) begin
 //             L2_right_error = L2_right - expected_L2_right;
 //         end else begin
 //             L2_right_error = expected_L2_right - L2_right;
 //         end
-        
 //         if (L2_right_error > power_tolerance) begin
-//             $display("    ERROR: L2_right mismatch exceeds tolerance");
-//             $display("      Expected: 0x%02h (%0d dB)", expected_L2_right, expected_L2_right);
-//             $display("      Got:      0x%02h (%0d dB)", L2_right, L2_right);
-//             $display("      Error:    %0d dB (tolerance: ±%0d dB)", L2_right_error, power_tolerance);
-//             mismatch = 1'b1;
+//             has_error = 1'b1;
 //         end else if (L2_right_error > 0) begin
-//             $display("    WARNING: L2_right has minor error within tolerance");
-//             $display("      Expected: 0x%02h (%0d dB)", expected_L2_right, expected_L2_right);
-//             $display("      Got:      0x%02h (%0d dB)", L2_right, L2_right);
-//             $display("      Error:    %0d dB (within ±%0d dB tolerance)", L2_right_error, power_tolerance);
-//         end else begin
-//             $display("    OK: L2_right = 0x%02h (%0d dB)", L2_right, L2_right);
+//             has_warning = 1'b1;
 //         end
         
-//         if (mismatch) begin
+//         // Write to CSV
+//         $fwrite(csv_file, "%0d,%0d,%0d,", channel, angle, window_num);
+//         $fwrite(csv_file, "%0d,%0d,%0d,%0d,", expected_f1_left, expected_f2_left, expected_L1_left, expected_L2_left);
+//         $fwrite(csv_file, "%0d,%0d,%0d,%0d,", expected_f1_right, expected_f2_right, expected_L1_right, expected_L2_right);
+//         $fwrite(csv_file, "%0d,%0d,%0d,%0d,", f1_left, f2_left, L1_left, L2_left);
+//         $fwrite(csv_file, "%0d,%0d,%0d,%0d,", f1_right, f2_right, L1_right, L2_right);
+//         $fwrite(csv_file, "%0d,%0d\n", has_warning, has_error);
+        
+//         // Update error count
+//         if (has_error) begin
 //             error_count++;
-//             $display("\n  RESULT: FAIL");
+//             $display("  RESULT: FAIL");
+//         end else if (has_warning) begin
+//             $display("  RESULT: PASS (with warnings)");
 //         end else begin
-//             $display("\n  RESULT: PASS");
+//             $display("  RESULT: PASS");
 //         end
 //     endtask
 
@@ -747,6 +693,39 @@ module top_tb();
         static integer test_count = 0;
         logic valid_captured;
         
+        // Dataset selection variables
+        string dataset_type;
+        string dataset_name;
+        string vector_filename;
+        string csv_filename;
+        string vector_path;
+        string csv_path;
+        
+        // Get dataset parameters from command line or use defaults
+        if (!$value$plusargs("DATASET_TYPE=%s", dataset_type)) begin
+            dataset_type = "experiments";
+            $display("INFO: Using default DATASET_TYPE=experiments");
+        end
+        
+        if (!$value$plusargs("DATASET_NAME=%s", dataset_name)) begin
+            dataset_name = "contrast_speckle";
+            $display("INFO: Using default DATASET_NAME=contrast_speckle");
+        end
+        
+        $display("=== Starting Top Module Testbench ===");
+        $display("Dataset Type: %s", dataset_type);
+        $display("Dataset Name: %s", dataset_name);
+        
+        // Build file paths based on dataset
+        vector_filename = {dataset_type, "_", dataset_name};
+        csv_filename = {dataset_type, "_", dataset_name};
+        
+        vector_path = {"/home/bsc25h10/mdietz/bachelors_thesis/rtl/simvectors/top_vectors_", vector_filename, ".txt"};
+        csv_path = {"/home/bsc25h10/mdietz/bachelors_thesis/rtl/sim_results/top_results_", csv_filename, ".csv"};
+        
+        $display("Vector file: %s", vector_path);
+        $display("Results file: %s", csv_path);
+        
         // Initialize signals
         enable = 1'b0;
         clear = 1'b0;
@@ -761,16 +740,17 @@ module top_tb();
         end
 
         // Open the vector file
-        file = $fopen("/home/bsc25h10/mdietz/bachelors_thesis/rtl/simvectors/top_vectors.txt", "r");
+        file = $fopen(vector_path, "r");
         if (file == 0) begin
-            $display("ERROR: Could not open vector file.");
+            $display("ERROR: Could not open vector file: %s", vector_path);
+            $display("Please ensure test vectors have been generated for this dataset.");
             $finish;
         end
 
         // Open CSV results file
-        csv_file = $fopen("/home/bsc25h10/mdietz/bachelors_thesis/rtl/sim_results/top_results.csv", "w");
+        csv_file = $fopen(csv_path, "w");
         if (csv_file == 0) begin
-            $display("ERROR: Could not open CSV results file.");
+            $display("ERROR: Could not open CSV results file: %s", csv_path);
             $fclose(file);
             $finish;
         end
@@ -782,8 +762,6 @@ module top_tb();
         $fwrite(csv_file, "act_f1_left,act_f2_left,act_L1_left,act_L2_left,");
         $fwrite(csv_file, "act_f1_right,act_f2_right,act_L1_right,act_L2_right,");
         $fwrite(csv_file, "warning,error\n");
-
-        $display("=== Starting Top Module Testbench ===");
         
         // Skip header lines (14 lines)
         for (int i = 0; i < 14; i++) begin
@@ -888,6 +866,7 @@ module top_tb();
                            exp_f1_left, exp_f2_left, exp_L1_left, exp_L2_left,
                            exp_f1_right, exp_f2_right, exp_L1_right, exp_L2_right);
             $display("  Loaded expected outputs");
+            
             
             // --- Drive DUT ---
             $display("\n--- Starting Test Execution ---");
@@ -999,6 +978,7 @@ module top_tb();
         $display("\n========================================");
         $display("Test Summary");
         $display("========================================");
+        $display("Dataset: %s/%s", dataset_type, dataset_name);
         $display("Total test cases: %0d", test_count);
         $display("Total errors:     %0d", n_errs);
         
@@ -1032,7 +1012,7 @@ module top_tb();
         automatic logic has_warning = 1'b0;
         automatic integer L1_left_error, L2_left_error;
         automatic integer L1_right_error, L2_right_error;
-        automatic integer power_tolerance = 3;  // Allow +/-3 dB for power values
+        automatic integer power_tolerance = 3;  // Allow ±3 dB for power values
         
         // Check frequencies (zero tolerance)
         if (f1_left !== expected_f1_left) has_error = 1'b1;

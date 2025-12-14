@@ -87,7 +87,7 @@ module simplified_dft_timing_wrapper_tb ();
         .OSC_WIDTH_FRAC(OSC_WIDTH_FRAC),
         .PHASE_WIDTH(PHASE_WIDTH),
         .WINDOW_SIZE(MAX_WINDOW_SIZE),
-        .OSC_LATENCY(35),
+        .OSC_LATENCY(36),
         .COUNTER_WIDTH(COUNTER_WIDTH),
         .SAMPLE_COUNT_WIDTH(SAMPLE_COUNT_WIDTH)
     ) dut (

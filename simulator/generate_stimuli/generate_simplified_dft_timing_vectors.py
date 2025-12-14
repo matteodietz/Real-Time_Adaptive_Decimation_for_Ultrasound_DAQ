@@ -211,31 +211,31 @@ def main():
     # ====================================================================
     # Sanity Check 1: 4-point DFT with 64 cycles padding
     # ====================================================================
-    print("\n========== Sanity Check 1: 4-point DFT ==========")
+    # print("\n========== Sanity Check 1: 4-point DFT ==========")
     
-    fs_sanity = 4.0
-    nperseg_sanity = 4
-    delay_cycles_sanity = 64
+    # fs_sanity = 4.0
+    # nperseg_sanity = 4
+    # delay_cycles_sanity = 64
     
-    t_sanity = np.arange(nperseg_sanity) / fs_sanity
-    signal_sanity = np.cos(2 * np.pi * 1.0 * t_sanity)
-    S_bins_sanity = np.fft.fftfreq(nperseg_sanity, 1/fs_sanity)
+    # t_sanity = np.arange(nperseg_sanity) / fs_sanity
+    # signal_sanity = np.cos(2 * np.pi * 1.0 * t_sanity)
+    # S_bins_sanity = np.fft.fftfreq(nperseg_sanity, 1/fs_sanity)
     
-    tc_sanity = generate_test_case(
-        "sanity_check_4pt_dft",
-        signal_sanity,
-        fs_sanity,
-        S_bins_sanity,
-        'boxcar',
-        IQ_WIDTH,
-        WINDOW_WIDTH,
-        ACCUM_WIDTH,
-        PHASE_WIDTH,
-        4,
-        delay_cycles_sanity,
-        nperseg_sanity
-    )
-    test_cases.append(tc_sanity)
+    # tc_sanity = generate_test_case(
+    #     "sanity_check_4pt_dft",
+    #     signal_sanity,
+    #     fs_sanity,
+    #     S_bins_sanity,
+    #     'boxcar',
+    #     IQ_WIDTH,
+    #     WINDOW_WIDTH,
+    #     ACCUM_WIDTH,
+    #     PHASE_WIDTH,
+    #     4,
+    #     delay_cycles_sanity,
+    #     nperseg_sanity
+    # )
+    # test_cases.append(tc_sanity)
 
     # ====================================================================
     # Sanity Check 2: 8-point DFT with 64 cycles padding

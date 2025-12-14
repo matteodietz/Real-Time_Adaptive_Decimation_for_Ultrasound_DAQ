@@ -269,6 +269,7 @@ module dft_accumulation_cordic_tb ();
             // #1;
             @(negedge clk);
             start = 1'b0;
+            //sample_valid = 1'b1;
             
             // Step 5: Stream samples
             for (int n = 0; n < num_samples_read; n++) begin
@@ -276,10 +277,12 @@ module dft_accumulation_cordic_tb ();
                 #1;
                 
                 // Apply sample data
-                sample_valid = 1'b1;
+                
                 i_sample = i_samples[n];
                 q_sample = q_samples[n];
                 window_coeff = window_coeffs[n];
+                @(negedge clk);
+                sample_valid = 1'b1;
                 
                 // Assert last_sample on final sample
                 if (n == num_samples_read - 1) begin

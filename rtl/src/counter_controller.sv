@@ -74,6 +74,8 @@ module counter_controller #(
                 osc_phase_tvalid = 1'b1;
                 start = 1'b0;
                 count_d = count_q + 1'b1;
+                // new:
+                // sample_valid = 1'b1;
             end else if (count_q == X + Y + 1) begin
                 // Phase 5: Start DFT low
                 osc_enable = 1'b1;
@@ -92,11 +94,14 @@ module counter_controller #(
                 osc_phase_tvalid = 1'b1;
                 count_d = count_q + 1'b1;
                 sample_valid = 1'b1;
+                // new
+                // last_sample = 1'b1;
             end else if (count_q == X + Y + Z) begin
                 // Phase 6: Wait Y cycles (maintain signals)
                 osc_enable = 1'b1;
                 osc_phase_tvalid = 1'b1;
                 count_d = count_q + 1'b1;
+                // new
                 sample_valid = 1'b1;
                 last_sample = 1'b1;
             end else if (count_q == X + Y + Z + 1) begin

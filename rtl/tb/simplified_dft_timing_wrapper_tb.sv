@@ -33,7 +33,7 @@ module simplified_dft_timing_wrapper_tb ();
     localparam integer SAMPLE_COUNT_WIDTH = 16;
     
     // Maximum window size
-    localparam integer MAX_WINDOW_SIZE = 4;
+    localparam integer MAX_WINDOW_SIZE = 8;
     
     // Maximum total samples (padding + signal)
     localparam integer MAX_SAMPLES = 512;
@@ -275,7 +275,7 @@ module simplified_dft_timing_wrapper_tb ();
             
             for (int n = 0; n < num_samples_read; n++) begin
                 @(posedge clk);
-                //#1;
+                #1;
                 
                 // Stream sample
                 sample_valid = 1'b1;

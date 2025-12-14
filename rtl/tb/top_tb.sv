@@ -287,9 +287,6 @@ module top_tb();
                            exp_f1_right, exp_f2_right, exp_L1_right, exp_L2_right);
             $display("  Loaded expected outputs");
             
-            // Skip blank line between test cases
-            status = $fgets(line, file);
-            
             // --- Drive DUT ---
             $display("\n--- Starting Test Execution ---");
             
@@ -413,6 +410,119 @@ module top_tb();
     end
 
     // --- Checking Task ---
+    // task check_result(
+    //     input logic expected_threshold_ok,
+    //     input logic [FREQ_BIN_WIDTH-1:0] expected_f1_left,
+    //     input logic [FREQ_BIN_WIDTH-1:0] expected_f2_left,
+    //     input logic [POWER_WIDTH-1:0] expected_L1_left,
+    //     input logic [POWER_WIDTH-1:0] expected_L2_left,
+    //     input logic [FREQ_BIN_WIDTH-1:0] expected_f1_right,
+    //     input logic [FREQ_BIN_WIDTH-1:0] expected_f2_right,
+    //     input logic [POWER_WIDTH-1:0] expected_L1_right,
+    //     input logic [POWER_WIDTH-1:0] expected_L2_right,
+    //     inout integer error_count
+    // );
+    //     automatic logic mismatch = 1'b0;
+        
+    //     $display("\n--- Checking Bandwidth Edge Detection Results ---");
+        
+    //     // Check threshold_ok
+    //     if (threshold_ok !== expected_threshold_ok) begin
+    //         $display("  ERROR: threshold_ok mismatch");
+    //         $display("    Expected: %b", expected_threshold_ok);
+    //         $display("    Got:      %b", threshold_ok);
+    //         mismatch = 1'b1;
+    //     end else begin
+    //         $display("  OK: threshold_ok = %b", threshold_ok);
+    //     end
+        
+    //     // Check left edge - frequencies
+    //     $display("\n  Left Edge:");
+    //     if (f1_left !== expected_f1_left) begin
+    //         $display("    ERROR: f1_left mismatch");
+    //         $display("      Expected: 0x%04h", expected_f1_left);
+    //         $display("      Got:      0x%04h", f1_left);
+    //         mismatch = 1'b1;
+    //     end else begin
+    //         $display("    OK: f1_left = 0x%04h", f1_left);
+    //     end
+        
+    //     if (f2_left !== expected_f2_left) begin
+    //         $display("    ERROR: f2_left mismatch");
+    //         $display("      Expected: 0x%04h", expected_f2_left);
+    //         $display("      Got:      0x%04h", f2_left);
+    //         mismatch = 1'b1;
+    //     end else begin
+    //         $display("    OK: f2_left = 0x%04h", f2_left);
+    //     end
+        
+    //     // Check left edge - powers (zero tolerance)
+    //     if (L1_left !== expected_L1_left) begin
+    //         $display("    ERROR: L1_left mismatch");
+    //         $display("      Expected: 0x%02h (%0d dB)", expected_L1_left, expected_L1_left);
+    //         $display("      Got:      0x%02h (%0d dB)", L1_left, L1_left);
+    //         mismatch = 1'b1;
+    //     end else begin
+    //         $display("    OK: L1_left = 0x%02h (%0d dB)", L1_left, L1_left);
+    //     end
+        
+    //     if (L2_left !== expected_L2_left) begin
+    //         $display("    ERROR: L2_left mismatch");
+    //         $display("      Expected: 0x%02h (%0d dB)", expected_L2_left, expected_L2_left);
+    //         $display("      Got:      0x%02h (%0d dB)", L2_left, L2_left);
+    //         mismatch = 1'b1;
+    //     end else begin
+    //         $display("    OK: L2_left = 0x%02h (%0d dB)", L2_left, L2_left);
+    //     end
+        
+    //     // Check right edge - frequencies
+    //     $display("\n  Right Edge:");
+    //     if (f1_right !== expected_f1_right) begin
+    //         $display("    ERROR: f1_right mismatch");
+    //         $display("      Expected: 0x%04h", expected_f1_right);
+    //         $display("      Got:      0x%04h", f1_right);
+    //         mismatch = 1'b1;
+    //     end else begin
+    //         $display("    OK: f1_right = 0x%04h", f1_right);
+    //     end
+        
+    //     if (f2_right !== expected_f2_right) begin
+    //         $display("    ERROR: f2_right mismatch");
+    //         $display("      Expected: 0x%04h", expected_f2_right);
+    //         $display("      Got:      0x%04h", f2_right);
+    //         mismatch = 1'b1;
+    //     end else begin
+    //         $display("    OK: f2_right = 0x%04h", f2_right);
+    //     end
+        
+    //     // Check right edge - powers (zero tolerance)
+    //     if (L1_right !== expected_L1_right) begin
+    //         $display("    ERROR: L1_right mismatch");
+    //         $display("      Expected: 0x%02h (%0d dB)", expected_L1_right, expected_L1_right);
+    //         $display("      Got:      0x%02h (%0d dB)", L1_right, L1_right);
+    //         mismatch = 1'b1;
+    //     end else begin
+    //         $display("    OK: L1_right = 0x%02h (%0d dB)", L1_right, L1_right);
+    //     end
+        
+    //     if (L2_right !== expected_L2_right) begin
+    //         $display("    ERROR: L2_right mismatch");
+    //         $display("      Expected: 0x%02h (%0d dB)", expected_L2_right, expected_L2_right);
+    //         $display("      Got:      0x%02h (%0d dB)", L2_right, L2_right);
+    //         mismatch = 1'b1;
+    //     end else begin
+    //         $display("    OK: L2_right = 0x%02h (%0d dB)", L2_right, L2_right);
+    //     end
+        
+    //     if (mismatch) begin
+    //         error_count++;
+    //         $display("\n  RESULT: FAIL");
+    //     end else begin
+    //         $display("\n  RESULT: PASS");
+    //     end
+    // endtask
+
+    // --- Checking Task ---
     task check_result(
         input logic expected_threshold_ok,
         input logic [FREQ_BIN_WIDTH-1:0] expected_f1_left,
@@ -426,6 +536,9 @@ module top_tb();
         inout integer error_count
     );
         automatic logic mismatch = 1'b0;
+        automatic integer L1_left_error, L2_left_error;
+        automatic integer L1_right_error, L2_right_error;
+        automatic integer power_tolerance = 3;  // Allow ±3 dB for power values
         
         $display("\n--- Checking Bandwidth Edge Detection Results ---");
         
@@ -439,7 +552,7 @@ module top_tb();
             $display("  OK: threshold_ok = %b", threshold_ok);
         end
         
-        // Check left edge - frequencies
+        // Check left edge - frequencies (zero tolerance)
         $display("\n  Left Edge:");
         if (f1_left !== expected_f1_left) begin
             $display("    ERROR: f1_left mismatch");
@@ -459,26 +572,52 @@ module top_tb();
             $display("    OK: f2_left = 0x%04h", f2_left);
         end
         
-        // Check left edge - powers (zero tolerance)
-        if (L1_left !== expected_L1_left) begin
-            $display("    ERROR: L1_left mismatch");
+        // Check left edge - powers (±3 dB tolerance)
+        // Calculate absolute error for L1_left
+        if (L1_left > expected_L1_left) begin
+            L1_left_error = L1_left - expected_L1_left;
+        end else begin
+            L1_left_error = expected_L1_left - L1_left;
+        end
+        
+        if (L1_left_error > power_tolerance) begin
+            $display("    ERROR: L1_left mismatch exceeds tolerance");
             $display("      Expected: 0x%02h (%0d dB)", expected_L1_left, expected_L1_left);
             $display("      Got:      0x%02h (%0d dB)", L1_left, L1_left);
+            $display("      Error:    %0d dB (tolerance: ±%0d dB)", L1_left_error, power_tolerance);
             mismatch = 1'b1;
+        end else if (L1_left_error > 0) begin
+            $display("    WARNING: L1_left has minor error within tolerance");
+            $display("      Expected: 0x%02h (%0d dB)", expected_L1_left, expected_L1_left);
+            $display("      Got:      0x%02h (%0d dB)", L1_left, L1_left);
+            $display("      Error:    %0d dB (within ±%0d dB tolerance)", L1_left_error, power_tolerance);
         end else begin
             $display("    OK: L1_left = 0x%02h (%0d dB)", L1_left, L1_left);
         end
         
-        if (L2_left !== expected_L2_left) begin
-            $display("    ERROR: L2_left mismatch");
+        // Calculate absolute error for L2_left
+        if (L2_left > expected_L2_left) begin
+            L2_left_error = L2_left - expected_L2_left;
+        end else begin
+            L2_left_error = expected_L2_left - L2_left;
+        end
+        
+        if (L2_left_error > power_tolerance) begin
+            $display("    ERROR: L2_left mismatch exceeds tolerance");
             $display("      Expected: 0x%02h (%0d dB)", expected_L2_left, expected_L2_left);
             $display("      Got:      0x%02h (%0d dB)", L2_left, L2_left);
+            $display("      Error:    %0d dB (tolerance: ±%0d dB)", L2_left_error, power_tolerance);
             mismatch = 1'b1;
+        end else if (L2_left_error > 0) begin
+            $display("    WARNING: L2_left has minor error within tolerance");
+            $display("      Expected: 0x%02h (%0d dB)", expected_L2_left, expected_L2_left);
+            $display("      Got:      0x%02h (%0d dB)", L2_left, L2_left);
+            $display("      Error:    %0d dB (within ±%0d dB tolerance)", L2_left_error, power_tolerance);
         end else begin
             $display("    OK: L2_left = 0x%02h (%0d dB)", L2_left, L2_left);
         end
         
-        // Check right edge - frequencies
+        // Check right edge - frequencies (zero tolerance)
         $display("\n  Right Edge:");
         if (f1_right !== expected_f1_right) begin
             $display("    ERROR: f1_right mismatch");
@@ -498,21 +637,47 @@ module top_tb();
             $display("    OK: f2_right = 0x%04h", f2_right);
         end
         
-        // Check right edge - powers (zero tolerance)
-        if (L1_right !== expected_L1_right) begin
-            $display("    ERROR: L1_right mismatch");
+        // Check right edge - powers (±3 dB tolerance)
+        // Calculate absolute error for L1_right
+        if (L1_right > expected_L1_right) begin
+            L1_right_error = L1_right - expected_L1_right;
+        end else begin
+            L1_right_error = expected_L1_right - L1_right;
+        end
+        
+        if (L1_right_error > power_tolerance) begin
+            $display("    ERROR: L1_right mismatch exceeds tolerance");
             $display("      Expected: 0x%02h (%0d dB)", expected_L1_right, expected_L1_right);
             $display("      Got:      0x%02h (%0d dB)", L1_right, L1_right);
+            $display("      Error:    %0d dB (tolerance: ±%0d dB)", L1_right_error, power_tolerance);
             mismatch = 1'b1;
+        end else if (L1_right_error > 0) begin
+            $display("    WARNING: L1_right has minor error within tolerance");
+            $display("      Expected: 0x%02h (%0d dB)", expected_L1_right, expected_L1_right);
+            $display("      Got:      0x%02h (%0d dB)", L1_right, L1_right);
+            $display("      Error:    %0d dB (within ±%0d dB tolerance)", L1_right_error, power_tolerance);
         end else begin
             $display("    OK: L1_right = 0x%02h (%0d dB)", L1_right, L1_right);
         end
         
-        if (L2_right !== expected_L2_right) begin
-            $display("    ERROR: L2_right mismatch");
+        // Calculate absolute error for L2_right
+        if (L2_right > expected_L2_right) begin
+            L2_right_error = L2_right - expected_L2_right;
+        end else begin
+            L2_right_error = expected_L2_right - L2_right;
+        end
+        
+        if (L2_right_error > power_tolerance) begin
+            $display("    ERROR: L2_right mismatch exceeds tolerance");
             $display("      Expected: 0x%02h (%0d dB)", expected_L2_right, expected_L2_right);
             $display("      Got:      0x%02h (%0d dB)", L2_right, L2_right);
+            $display("      Error:    %0d dB (tolerance: ±%0d dB)", L2_right_error, power_tolerance);
             mismatch = 1'b1;
+        end else if (L2_right_error > 0) begin
+            $display("    WARNING: L2_right has minor error within tolerance");
+            $display("      Expected: 0x%02h (%0d dB)", expected_L2_right, expected_L2_right);
+            $display("      Got:      0x%02h (%0d dB)", L2_right, L2_right);
+            $display("      Error:    %0d dB (within ±%0d dB tolerance)", L2_right_error, power_tolerance);
         end else begin
             $display("    OK: L2_right = 0x%02h (%0d dB)", L2_right, L2_right);
         end

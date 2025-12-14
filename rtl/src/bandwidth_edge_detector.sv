@@ -1,22 +1,3 @@
-////////////////////////////////////////////////////////////////////////////////
-//
-//  Module: bandwidth_edge_detector
-//
-//  Function: Detects bandwidth edges by finding threshold crossings in dB power
-//            spectrum. Takes dB power values as input and outputs the frequency
-//            bins and power levels where the signal crosses the threshold.
-//
-//  Pipeline: 
-//    1. Find maximum power across all bins
-//    2. Calculate absolute threshold (max_power - threshold_drop)
-//    3. Find left edge (scan from center towards DC)
-//    4. Find right edge (scan from center towards positive frequencies)
-//
-//  Note: Linear interpolation is NOT performed here - that is offloaded to APU.
-//        This module only identifies the two bins between which crossing occurs.
-//
-////////////////////////////////////////////////////////////////////////////////
-
 module bandwidth_edge_detector #(
     // Power and Threshold Parameters
     parameter int POWER_WIDTH = 8,

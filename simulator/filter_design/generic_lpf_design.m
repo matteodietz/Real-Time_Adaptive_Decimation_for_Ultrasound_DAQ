@@ -33,14 +33,14 @@ fprintf('  Order (N):      %d\n', filter_order);
 fprintf('  3dB Cutoff:     %.4f (Normalized)\n', f_3dB);
 
 % Create filter specification object
-% 'N,F3dB' means we specify the Order (N) and the 3dB Frequency
-d = fdesign.lowpass('N,F3dB', filter_order, f_3dB);
+Hd = designfilt('lowpassfir', ...
+    'FilterOrder', filter_order, ...
+    'CutoffFrequency', f_3dB, ...
+    'Window', 'hamming', ...
+    'DesignMethod', 'window');
 
-% Design the filter (using Hamming window by default)
-Hd = design(d, 'window');
+coeffs = Hd.Coefficients;
 
-% Extract coefficients
-coeffs = Hd.Numerator;
 
 %% 3. Verify Design (Plotting)
 

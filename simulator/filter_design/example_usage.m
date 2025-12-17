@@ -11,7 +11,9 @@ I = 4;  % Example: decimation ratio of 4
 
 % Bandwidth edge where signal is at -30dB (normalized frequency, 0 to 1)
 % where 1 corresponds to the Nyquist frequency (Fs/2)
-bw_edge = 0.3;  % Example: 0.3 means the signal BW edge is at 0.3*Fs/2
+fs = 125;
+fc = 3;
+bw_edge = fc * 2 / fs;  % Example: 0.3 means the signal BW edge is at 0.3*Fs/2
 
 % Edge boost to compensate for signal rolloff (in dB)
 edge_boost_db = 10;  % 10 dB boost near passband edges
@@ -83,8 +85,8 @@ ylim([-80 15]);
 fprintf('\n=== Advanced Design with Custom Parameters ===\n');
 
 % Custom parameters
-custom_boost_width = 0.3;      % Wider boost region (30% of passband)
-custom_trans_width = 0.08;     % Wider transition band
+custom_boost_width = 0.03;      % Wider boost region (30% of passband)
+custom_trans_width = 0.008;     % Wider transition band
 custom_stopband_atten = 80;    % Higher stopband attenuation
 
 [Hd_custom, coeffs_custom] = arbmag_lpf_design(I, bw_edge, edge_boost_db, ...

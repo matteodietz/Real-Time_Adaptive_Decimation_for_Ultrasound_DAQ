@@ -13,7 +13,9 @@ I = 4;
 % 1.0 corresponds to the Nyquist frequency (Fs/2).
 % Example: If Fs=125MHz, Nyquist=62.5MHz. 
 % For a 5MHz cutoff: f_3dB = 5 / 62.5 = 0.08
-f_3dB = 0.15; 
+fs = 125;
+fc = 3;
+f_3dB = fc * 2 / fs; 
 
 % Output filename
 output_file = 'generic_lpf_coeffs.txt';

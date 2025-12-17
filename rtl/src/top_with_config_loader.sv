@@ -88,7 +88,7 @@ module top_with_config_loader #(
     output logic [POWER_WIDTH-1:0] L2_right_o,
     
     // Valid output (bandwidth detection complete)
-    output logic valid_o,
+    output logic valid_o
 );
 
     //--------------------------------------------------------------------------
@@ -206,8 +206,7 @@ module top_with_config_loader #(
     //--------------------------------------------------------------------------
     
     assign config_valid_o = config_valid;
-    assign config_busy_o = config_busy;
-    
+
     assign dft_busy_o = dft_busy;
     assign threshold_ok_o = threshold_ok;
     

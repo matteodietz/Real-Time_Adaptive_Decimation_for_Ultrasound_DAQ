@@ -29,7 +29,7 @@ module top_with_config_loader_tb();
     // Oscillator Parameters
     localparam integer OSC_WIDTH = 32;
     localparam integer OSC_WIDTH_FRAC = 30;
-    localparam integer PHASE_WIDTH = 32;
+    localparam integer PHASE_WIDTH = 32; //32
     
     // Power Conversion Parameters
     localparam integer POWER_INPUT_WIDTH = 32;
@@ -47,7 +47,7 @@ module top_with_config_loader_tb();
     localparam logic [POWER_WIDTH-1:0] THRESHOLD_DROP = 8'h1E; // 30 dB
     
     // Config Loader Parameters
-    localparam integer CONFIG_DATA_WIDTH = 32;
+    localparam integer CONFIG_DATA_WIDTH = 32; //32
     
     // Test-specific parameters
     localparam integer MAX_SAMPLES = 8192;  // Maximum frame size
@@ -140,7 +140,6 @@ module top_with_config_loader_tb();
         .i_sample_i              (i_sample),
         .q_sample_i              (q_sample),
         .window_coeff_i          (window_coeff),
-        .dft_busy_o              (dft_busy),
         .threshold_ok_o          (threshold_ok),
         .f1_left_o               (f1_left),
         .f2_left_o               (f2_left),

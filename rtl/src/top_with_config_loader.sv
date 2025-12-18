@@ -28,7 +28,7 @@ module top_with_config_loader #(
     // --- Oscillator Parameters ---
     parameter integer OSC_WIDTH = 32,
     parameter integer OSC_WIDTH_FRAC = 30,
-    parameter integer PHASE_WIDTH = 16, //32
+    parameter integer PHASE_WIDTH = 32, //32
     
     // --- Power Conversion Parameters ---
     parameter integer POWER_INPUT_WIDTH = 32,
@@ -46,7 +46,7 @@ module top_with_config_loader #(
     parameter logic [POWER_WIDTH-1:0] THRESHOLD_DROP = 8'h1E,  // 30dB
     
     // --- Config Loader Parameters ---
-    parameter integer CONFIG_DATA_WIDTH = 16  // Max(PHASE_WIDTH, FREQ_BIN_WIDTH) //32
+    parameter integer CONFIG_DATA_WIDTH = 32  // Max(PHASE_WIDTH, FREQ_BIN_WIDTH) //32
 )(
     input  logic clk_i,
     input  logic rst_ni,

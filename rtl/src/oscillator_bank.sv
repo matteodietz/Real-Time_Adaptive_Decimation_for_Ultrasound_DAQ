@@ -24,14 +24,6 @@ module oscillator_bank #(
     output logic signed [OSC_WIDTH-1:0] W_real_o[NUM_BINS],
     output logic signed [OSC_WIDTH-1:0] W_imag_o[NUM_BINS]
 );
-    // TODO: if able to remove overflow logic, can remove these two params as well
-    // 32 bit fixed point representation of pi and -pi (Q3.29)
-    // localparam signed [PHASE_WIDTH-1:0] PI_POS = 32'b0110_0100_1000_0111_1110_1101_0101_0001; // + pi
-    // localparam signed [PHASE_WIDTH-1:0] PI_NEG = 32'b1001_1011_0111_1000_0001_0010_1010_1111; // - pi
-
-    // Phase Accumulators
-    // logic [PHASE_WIDTH-1:0] phase_acc[NUM_BINS];
-
 
     logic [PHASE_WIDTH-1:0] phase_acc_d[NUM_BINS];
     logic [PHASE_WIDTH-1:0] phase_acc_q[NUM_BINS];
@@ -44,13 +36,7 @@ module oscillator_bank #(
                 for (int k = 0; k < NUM_BINS; k++) phase_acc_d[k] = '0;
         end else if (enable_i) begin
             for (int k = 0; k < NUM_BINS; k++) begin
-                // TODO: probably able to remove overflow logic
-                // phases are accumulated from 0 to pi -> there is no need to handle overflow
-                // if(phase_acc_q[k] + freq_steps_i[k] < PI_POS) begin
-                    phase_acc_d[k] = phase_acc_q[k] + freq_steps_i[k];
-                // end else begin
-                //    phase_acc_d[k] = PI_NEG;
-                // end
+                phase_acc_d[k] = phase_acc_q[k] + freq_steps_i[k];
             end
         end
     end
@@ -75,13 +61,12 @@ module oscillator_bank #(
             logic [2*OSC_WIDTH-1:0] cordic_dout;
 
             // Arithmetic Right Shift by 2. because cordic IP with scaled radians 
-            // forces Q2.29 input, but phase needs to be between -1 and 1
+            // Forces Q2.29 input, but phase needs to be between -1 and 1
             // between 111000.. and 001000...
-            // TODO: don't we lose 2 bits of precision for the phase like this?
-            // but it makes the entire system easier because we dont need to multiply with pi,
-            // also we dont need to detect overflow (phase > pi)
-            // also, now the phase steps are represented perfectly in binary
-            // use concatenation to force the sign extension explicitly.
+            // Makes the entire system easier because we dont need to multiply with pi,
+            // Also, we dont need to detect overflow (phase > pi)
+            // Also, now the phase steps are represented perfectly in binary
+            // Use concatenation to force the sign extension explicitly.
             logic [PHASE_WIDTH-1:0] phase_scaled;
             assign phase_scaled = { {2{phase_acc_q[k][PHASE_WIDTH-1]}}, phase_acc_q[k][PHASE_WIDTH-1:2] };
             

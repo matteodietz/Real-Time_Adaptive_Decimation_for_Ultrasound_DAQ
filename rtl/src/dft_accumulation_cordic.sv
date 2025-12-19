@@ -153,23 +153,6 @@ module dft_accumulation_cordic #(
     // -------------------------------------------------------------------------
     // Combinational Logic: Stage 1 (Windowing)
     // -------------------------------------------------------------------------
-    // always_comb begin
-    //     x_weighted_real_d = x_weighted_real_q;
-    //     x_weighted_imag_d = x_weighted_imag_q;
-    //     sample_valid_stage1_d = 1'b0; // before: sample_valid_stage1_q
-    //     last_sample_stage1_d = 1'b0;   // before: last_sample_stage1_q
-
-    //     if (sample_valid_i && (state_q == ACCUMULATE)) begin
-    //         x_weighted_real_d = $signed(i_sample_i) * $signed(window_coeff_i);
-    //         x_weighted_imag_d = $signed(q_sample_i) * $signed(window_coeff_i);
-    //         sample_valid_stage1_d = 1'b1;
-    //         last_sample_stage1_d = last_sample_i;
-    //     end else begin
-    //         sample_valid_stage1_d = 1'b0;
-    //         last_sample_stage1_d = 1'b0;
-    //     end
-    // end
-
      always_comb begin
         // Default
         x_weighted_real_d = x_weighted_real_q;

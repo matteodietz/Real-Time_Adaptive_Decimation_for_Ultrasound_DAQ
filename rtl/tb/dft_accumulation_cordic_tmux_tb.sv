@@ -4,7 +4,7 @@ module dft_accumulation_cordic_tmux_tb ();
     timeprecision 1ps;
 
     // --- Parameters (MUST match DUT and Python generator) ---
-    localparam time CLK_PERIOD = 10ns;  // 100 MHz (12x faster conceptually)
+    localparam time CLK_PERIOD = 10ns;
     localparam unsigned RST_CLK_CYCLES = 5;
     
     localparam integer IQ_WIDTH = 16;
@@ -18,13 +18,13 @@ module dft_accumulation_cordic_tmux_tb ();
     localparam integer PHASE_WIDTH = 32;
     localparam integer NUM_BINS = 24;
     localparam integer SAMPLE_COUNT_WIDTH = 16;
-    localparam integer COUNTER_WIDTH = 4;
-    localparam integer OSC_COUNTER_WIDTH = 6;
+    localparam integer COUNTER_WIDTH = 5;
     
     // Timing constants
-    localparam integer OSC_LATENCY = 36;
-    localparam integer CYCLES_PER_SAMPLE = 12;  // NUM_BINS/2
-    localparam integer OSC_STARTUP_CYCLES = (OSC_LATENCY - 1) * CYCLES_PER_SAMPLE;  // 420 cycles
+    localparam integer CORDIC_LATENCY = 36;
+    localparam integer WINDOWING_LATENCY = 1;
+    localparam integer CYCLES_PER_SAMPLE = 12;  // NUM_BINS/2 - counter cycles per sample
+    localparam integer OSC_EARLY_START = CORDIC_LATENCY - WINDOWING_LATENCY; // 35 cycles
     
     // Maximum samples per test
     localparam integer MAX_SAMPLES = 256;
@@ -35,6 +35,11 @@ module dft_accumulation_cordic_tmux_tb ();
     logic start;
     logic sample_valid;
     logic last_sample;
+    
+    // Oscillator control signals
+    logic osc_reset;
+    logic osc_enable;
+    logic osc_phase_tvalid;
     
     // Frequency steps for oscillator bank
     logic [PHASE_WIDTH-1:0] freq_steps[NUM_BINS];
@@ -73,15 +78,16 @@ module dft_accumulation_cordic_tmux_tb ();
         .OSC_WIDTH_FRAC(OSC_WIDTH_FRAC),
         .PHASE_WIDTH(PHASE_WIDTH),
         .SAMPLE_COUNT_WIDTH(SAMPLE_COUNT_WIDTH),
-        .COUNTER_WIDTH(COUNTER_WIDTH),
-        .OSC_COUNTER_WIDTH(OSC_COUNTER_WIDTH),
-        .OSC_LATENCY(OSC_LATENCY)
+        .COUNTER_WIDTH(COUNTER_WIDTH)
     ) dut (
         .clk_i(clk),
         .rst_ni(rst_n),
         .start_i(start),
         .sample_valid_i(sample_valid),
         .last_sample_i(last_sample),
+        .osc_reset_i(osc_reset),
+        .osc_enable_i(osc_enable),
+        .osc_phase_tvalid_i(osc_phase_tvalid),
         .freq_steps_i(freq_steps),
         .i_sample_i(i_sample),
         .q_sample_i(q_sample),
@@ -113,6 +119,9 @@ module dft_accumulation_cordic_tmux_tb ();
         start = 1'b0;
         sample_valid = 1'b0;
         last_sample = 1'b0;
+        osc_reset = 1'b0;
+        osc_enable = 1'b0;
+        osc_phase_tvalid = 1'b0;
         i_sample = '0;
         q_sample = '0;
         window_coeff = '0;
@@ -191,10 +200,8 @@ module dft_accumulation_cordic_tmux_tb ();
             
             // Read all sample data
             for (int n = 0; n < num_samples_read; n++) begin
-                // Read I, Q, window_coeff
                 status = $fscanf(file, "%h %h %h", 
                                i_samples[n], q_samples[n], window_coeffs[n]);
-                // $display("%h %h %h", i_samples[n], q_samples[n], window_coeffs[n]);
                 status = $fgets(line, file); // Consume newline
             end
             
@@ -204,19 +211,15 @@ module dft_accumulation_cordic_tmux_tb ();
             status = $fgets(line, file);
             
             // Read expected A_real values
-            $display("\nExpected Accumulator Values (real):\n");
             for (int k = 0; k < num_bins_read; k++) begin
                 status = $fscanf(file, "%h", exp_A_real[k]);
                 status = $fgets(line, file); // Consume newline
-                // $display(" %h ", exp_A_real[k]);
             end
             
             // Read expected A_imag values
-            $display("\nExpected Accumulator Values (imag):\n");
             for (int k = 0; k < num_bins_read; k++) begin
                 status = $fscanf(file, "%h", exp_A_imag[k]);
                 status = $fgets(line, file); // Consume newline
-                // $display(" %h ", exp_A_imag[k]);
             end
             
             // Skip GOLDEN line
@@ -225,47 +228,69 @@ module dft_accumulation_cordic_tmux_tb ();
             // Skip blank line
             status = $fgets(line, file);
             
-            // --- Drive DUT with time-multiplexed timing ---
-            $display("  Starting DFT computation (internal OSC_STARTUP)...");
+            // --- Drive DUT with proper timing ---
+            $display("  Starting oscillator bank (35 cycles early)...");
             
-            // Assert start signal for 1 cycle
+            // Step 1: Reset oscillator phase accumulators
             @(posedge clk);
             @(negedge clk);
-            #1;
+            osc_reset = 1'b1;
+            @(negedge clk);
+            osc_reset = 1'b0;
+            
+            // Step 2: Start oscillator bank (enable and phase_tvalid)
+            @(negedge clk);
+            osc_enable = 1'b1;
+            osc_phase_tvalid = 1'b1;
+            
+            // Step 3: Wait for CORDIC latency minus windowing stage (35 cycles)
+            $display("  Waiting %0d cycles for CORDIC pipeline...", OSC_EARLY_START);
+            // repeat(OSC_EARLY_START-3) @(posedge clk);
+            // -3 adjustment for timing (same as non-tmux version)
+            repeat(CORDIC_LATENCY - 4) @(posedge clk);
+
+            // Step 4: Start DFT accumulation
+            $display("  Starting DFT accumulation...");
+            @(posedge clk);
+            @(negedge clk);
             start = 1'b1;
-            @(posedge clk);
-            @(negedge clk);
-            #1;
-            start = 1'b0;
+            // sample_valid = 1'b1;
+             @(negedge clk);
+             start = 1'b0;
             
-            // Wait for oscillator startup to complete
-            // OSC_STARTUP takes (OSC_LATENCY - 1) * CYCLES_PER_SAMPLE = 35 * 12 = 420 cycles
-            $display("  Waiting %0d cycles for internal OSC_STARTUP...", OSC_STARTUP_CYCLES);
-            repeat(OSC_STARTUP_CYCLES + 10) @(posedge clk);  // Add a few extra cycles for safety
-            
-            // Now in ACCUMULATE state, start streaming samples
+            // Step 5: Stream samples (each held for 12 cycles)
             $display("  Streaming samples (each held for %0d cycles)...", CYCLES_PER_SAMPLE);
-            
             for (int n = 0; n < num_samples_read; n++) begin
-                // Set up sample data - will be held for 12 cycles
+                // Wait for counter to wrap to 0 (ready for new sample)
+                // In the module, samples are accepted when tmux_counter == 0
+
+                
+                // @(posedge clk);
                 #1;
+                
+                // Set up sample data
                 i_sample = i_samples[n];
                 q_sample = q_samples[n];
                 window_coeff = window_coeffs[n];
+
+                @(negedge clk);
                 sample_valid = 1'b1;
                 
-                // Assert last_sample during the entire 12 cycles of the last sample
+                // Assert last_sample on final sample
                 if (n == num_samples_read - 1) begin
                     last_sample = 1'b1;
                 end else begin
                     last_sample = 1'b0;
                 end
+
+                // @(negedge clk);
+                // start = 1'b0;
                 
-                // Hold sample for 12 cycles (one complete counter cycle)
+                // Hold sample for 12 cycles while counter cycles through bins
                 repeat(CYCLES_PER_SAMPLE) @(posedge clk);
                 
                 if (n % 16 == 0) begin
-                    $display("    Streamed sample %0d/%0d...", n, num_samples_read);
+                    $display("    Processing sample %0d/%0d...", n, num_samples_read);
                 end
             end
             
@@ -274,6 +299,8 @@ module dft_accumulation_cordic_tmux_tb ();
             @(negedge clk);
             sample_valid = 1'b0;
             last_sample = 1'b0;
+            osc_enable = 1'b0;
+            osc_phase_tvalid = 1'b0;
             
             $display("  All samples streamed, waiting for valid...");
             
@@ -298,8 +325,8 @@ module dft_accumulation_cordic_tmux_tb ();
             end
             
             // Wait before next test case
-            $display("  Waiting 100 cycles before next test...");
-            repeat(100) @(posedge clk);
+            $display("  Waiting 50 cycles before next test...");
+            repeat(50) @(posedge clk);
         end
 
         $fclose(file);
@@ -329,7 +356,6 @@ module dft_accumulation_cordic_tmux_tb ();
         automatic longint error_real, error_imag;
         automatic real error_real_float, error_imag_float;
         
-        // Define tolerance (adjust based on expected quantization error)
         automatic longint tolerance = 2; // Allow ±2 LSBs of error
         
         $display("  Checking results...");

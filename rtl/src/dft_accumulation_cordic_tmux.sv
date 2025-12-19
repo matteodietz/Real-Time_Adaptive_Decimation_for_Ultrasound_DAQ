@@ -11,6 +11,7 @@ module dft_accumulation_cordic_tmux #(
     parameter integer PHASE_WIDTH = 16,
     parameter integer SAMPLE_COUNT_WIDTH = 16,
     parameter integer COUNTER_WIDTH = 4,       // clog2(NUM_BINS/2)
+    parameter integer OSC_COUNTER_WIDTH = 6,   // clog(OSC_LATENCY - 1)
     parameter integer OSC_LATENCY = 36         // CORDIC latency
 )(
     input  logic clk_i,
@@ -51,7 +52,7 @@ module dft_accumulation_cordic_tmux #(
 
     state_t state_q, state_d;
     logic [SAMPLE_COUNT_WIDTH-1:0] sample_count_q, sample_count_d;
-    logic [COUNTER_WIDTH-1:0] osc_startup_counter_q, osc_startup_counter_d;
+    logic [OSC_COUNTER_WIDTH-1:0] osc_startup_counter_q, osc_startup_counter_d;
 
     // =========================================================================
     // Counter for Time Multiplexing (0 to CYCLES_PER_SAMPLE-1)
@@ -257,7 +258,8 @@ module dft_accumulation_cordic_tmux #(
                 if (tmux_counter_q == COUNTER_WIDTH'(CYCLES_PER_SAMPLE - 1)) begin
                     osc_startup_counter_d = osc_startup_counter_q + 1;
                     
-                    if (osc_startup_counter_q == COUNTER_WIDTH'(OSC_LATENCY - 1)) begin
+                    // OSC_LATENCY - 2 because counter starts at 0, need to wait 35 cycles total
+                    if (osc_startup_counter_q == OSC_COUNTER_WIDTH'(OSC_LATENCY - 2)) begin
                         state_d = ACCUMULATE;
                     end
                 end

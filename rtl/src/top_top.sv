@@ -1,7 +1,6 @@
 module top_top (
     input  logic clk_i,
     input  logic rst_ni,
-    input  logic enable_i,
     output logic valid_o
 );
 
@@ -15,7 +14,7 @@ module top_top (
     localparam integer NUM_BINS = 24;
     localparam integer OSC_WIDTH = 32;
     localparam integer OSC_WIDTH_FRAC = 30;
-    localparam integer PHASE_WIDTH = 32;
+    localparam integer PHASE_WIDTH = 24;
     localparam integer POWER_INPUT_WIDTH = 32;
     localparam integer POWER_WIDTH = 8;
     localparam integer POWER_FRAC = 0;
@@ -25,7 +24,7 @@ module top_top (
     localparam integer SAMPLE_COUNT_WIDTH = 16;
     localparam integer FREQ_BIN_WIDTH = 16;
     localparam logic [POWER_WIDTH-1:0] THRESHOLD_DROP = 8'h1E;
-    localparam integer CONFIG_DATA_WIDTH = 32;
+    localparam integer CONFIG_DATA_WIDTH = 24;
 
     // --- Internal wires for wrapper I/O ---
     // Configuration Loading Interface

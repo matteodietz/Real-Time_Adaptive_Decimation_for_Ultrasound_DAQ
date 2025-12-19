@@ -123,6 +123,7 @@ module top_with_config_loader #(
     //--------------------------------------------------------------------------
     
     // 0. Configuration Loader
+    (* DONT_TOUCH = "true" *)
     config_loader #(
         .PHASE_WIDTH     (PHASE_WIDTH),
         .FREQ_BIN_WIDTH  (FREQ_BIN_WIDTH),
@@ -141,6 +142,7 @@ module top_with_config_loader #(
     );
     
     // 1. Spectral Power Estimator
+    (* DONT_TOUCH = "true" *)
     spectral_power_estimator #(
         .IQ_WIDTH           (IQ_WIDTH),
         .IQ_WIDTH_FRAC      (IQ_WIDTH_FRAC),
@@ -176,6 +178,7 @@ module top_with_config_loader #(
     );
     
     // 2. Bandwidth Edge Detector
+    (* DONT_TOUCH = "true" *)
     bandwidth_edge_detector #(
         .POWER_WIDTH        (POWER_WIDTH),
         .POWER_FRAC         (POWER_FRAC),

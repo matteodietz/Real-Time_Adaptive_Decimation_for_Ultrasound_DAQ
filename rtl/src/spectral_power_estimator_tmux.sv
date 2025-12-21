@@ -81,7 +81,7 @@ module spectral_power_estimator_tmux #(
     
     // Power Conversion Outputs
     logic [POWER_WIDTH-1:0] db_power_internal[NUM_BINS];
-    logic power_valid[NUM_BINS];
+    logic power_valid; // [NUM_BINS];
     
     // Combined valid signal (all bins converted)
     logic all_bins_valid;
@@ -234,50 +234,82 @@ module spectral_power_estimator_tmux #(
             assign A_imag_clipped[j] = A_imag[j][ACCUM_WIDTH-1 -: POWER_INPUT_WIDTH];
         end
     endgenerate
-    
+
     // =========================================================================
-    // 5. Complex to Log Power Conversion (Per Bin)
+    // 5. Time-Multiplexed Complex to Log Power Conversion
     // =========================================================================
-    // Converts each complex DFT bin to logarithmic power (dB)
-    // Instantiate one converter per frequency bin
+    // logic [POWER_WIDTH-1:0] db_power_internal[NUM_BINS];
+    // logic power_valid;
     
-    genvar k;
-    generate
-        for (k = 0; k < NUM_BINS; k++) begin : gen_power_converters
-            
-            complex_to_log_power #(
-                .INPUT_WIDTH    (POWER_INPUT_WIDTH),
-                .OUTPUT_WIDTH   (POWER_WIDTH),
-                .OUTPUT_FRAC    (POWER_FRAC)
-            ) u_log_power (
-                .clk_i          (clk_i),
-                .rst_ni         (rst_ni),
-                .valid_i        (dft_valid),
-                .i_data_i       (A_real_clipped[k]),
-                .q_data_i       (A_imag_clipped[k]),
-                .valid_o        (power_valid[k]),
-                .db_power_o     (db_power_internal[k])
-            );
-            
-            // Connect to output array
-            assign db_power_o[k] = db_power_internal[k];
-        end
-    endgenerate
+    complex_to_log_power_tmux #(
+        .NUM_BINS           (NUM_BINS),
+        .POWER_INPUT_WIDTH  (POWER_INPUT_WIDTH),
+        .POWER_WIDTH        (POWER_WIDTH),
+        .POWER_FRAC         (POWER_FRAC),
+        .LATENCY            (3)  // Fixed 3-cycle latency
+    ) u_log_power_tmux (
+        .clk_i              (clk_i),
+        .rst_ni             (rst_ni),
+        .valid_i            (dft_valid),
+        .A_real_clipped_i   (A_real_clipped),
+        .A_imag_clipped_i   (A_imag_clipped),
+        .db_power_o         (db_power_internal),
+        .valid_o            (power_valid)
+    );
     
-    // =========================================================================
-    // 6. Output Logic
-    // =========================================================================
-    // Valid output when all bins have been converted to dB power
-    
+    // Connect to output
     always_comb begin
-        all_bins_valid = 1'b1;
-        for (int i = 0; i < NUM_BINS; i++) begin
-            all_bins_valid = all_bins_valid & power_valid[i];
+        for (int k = 0; k < NUM_BINS; k++) begin
+            db_power_o[k] = db_power_internal[k];
         end
     end
     
-    assign valid_o = all_bins_valid;
+    assign valid_o = power_valid;
     assign busy_o = dft_busy;
+    
+    // // =========================================================================
+    // // 5. Complex to Log Power Conversion (Per Bin)
+    // // =========================================================================
+    // // Converts each complex DFT bin to logarithmic power (dB)
+    // // Instantiate one converter per frequency bin
+    
+    // genvar k;
+    // generate
+    //     for (k = 0; k < NUM_BINS; k++) begin : gen_power_converters
+            
+    //         complex_to_log_power #(
+    //             .INPUT_WIDTH    (POWER_INPUT_WIDTH),
+    //             .OUTPUT_WIDTH   (POWER_WIDTH),
+    //             .OUTPUT_FRAC    (POWER_FRAC)
+    //         ) u_log_power (
+    //             .clk_i          (clk_i),
+    //             .rst_ni         (rst_ni),
+    //             .valid_i        (dft_valid),
+    //             .i_data_i       (A_real_clipped[k]),
+    //             .q_data_i       (A_imag_clipped[k]),
+    //             .valid_o        (power_valid[k]),
+    //             .db_power_o     (db_power_internal[k])
+    //         );
+            
+    //         // Connect to output array
+    //         assign db_power_o[k] = db_power_internal[k];
+    //     end
+    // endgenerate
+    
+    // // =========================================================================
+    // // 6. Output Logic
+    // // =========================================================================
+    // // Valid output when all bins have been converted to dB power
+    
+    // always_comb begin
+    //     all_bins_valid = 1'b1;
+    //     for (int i = 0; i < NUM_BINS; i++) begin
+    //         all_bins_valid = all_bins_valid & power_valid[i];
+    //     end
+    // end
+    
+    // assign valid_o = all_bins_valid;
+    // assign busy_o = dft_busy;
     
     // =========================================================================
     // Assertions

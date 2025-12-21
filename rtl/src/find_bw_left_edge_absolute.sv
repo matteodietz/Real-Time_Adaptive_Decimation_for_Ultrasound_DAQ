@@ -105,8 +105,8 @@ module find_bw_left_edge_absolute #(
     // -------------------------------------------------------------------------
     // Assuming inputs are Unsigned Absolute dB (e.g., 60dB, 90dB)
     // We simply compare against the unsigned abs_threshold_i
-    assign L1_above_thresh = (L1 >= abs_threshold_i);
-    assign L2_above_thresh = (L2 >= abs_threshold_i);
+    assign L1_above_thresh = (L1 > abs_threshold_i);
+    assign L2_above_thresh = (L2 > abs_threshold_i);
     
     always_comb begin
         case ({L1_above_thresh, L2_above_thresh})

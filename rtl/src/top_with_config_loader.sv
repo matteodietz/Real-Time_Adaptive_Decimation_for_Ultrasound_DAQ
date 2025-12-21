@@ -46,7 +46,9 @@ module top_with_config_loader #(
     parameter logic [POWER_WIDTH-1:0] THRESHOLD_DROP = 8'h1E,  // 30dB
     
     // --- Config Loader Parameters ---
-    parameter integer CONFIG_DATA_WIDTH = 32  // Max(PHASE_WIDTH, FREQ_BIN_WIDTH) //32
+    parameter integer CONFIG_DATA_WIDTH = 32,  // Max(PHASE_WIDTH, FREQ_BIN_WIDTH) //32
+    parameter integer TMUX_COUNTER_WIDTH = 5,
+    parameter integer CYCLES_PER_SAMPLE = 12
 )(
     input  logic clk_i,
     input  logic rst_ni,
@@ -160,7 +162,9 @@ module top_with_config_loader #(
         .WINDOW_SIZE        (WINDOW_SIZE),
         .OSC_LATENCY        (OSC_LATENCY),
         .COUNTER_WIDTH      (COUNTER_WIDTH),
-        .SAMPLE_COUNT_WIDTH (SAMPLE_COUNT_WIDTH)
+        .SAMPLE_COUNT_WIDTH (SAMPLE_COUNT_WIDTH),
+        .TMUX_COUNTER_WIDTH (TMUX_COUNTER_WIDTH),
+        .CYCLES_PER_SAMPLE  (CYCLES_PER_SAMPLE)
     ) u_spectral_power_estimator (
         .clk_i          (clk_i),
         .rst_ni         (rst_ni),

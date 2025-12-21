@@ -76,7 +76,7 @@ module spectral_power_estimator_tmux_tb();
     end
 
     // --- DUT Instantiation ---
-    spectral_power_estimator #(
+    spectral_power_estimator_tmux #(
         .IQ_WIDTH           (IQ_WIDTH),
         .IQ_WIDTH_FRAC      (IQ_WIDTH_FRAC),
         .WINDOW_WIDTH       (WINDOW_WIDTH),
@@ -488,3 +488,4 @@ module spectral_power_estimator_tmux_tb();
     endtask
 
 endmodule
+

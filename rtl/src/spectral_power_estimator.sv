@@ -23,7 +23,8 @@ module spectral_power_estimator #(
     parameter integer OSC_LATENCY = 36,           // CORDIC pipeline depth
     parameter integer COUNTER_WIDTH = 16,
     parameter integer SAMPLE_COUNT_WIDTH = 16,
-    parameter integer TMUX_COUNTER_WIDTH = 5
+    parameter integer TMUX_COUNTER_WIDTH = 5,
+    parameter integer CYCLES_PER_SAMPLE = 12
 )(
     input  logic clk_i,
     input  logic rst_ni,
@@ -94,7 +95,7 @@ module spectral_power_estimator #(
     
     assign X = delay_cycles_i - COUNTER_WIDTH'(OSC_LATENCY - 1);
     assign Y = COUNTER_WIDTH'(OSC_LATENCY);
-    assign Z = COUNTER_WIDTH'(WINDOW_SIZE);
+    assign Z = COUNTER_WIDTH'(WINDOW_SIZE * CYCLES_PER_SAMPLE);
     
     // =========================================================================
     // 1. Counter Controller (replaces dft_timing_controller)

@@ -1,4 +1,4 @@
-module spectral_power_estimator #(
+module spectral_power_estimator_tmux #(
     // --- DFT Parameters ---
     parameter integer IQ_WIDTH = 16,
     parameter integer IQ_WIDTH_FRAC = 14,
@@ -104,7 +104,8 @@ module spectral_power_estimator #(
     counter_controller #(
         .COUNTER_WIDTH_X(COUNTER_WIDTH),
         .COUNTER_WIDTH_Y(COUNTER_WIDTH),
-        .COUNTER_WIDTH_Z(COUNTER_WIDTH)
+        .COUNTER_WIDTH_Z(COUNTER_WIDTH),
+        .N              (CYCLES_PER_SAMPLE)
     ) u_counter_ctrl (
         .clk_i              (clk_i),
         .rst_ni             (rst_ni),

@@ -143,7 +143,7 @@ module top_with_config_loader #(
     
     // 1. Spectral Power Estimator
     (* DONT_TOUCH = "true" *)
-    spectral_power_estimator #(
+    spectral_power_estimator_tmux #(
         .IQ_WIDTH           (IQ_WIDTH),
         .IQ_WIDTH_FRAC      (IQ_WIDTH_FRAC),
         .WINDOW_WIDTH       (WINDOW_WIDTH),

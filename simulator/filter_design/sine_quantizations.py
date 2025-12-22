@@ -1,138 +1,154 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def float_to_fixed_point(value, total_bits, frac_bits, signed=True):
+def quantize_to_int16(signal_float):
     """
-    Simulates the AFE Quantizer (ADC).
-    Converts float to integer representation of fixed point.
+    Simulates rounding to 16-bit integer range [-32768, 32767].
     """
-    scale = 2 ** frac_bits
+    scale_factor = 32767.0
+    val_scaled = signal_float * scale_factor
+    val_int = np.round(val_scaled)
     
-    # 1. Scale
-    scaled = value * scale
-    
-    # 2. Round (This is where information is lost!)
-    fixed_val = int(np.round(scaled))
-    
-    # 3. Saturation / Clipping logic
-    if signed:
-        max_val = 2 ** (total_bits - 1) - 1
-        min_val = -(2 ** (total_bits - 1))
-    else:
-        max_val = 2 ** total_bits - 1
-        min_val = 0
-        
-    fixed_val = max(min_val, min(max_val, fixed_val))
-    
-    # 4. Convert to unsigned integer for "wire" format (SystemVerilog compatibility)
-    if signed and fixed_val < 0:
-        fixed_val = (1 << total_bits) + fixed_val
-        
-    return fixed_val
+    # Check for clipping before applying it
+    clip_mask = (val_int > 32767) | (val_int < -32768)
+    if np.any(clip_mask):
+        print(f"  WARNING: {np.sum(clip_mask)} samples clipped during quantization!")
 
-def fixed_point_to_float(fixed_val, total_bits, frac_bits, signed=True):
-    """
-    Simulates the FPGA reading the integer and interpreting it as a voltage.
-    """
-    if not signed:
-        return float(fixed_val) / (2**frac_bits)
+    val_int = np.clip(val_int, -32768, 32767)
+    return val_int, scale_factor
 
-    sign_bit_mask = 1 << (total_bits - 1)
-    
-    if (fixed_val & sign_bit_mask):
-        signed_int = fixed_val - (1 << total_bits)
-    else:
-        signed_int = fixed_val
-        
-    return float(signed_int) / (2**frac_bits)
+def calculate_sqnr(signal_power, noise_power):
+    """Calculates SQNR in dB given raw powers."""
+    if noise_power == 0: return float('inf')
+    return 10 * np.log10(signal_power / noise_power)
 
 def run_simulation():
-    # --- Configuration ---
-    FS_HIGH = 125e6
-    DECIMATION = 4
-    FS = FS_HIGH / DECIMATION  # 31.25 MHz
+    print("=== AFE Filter Gain Staging Proof ===\n")
     
-    FREQ = 3e6 
+    # -------------------------------------------------------------------------
+    # 1. The Physical World (Analog Input)
+    # -------------------------------------------------------------------------
+    n_samples = 200
+    # Signal spans 4 full cycles (0 to 8pi)
+    t = np.linspace(0, 8*np.pi, n_samples)
     
-    # Bit Configuration (16-bit output, Q2.14 format)
-    TOTAL_BITS = 16
-    FRAC_BITS = 14
+    # FIX: Reduce Amplitude to 0.8 (-2 dBFS) to prevent clipping in Scenario B
+    # This leaves headroom for the noise and rounding at the top of the range.
+    original_physics_signal = 0.8 * np.sin(t)
     
-    # Simulation Window
-    num_samples = 100
-    t = np.arange(num_samples) / FS
+    # Signal attenuation by tissue (-6dB) 
+    tissue_atten_db = -6.0
+    tissue_gain = 10**(tissue_atten_db/20.0) # ~0.501
     
-    # 1. Ideal Input Signal (Magnitude 1.0)
-    ideal_signal = 1.0 * np.sin(2 * np.pi * FREQ * t)
+    # Input Thermal Noise (-80dB, low enough to see quantization effects clearly)
+    snr_input = -35
+    input_noise = np.random.normal(0, 10**(snr_input/20), n_samples)
 
-    # --- Scenario A: The "Generic" Path (Attenuated) ---
-    # Logic: Transducer (-6dB) + Filter (-3dB) = -9dB Total Attenuation
-    atten_db = -9.0
-    atten_gain = 10**(atten_db / 20.0) # ~0.355
+    analog_input_total = (original_physics_signal * tissue_gain) + input_noise
     
-    print(f"Scenario A Attenuation: {atten_db} dB (Linear: {atten_gain:.4f})")
-    
-    # A1. Apply Analog Attenuation
-    sig_a_analog = ideal_signal * atten_gain
-    
-    # A2. Quantize (ADC Step) -> This creates the "Staircase"
-    # We apply the quantization to the weak signal
-    sig_a_digital_int = [float_to_fixed_point(x, TOTAL_BITS, FRAC_BITS) for x in sig_a_analog]
-    
-    # A3. Reconstruct (FPGA Step)
-    sig_a_recon_raw = np.array([fixed_point_to_float(x, TOTAL_BITS, FRAC_BITS) for x in sig_a_digital_int])
-    
-    # A4. Digital Correction (The Comparison Step)
-    # To compare with the original, we must digitally boost it back up
-    # This amplifies the quantization error!
-    sig_a_final = sig_a_recon_raw / atten_gain
+    print(f"Input Signal Peak: {np.max(np.abs(analog_input_total)):.4f} (relative to FS=1.0)")
 
-    # --- Scenario B: The "Boosted" Path ---
-    # Logic: We apply analog gain to counteract the -9dB BEFORE quantization.
-    # So the signal entering the ADC is approx Magnitude 1.0
+    # -------------------------------------------------------------------------
+    # 2. First Quantization (The ADC)
+    # -------------------------------------------------------------------------
+    print("\n--- ADC Conversion ---")
+    adc_output_int, scale_factor = quantize_to_int16(analog_input_total)
     
-    # B1. Apply Boost (effectively canceling attenuation)
-    sig_b_analog = ideal_signal * 1.0 
+    # -------------------------------------------------------------------------
+    # 3. The Processing Fork (Internal High Precision)
+    # -------------------------------------------------------------------------
     
-    # B2. Quantize (ADC Step)
-    sig_b_digital_int = [float_to_fixed_point(x, TOTAL_BITS, FRAC_BITS) for x in sig_b_analog]
+    # Scenario A: Standard Filter (Attenuates -3dB)
+    filter_gain_A_db = -3.0
+    gain_A = 10**(filter_gain_A_db/20.0) # ~0.707
+    internal_A = adc_output_int * gain_A
     
-    # B3. Reconstruct (FPGA Step)
-    sig_b_final = np.array([fixed_point_to_float(x, TOTAL_BITS, FRAC_BITS) for x in sig_b_digital_int])
-    
-    # B4. No Digital Correction needed (Signal is already at correct scale)
+    # Scenario B: Boost Filter (Boosts +6dB)
+    filter_gain_B_db = 6.0
+    gain_B = 10**(filter_gain_B_db/20.0) # ~1.995
+    internal_B = adc_output_int * gain_B
 
-    # --- Analysis ---
-    error_a = ideal_signal - sig_a_final
-    error_b = ideal_signal - sig_b_final
+    # -------------------------------------------------------------------------
+    # 4. Second Quantization (Output to FPGA)
+    # -------------------------------------------------------------------------
     
-    sqnr_a = 10 * np.log10(np.mean(ideal_signal**2) / np.mean(error_a**2))
-    sqnr_b = 10 * np.log10(np.mean(ideal_signal**2) / np.mean(error_b**2))
+    print("\n--- Re-Quantization (to 16-bit) ---")
+    # Output A
+    output_A_int = np.round(internal_A)
+    # Check clipping A
+    if np.any((output_A_int > 32767) | (output_A_int < -32768)):
+        print("  Scenario A Clipped!")
+    output_A_int = np.clip(output_A_int, -32768, 32767)
     
-    print(f"\n--- Results ---")
-    print(f"SQNR Scenario A (Attenuated then Digitally Boosted): {sqnr_a:.2f} dB")
-    print(f"SQNR Scenario B (Analog Boosted then Quantized):     {sqnr_b:.2f} dB")
-    print(f"Improvement: {sqnr_b - sqnr_a:.2f} dB (Expected: ~9 dB)")
+    # Output B
+    output_B_int = np.round(internal_B)
+    # Check clipping B
+    if np.any((output_B_int > 32767) | (output_B_int < -32768)):
+        print("  Scenario B Clipped! (Results will be invalid)")
+    output_B_int = np.clip(output_B_int, -32768, 32767)
 
-    # --- Plotting ---
-    plt.figure(figsize=(12, 8))
+    # -------------------------------------------------------------------------
+    # 5. Analysis: Input-Referred Noise
+    # -------------------------------------------------------------------------
     
-    plt.subplot(2,1,1)
-    plt.title(f"Reconstructed Signals (Target Magnitude 1.0)")
-    plt.plot(t*1e6, ideal_signal, 'k', label='Ideal Input', linewidth=1, alpha=0.5)
-    plt.step(t*1e6, sig_a_final, 'r', label=f'Scenario A (SQNR {sqnr_a:.1f}dB)', where='mid')
-    plt.step(t*1e6, sig_b_final, 'g--', label=f'Scenario B (SQNR {sqnr_b:.1f}dB)', where='mid')
-    plt.legend()
-    plt.ylabel("Amplitude")
+    # Error introduced by the rounding step (Output Domain LSBs)
+    error_A_out = internal_A - output_A_int
+    error_B_out = internal_B - output_B_int
+    
+    # Refer error back to the Input Domain (divide by the gain applied)
+    error_A_in = error_A_out / gain_A
+    error_B_in = error_B_out / gain_B
+    
+    # Calculate Powers
+    # We compare noise against the theoretical signal power in the ADC domain
+    signal_power_adc = np.mean(adc_output_int**2)
+    noise_power_A = np.mean(error_A_in**2)
+    noise_power_B = np.mean(error_B_in**2)
+    
+    sqnr_A = calculate_sqnr(signal_power_adc, noise_power_A)
+    sqnr_B = calculate_sqnr(signal_power_adc, noise_power_B)
+    
+    print("\n=== Results: Re-Quantization SQNR ===")
+    print(f"Scenario A (Attenuated): {sqnr_A:.2f} dB")
+    print(f"Scenario B (Boosted):    {sqnr_B:.2f} dB")
+    
+    diff = sqnr_B - sqnr_A
+    print(f"\nImprovement:          {diff:.2f} dB")
+    print(f"Effective Bits Gained: {diff/6.02:.2f} bits")
+    print(f"Theoretical Gain Diff: {filter_gain_B_db - filter_gain_A_db:.2f} dB")
+
+    # -------------------------------------------------------------------------
+    # 6. Plotting
+    # -------------------------------------------------------------------------
+    plt.figure(figsize=(10, 10))
+    
+    # DYNAMIC PLOT LIMIT: Always show exactly 1 cycle for clarity
+    samples_to_plot = int(n_samples)
+    
+    # Plot 1: Original Analog Signal
+    plt.subplot(3, 1, 1)
+    plt.plot(t[:samples_to_plot], analog_input_total[:samples_to_plot], 'k', label='Analog Input (Attenuated + Noise)')
+    plt.title(f"1. Original Analog Signal (Input to ADC) - First {samples_to_plot} samples")
+    plt.ylabel("Amplitude (Normalized)")
+    plt.legend(loc='upper right')
     plt.grid(True, alpha=0.3)
     
-    plt.subplot(2,1,2)
-    plt.title("Quantization Error (Residuals)")
-    plt.plot(t*1e6, error_a, 'r', label='Error A (Digital Boost noise)', linewidth=1.5)
-    plt.plot(t*1e6, error_b, 'g', label='Error B (Analog Boost noise)', linewidth=1.5)
-    plt.legend()
-    plt.xlabel("Time (us)")
-    plt.ylabel("Error Magnitude")
+    # Plot 2: Filtered Digital Signals
+    plt.subplot(3, 1, 2)
+    plt.plot(output_B_int[:samples_to_plot], 'b', label=f'Scenario B: Boosted (Used Range: {np.max(np.abs(output_B_int))})')
+    plt.plot(output_A_int[:samples_to_plot], 'r', label=f'Scenario A: Attenuated (Used Range: {np.max(np.abs(output_A_int))})')
+    plt.title("2. Digital Output Codes (16-bit)")
+    plt.ylabel("16-bit Integer Code")
+    plt.legend(loc='upper right')
+    plt.grid(True, alpha=0.3)
+    
+    # Plot 3: Input-Referred Error
+    plt.subplot(3, 1, 3)
+    plt.plot(error_A_in[:samples_to_plot], 'r', label='Error A (Input Ref)', alpha=0.6)
+    plt.plot(error_B_in[:samples_to_plot], 'b', label='Error B (Input Ref)', alpha=0.6)
+    plt.title("3. Effective Noise Referred to Input")
+    plt.ylabel("Error (ADC LSBs)")
+    plt.legend(loc='upper right')
     plt.grid(True, alpha=0.3)
     
     plt.tight_layout()

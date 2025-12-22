@@ -11,10 +11,10 @@ module dft_accumulation_cordic_tmux_tb ();
     localparam integer IQ_WIDTH_FRAC = 14;
     localparam integer WINDOW_WIDTH = 16;
     localparam integer WINDOW_WIDTH_FRAC = 14;
-    localparam integer ACCUM_WIDTH = 64;
-    localparam integer ACCUM_WIDTH_FRAC = 56;
-    localparam integer OSC_WIDTH = 32;
-    localparam integer OSC_WIDTH_FRAC = 30;
+    localparam integer ACCUM_WIDTH = 64; //64 //48
+    localparam integer ACCUM_WIDTH_FRAC = 56; //56 //40
+    localparam integer OSC_WIDTH = 32;  //32 //24
+    localparam integer OSC_WIDTH_FRAC = 30; //30 //22
     localparam integer PHASE_WIDTH = 32;
     localparam integer NUM_BINS = 24;
     localparam integer SAMPLE_COUNT_WIDTH = 16;

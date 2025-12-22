@@ -13,15 +13,15 @@ module dft_accumulation_cordic_tmux_tb ();
     localparam integer WINDOW_WIDTH_FRAC = 14;
     localparam integer ACCUM_WIDTH = 64; //64 //48
     localparam integer ACCUM_WIDTH_FRAC = 56; //56 //40
-    localparam integer OSC_WIDTH = 32;  //32 //24
-    localparam integer OSC_WIDTH_FRAC = 30; //30 //22
-    localparam integer PHASE_WIDTH = 32;
+    localparam integer OSC_WIDTH = 24;  //32
+    localparam integer OSC_WIDTH_FRAC = 22; //30
+    localparam integer PHASE_WIDTH = 24; //32
     localparam integer NUM_BINS = 24;
     localparam integer SAMPLE_COUNT_WIDTH = 16;
     localparam integer COUNTER_WIDTH = 5;
     
     // Timing constants
-    localparam integer CORDIC_LATENCY = 36;
+    localparam integer CORDIC_LATENCY = 28; //36
     localparam integer WINDOWING_LATENCY = 1;
     localparam integer CYCLES_PER_SAMPLE = 12;  // NUM_BINS/2 - counter cycles per sample
     localparam integer OSC_EARLY_START = CORDIC_LATENCY - WINDOWING_LATENCY; // 35 cycles
@@ -48,8 +48,8 @@ module dft_accumulation_cordic_tmux_tb ();
     logic signed [IQ_WIDTH-1:0] q_sample;
     logic signed [WINDOW_WIDTH-1:0] window_coeff;
     
-    logic signed [ACCUM_WIDTH-1:0] act_A_real[NUM_BINS];
-    logic signed [ACCUM_WIDTH-1:0] act_A_imag[NUM_BINS];
+    logic signed [48-1:0] act_A_real[NUM_BINS]; // accum_width-1
+    logic signed [48-1:0] act_A_imag[NUM_BINS]; // accum_width-1
     logic act_valid;
     logic act_busy;
 
@@ -103,8 +103,8 @@ module dft_accumulation_cordic_tmux_tb ();
     logic signed [IQ_WIDTH-1:0] q_samples[MAX_SAMPLES];
     logic signed [WINDOW_WIDTH-1:0] window_coeffs[MAX_SAMPLES];
     
-    logic signed [ACCUM_WIDTH-1:0] exp_A_real[NUM_BINS];
-    logic signed [ACCUM_WIDTH-1:0] exp_A_imag[NUM_BINS];
+    logic signed [48-1:0] exp_A_real[NUM_BINS]; //accum_width-1
+    logic signed [48-1:0] exp_A_imag[NUM_BINS]; //accum_width-1
 
     // --- Test Sequencer and Checker ---
     initial begin: checker_block
@@ -346,8 +346,8 @@ module dft_accumulation_cordic_tmux_tb ();
     // --- Checking Task ---
     task check_result(
         input integer num_bins,
-        input logic signed [ACCUM_WIDTH-1:0] expected_A_real[NUM_BINS],
-        input logic signed [ACCUM_WIDTH-1:0] expected_A_imag[NUM_BINS],
+        input logic signed [48-1:0] expected_A_real[NUM_BINS], //accum_width-1
+        input logic signed [48-1:0] expected_A_imag[NUM_BINS], //accum_width-1
         inout integer error_count
     );
         automatic logic mismatch = 1'b0;
@@ -356,7 +356,8 @@ module dft_accumulation_cordic_tmux_tb ();
         automatic longint error_real, error_imag;
         automatic real error_real_float, error_imag_float;
         
-        automatic longint tolerance = 2; // Allow ±2 LSBs of error
+        // automatic longint tolerance = 2; // Allow +/-2 LSBs of error
+        automatic real tolerance_float = 0.001; // Allow +/-10^-3 error
         
         $display("  Checking results...");
         
@@ -379,22 +380,22 @@ module dft_accumulation_cordic_tmux_tb ();
             if (error_imag > max_error_imag) max_error_imag = error_imag;
             
             // Convert errors to floating point for display
-            error_real_float = $itor(longint'(error_real)) / (2.0**ACCUM_WIDTH_FRAC);
-            error_imag_float = $itor(longint'(error_imag)) / (2.0**ACCUM_WIDTH_FRAC);
+            error_real_float = $itor(longint'(error_real)) / (2.0**40); //**ACCUM_WIDTH_FRAC
+            error_imag_float = $itor(longint'(error_imag)) / (2.0**40); //**ACCUM_WIDTH_FRAC
             
             // Check against tolerance
-            if (error_real > tolerance || error_imag > tolerance) begin
+            if (error_real_float > tolerance_float || error_imag_float > tolerance_float) begin
                 $display("    ERROR: Bin %0d mismatch", k);
-                $display("      A_real: Expected=%016h, Got=%016h, Error=%f", 
+                $display("      A_real: Expected=%012h, Got=%012h, Error=%f", 
                         expected_A_real[k], act_A_real[k], error_real_float);
-                $display("      A_imag: Expected=%016h, Got=%016h, Error=%f", 
+                $display("      A_imag: Expected=%012h, Got=%012h, Error=%f", 
                         expected_A_imag[k], act_A_imag[k], error_imag_float);
                 mismatch = 1'b1;
             end else begin
                 $display("    SUCCESS: Bin %0d matches (within tolerance)", k);
-                $display("      A_real: Expected=%016h, Got=%016h, Error=%f", 
+                $display("      A_real: Expected=%012h, Got=%012h, Error=%f", 
                         expected_A_real[k], act_A_real[k], error_real_float);
-                $display("      A_imag: Expected=%016h, Got=%016h, Error=%f", 
+                $display("      A_imag: Expected=%012h, Got=%012h, Error=%f", 
                         expected_A_imag[k], act_A_imag[k], error_imag_float);
             end
         end
@@ -407,8 +408,8 @@ module dft_accumulation_cordic_tmux_tb ();
         end
         
         $display("    Max error: Real=%f, Imag=%f", 
-                 $itor(longint'(max_error_real)) / (2.0**ACCUM_WIDTH_FRAC),
-                 $itor(longint'(max_error_imag)) / (2.0**ACCUM_WIDTH_FRAC));
+                 $itor(longint'(max_error_real)) / (2.0**40), //**ACCUM_WIDTH_FRAC
+                 $itor(longint'(max_error_imag)) / (2.0**40)); //**ACCUM_WIDTH_FRAC
     endtask
 
 endmodule

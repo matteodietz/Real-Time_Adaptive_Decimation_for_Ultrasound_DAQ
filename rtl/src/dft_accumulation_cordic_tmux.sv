@@ -6,9 +6,9 @@ module dft_accumulation_cordic_tmux #(
     parameter integer ACCUM_WIDTH = 48,
     parameter integer ACCUM_WIDTH_FRAC = 40,
     parameter integer NUM_BINS = 24,
-    parameter integer OSC_WIDTH = 32,
-    parameter integer OSC_WIDTH_FRAC = 30,
-    parameter integer PHASE_WIDTH = 32,
+    parameter integer OSC_WIDTH = 24, //32
+    parameter integer OSC_WIDTH_FRAC = 22, //30
+    parameter integer PHASE_WIDTH = 24, //32
     parameter integer SAMPLE_COUNT_WIDTH = 16,
     parameter integer COUNTER_WIDTH = 5        // clog2(NUM_BINS) = 5 bits for 0-23
 )(
@@ -35,8 +35,8 @@ module dft_accumulation_cordic_tmux #(
     input  logic signed [WINDOW_WIDTH-1:0] window_coeff_i,
     
     // Outputs
-    output logic signed [ACCUM_WIDTH-1:0] A_real_o[NUM_BINS],
-    output logic signed [ACCUM_WIDTH-1:0] A_imag_o[NUM_BINS],
+    output logic signed [48-1:0] A_real_o[NUM_BINS], // accum_width-1
+    output logic signed [48-1:0] A_imag_o[NUM_BINS], // accum_width-1
     output logic valid_o,
     output logic busy_o
 );
@@ -138,8 +138,8 @@ module dft_accumulation_cordic_tmux #(
     logic [COUNTER_WIDTH-1:0] prod_bin_counter_q, prod_bin_counter_d;  // Which bin pair (0-11)
 
     // --- Accumulators ---
-    logic signed [ACCUM_WIDTH-1:0] A_real_q[NUM_BINS], A_real_d[NUM_BINS];
-    logic signed [ACCUM_WIDTH-1:0] A_imag_q[NUM_BINS], A_imag_d[NUM_BINS];
+    logic signed [56-1:0] A_real_q[NUM_BINS], A_real_d[NUM_BINS]; //accum_width-1
+    logic signed [56-1:0] A_imag_q[NUM_BINS], A_imag_d[NUM_BINS]; //accum_width-1
 
     // -------------------------------------------------------------------------
     // Sequential Logic
@@ -234,53 +234,6 @@ module dft_accumulation_cordic_tmux #(
     assert_window_msb_ok: assert property (window_msb_ok)
         else $error("window_coeff_i gets sign extended as a negative number in the first multiplication stage");
 
-    // // -------------------------------------------------------------------------
-    // // Combinational Logic: Stage 2 (Complex Mult - 2 bins per cycle)
-    // // -------------------------------------------------------------------------
-    // always_comb begin
-    //     prod_real_d[0] = prod_real_q[0];
-    //     prod_real_d[1] = prod_real_q[1];
-    //     prod_imag_d[0] = prod_imag_q[0];
-    //     prod_imag_d[1] = prod_imag_q[1];
-    //     sample_valid_stage2_d = 1'b0;
-    //     last_sample_stage2_d = 1'b0;
-    //     prod_bin_counter_d = prod_bin_counter_q;
-
-    //     if (windowed_sample_valid_q) begin
-    //         // Calculate bin indices for current counter value
-    //         automatic int bin0 = tmux_counter_q;                    // 0-11
-    //         automatic int bin1 = tmux_counter_q + BINS_PER_CORDIC;  // 12-23
-            
-    //         // Complex multiplication for bin0
-    //         logic signed [IQ_WIDTH+WINDOW_WIDTH+OSC_WIDTH-1:0] xr_wr_0, xi_wi_0, xr_wi_0, xi_wr_0;
-    //         logic signed [IQ_WIDTH+WINDOW_WIDTH+OSC_WIDTH-1:0] xr_wr_1, xi_wi_1, xr_wi_1, xi_wr_1;
-
-    //         xr_wr_0 = x_weighted_real_q * W_real_internal[bin0];
-    //         xi_wi_0 = x_weighted_imag_q * W_imag_internal[bin0];
-    //         xr_wi_0 = x_weighted_real_q * W_imag_internal[bin0];
-    //         xi_wr_0 = x_weighted_imag_q * W_real_internal[bin0];
-            
-    //         prod_real_d[0] = xr_wr_0 - xi_wi_0;
-    //         prod_imag_d[0] = xr_wi_0 + xi_wr_0;
-            
-    //         // Complex multiplication for bin1
-    //         xr_wr_1 = x_weighted_real_q * W_real_internal[bin1];
-    //         xi_wi_1 = x_weighted_imag_q * W_imag_internal[bin1];
-    //         xr_wi_1 = x_weighted_real_q * W_imag_internal[bin1];
-    //         xi_wr_1 = x_weighted_imag_q * W_real_internal[bin1];
-            
-    //         prod_real_d[1] = xr_wr_1 - xi_wi_1;
-    //         prod_imag_d[1] = xr_wi_1 + xi_wr_1;
-            
-    //         sample_valid_stage2_d = 1'b1;
-    //         last_sample_stage2_d = windowed_last_sample_q && 
-    //                                (windowed_cycle_count_q == COUNTER_WIDTH'(CYCLES_PER_SAMPLE - 1));
-    //         prod_bin_counter_d = tmux_counter_q;  // Track which bin pair
-    //     end else begin
-    //         sample_valid_stage2_d = 1'b0;
-    //         last_sample_stage2_d = 1'b0;
-    //     end
-    // end
 
     // -------------------------------------------------------------------------
     // Combinational Logic: Stage 2 (Complex Mult - 2 bins per cycle)
@@ -334,7 +287,7 @@ module dft_accumulation_cordic_tmux #(
     // -------------------------------------------------------------------------
     // Combinational Logic: Accumulation & State (2 bins per cycle)
     // -------------------------------------------------------------------------
-    localparam int SHIFT_AMOUNT = IQ_WIDTH_FRAC + WINDOW_WIDTH_FRAC + OSC_WIDTH_FRAC - ACCUM_WIDTH_FRAC;
+    localparam int SHIFT_AMOUNT = IQ_WIDTH_FRAC + WINDOW_WIDTH_FRAC + OSC_WIDTH_FRAC - 48; //-accum_width_frac
     
     always_comb begin
         state_d = state_q;
@@ -401,8 +354,8 @@ module dft_accumulation_cordic_tmux #(
     // -------------------------------------------------------------------------
     always_comb begin
         for (int k = 0; k < NUM_BINS; k++) begin
-            A_real_o[k] = A_real_q[k];
-            A_imag_o[k] = A_imag_q[k];
+            A_real_o[k] = A_real_q[k][56-1:56-48];
+            A_imag_o[k] = A_imag_q[k][56-1:56-48];
         end
     end
     

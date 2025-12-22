@@ -11,10 +11,10 @@ module oscillator_bank_tmux_tb;
 
     // Parameters
     localparam int NUM_BINS = 24;
-    localparam int OSC_WIDTH = 32;
-    localparam int PHASE_WIDTH = 32;
-    localparam int COUNTER_WIDTH = 4;
-    localparam int CORDIC_LATENCY = 36;
+    localparam int OSC_WIDTH = 24; //32
+    localparam int PHASE_WIDTH = 24; //32
+    localparam int COUNTER_WIDTH = 5;
+    localparam int CORDIC_LATENCY = 28; //36
     localparam real CLK_PERIOD = 10.0; // 100 MHz (representing 375 MHz in real system)
     localparam int BINS_PER_CORDIC = NUM_BINS / 2;
     
@@ -139,10 +139,10 @@ module oscillator_bank_tmux_tb;
         // Setup frequency steps for 4 bins (2 per CORDIC)
         // Choose values that create visible oscillations in waveform viewer
         // Phase range is 0 to 2^16-1, representing -1 to +1
-        freq_steps[0] = 32'h01000000;  // 2^32 / 256 ≈ 16777216
-        freq_steps[1] = 32'h00800000;  // 2^32 / 512 ≈ 8388608
-        freq_steps[12] = 32'h06000000;  // Medium-fast - completes cycle in ~11 counter periods
-        freq_steps[13] = 32'h02000000;  // Slowest - completes cycle in ~32 counter periods
+        freq_steps[0] = 24'h100000; // 32'h01000000;  // 2^32 / 256 ≈ 16777216
+        freq_steps[1] = 24'h080000; // 32'h00800000;  // 2^32 / 512 ≈ 8388608
+        freq_steps[12] = 24'h060000; // 32'h06000000;  // Medium-fast - completes cycle in ~11 counter periods
+        freq_steps[13] = 24'h020000; // 32'h02000000;  // Slowest - completes cycle in ~32 counter periods
         
         // Wait and release reset
         repeat(10) @(posedge clk);

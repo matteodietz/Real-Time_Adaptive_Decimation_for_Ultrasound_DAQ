@@ -110,7 +110,7 @@ def generate_test_case(test_name, iq_data, fs, freq_bins, window_type,
                        for w in window_coeffs]
     
     # Expected accumulator outputs: Q8.56 format
-    accum_frac_bits = 56
+    accum_frac_bits = 40 # 56
     accum_int_bits = accum_width - accum_frac_bits
     
     # IMPORTANT: We must scale the expected golden result by the same factor
@@ -183,7 +183,7 @@ def write_vector_file(test_cases, output_path, iq_width, window_width,
             # Write frequency steps (for CORDIC)
             f.write("FREQ_STEPS\n")
             for step in tc['freq_steps']:
-                f.write(f"{step:08x}\n")
+                f.write(f"{step:06x}\n")
             f.write("\n")
             
             # Write sample data (one line per sample)
@@ -197,9 +197,9 @@ def write_vector_file(test_cases, output_path, iq_width, window_width,
             # Write expected outputs
             f.write("EXPECTED\n")
             for k in range(tc['num_bins']):
-                f.write(f"{tc['expected_A_real'][k]:016x}\n")
+                f.write(f"{tc['expected_A_real'][k]:012x}\n")
             for k in range(tc['num_bins']):
-                f.write(f"{tc['expected_A_imag'][k]:016x}\n")
+                f.write(f"{tc['expected_A_imag'][k]:012x}\n")
             
             # Write golden reference
             f.write("GOLDEN ")
@@ -220,9 +220,9 @@ def main():
     # Hardware parameters
     IQ_WIDTH = 16           # Q2.14
     WINDOW_WIDTH = 16       # Q2.14
-    ACCUM_WIDTH = 64        # Q8.56
-    OSC_WIDTH = 32          # CORDIC output width
-    PHASE_WIDTH = 32        # Phase accumulator width
+    ACCUM_WIDTH = 48        # Q8.56 # 64
+    OSC_WIDTH = 24          # CORDIC output width #32
+    PHASE_WIDTH = 24        # Phase accumulator width #32
     NUM_BINS = 24           # Maximum
     
     test_cases = []

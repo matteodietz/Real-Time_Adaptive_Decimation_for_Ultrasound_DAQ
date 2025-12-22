@@ -34,7 +34,7 @@ module oscillator_bank_tmux #(
 );
 
     localparam int BINS_PER_CORDIC = NUM_BINS / 2;
-    localparam int CORDIC_LATENCY = 36;
+    localparam int CORDIC_LATENCY = 28; //36
 
     // =========================================================================
     // Phase Accumulators (24 total, updated once every 12 cycles)

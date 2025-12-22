@@ -62,7 +62,7 @@ print("Loading Filter Coefficients...")
 # Filter A: Generic LPF
 coeffs_generic = read_coeffs('generic_lpf_coeffs.txt', skip_lines=6)
 # Filter B: Boost Filter
-coeffs_boost   = read_coeffs('filter_coefficients.txt', skip_lines=7)
+coeffs_boost   = read_coeffs('boost_filter_coeffs.txt', skip_lines=7)
 
 print(f"  Generic LPF: {len(coeffs_generic)} taps")
 print(f"  Boost Filter: {len(coeffs_boost)} taps")

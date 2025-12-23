@@ -12,26 +12,27 @@ module spectral_power_estimator_tmux_tb();
     localparam integer IQ_WIDTH_FRAC = 14;
     localparam integer WINDOW_WIDTH = 16;
     localparam integer WINDOW_WIDTH_FRAC = 14;
-    localparam integer ACCUM_WIDTH = 64;
-    localparam integer ACCUM_WIDTH_FRAC = 56;
+    localparam integer ACCUM_WIDTH = 36;
+    localparam integer ACCUM_WIDTH_FRAC = 28;
     localparam integer NUM_BINS = 24;
     
     // Oscillator Parameters
-    localparam integer OSC_WIDTH = 32;
-    localparam integer OSC_WIDTH_FRAC = 30;
-    localparam integer PHASE_WIDTH = 32;
+    localparam integer OSC_WIDTH = 16;
+    localparam integer OSC_WIDTH_FRAC = 14;
+    localparam integer PHASE_WIDTH = 16;
     
     // Power Conversion Parameters
-    localparam integer POWER_INPUT_WIDTH = 32;
+    localparam integer POWER_INPUT_WIDTH = 24;
     localparam integer POWER_WIDTH = 8;
     localparam integer POWER_FRAC = 0;
     
     // Timing Parameters
     localparam integer WINDOW_SIZE = 256;
-    localparam integer OSC_LATENCY = 36;
+    localparam integer OSC_LATENCY = 20;
     localparam integer COUNTER_WIDTH = 16;
     localparam integer SAMPLE_COUNT_WIDTH = 16;
     localparam integer TMUX_COUNTER_WIDTH = 5;
+    localparam integer STAGE1_WIDTH = 20;
     
     // Time-multiplexing parameters
     localparam integer CYCLES_PER_SAMPLE = 12;  // Hold each sample for 12 cycles
@@ -95,7 +96,8 @@ module spectral_power_estimator_tmux_tb();
         .COUNTER_WIDTH      (COUNTER_WIDTH),
         .SAMPLE_COUNT_WIDTH (SAMPLE_COUNT_WIDTH),
         .TMUX_COUNTER_WIDTH (TMUX_COUNTER_WIDTH),
-        .CYCLES_PER_SAMPLE  (CYCLES_PER_SAMPLE)
+        .CYCLES_PER_SAMPLE  (CYCLES_PER_SAMPLE),
+        .STAGE1_WIDTH       (STAGE1_WIDTH)
     ) dut (
         .clk_i          (clk),
         .rst_ni         (rst_n),

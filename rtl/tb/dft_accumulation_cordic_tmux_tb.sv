@@ -11,18 +11,18 @@ module dft_accumulation_cordic_tmux_tb ();
     localparam integer IQ_WIDTH_FRAC = 14;
     localparam integer WINDOW_WIDTH = 16;
     localparam integer WINDOW_WIDTH_FRAC = 14;
-    localparam integer ACCUM_WIDTH = 48;
-    localparam integer ACCUM_WIDTH_FRAC = 40;
-    localparam integer OSC_WIDTH = 24;  
-    localparam integer OSC_WIDTH_FRAC = 22; 
-    localparam integer PHASE_WIDTH = 24; 
+    localparam integer ACCUM_WIDTH = 40;
+    localparam integer ACCUM_WIDTH_FRAC = 32;
+    localparam integer OSC_WIDTH = 16;  //24
+    localparam integer OSC_WIDTH_FRAC = 14;  //22
+    localparam integer PHASE_WIDTH = 16; //24
     localparam integer NUM_BINS = 24;
     localparam integer SAMPLE_COUNT_WIDTH = 16;
     localparam integer COUNTER_WIDTH = 5;
     localparam integer STAGE1_WIDTH = 24;
     
     // Timing constants
-    localparam integer CORDIC_LATENCY = 28; 
+    localparam integer CORDIC_LATENCY = 20; 
     localparam integer WINDOWING_LATENCY = 1;
     localparam integer CYCLES_PER_SAMPLE = 12;  // NUM_BINS/2 - counter cycles per sample
     localparam integer OSC_EARLY_START = CORDIC_LATENCY - WINDOWING_LATENCY; // 35 cycles
@@ -348,8 +348,8 @@ module dft_accumulation_cordic_tmux_tb ();
     // --- Checking Task ---
     task check_result(
         input integer num_bins,
-        input logic signed [48-1:0] expected_A_real[NUM_BINS], //accum_width-1
-        input logic signed [48-1:0] expected_A_imag[NUM_BINS], //accum_width-1
+        input logic signed [ACCUM_WIDTH-1:0] expected_A_real[NUM_BINS], //accum_width-1
+        input logic signed [ACCUM_WIDTH-1:0] expected_A_imag[NUM_BINS], //accum_width-1
         inout integer error_count
     );
         automatic logic mismatch = 1'b0;
@@ -382,8 +382,8 @@ module dft_accumulation_cordic_tmux_tb ();
             if (error_imag > max_error_imag) max_error_imag = error_imag;
             
             // Convert errors to floating point for display
-            error_real_float = $itor(longint'(error_real)) / (2.0**40); //**ACCUM_WIDTH_FRAC
-            error_imag_float = $itor(longint'(error_imag)) / (2.0**40); //**ACCUM_WIDTH_FRAC
+            error_real_float = $itor(longint'(error_real)) / (2.0**ACCUM_WIDTH_FRAC); //**ACCUM_WIDTH_FRAC
+            error_imag_float = $itor(longint'(error_imag)) / (2.0**ACCUM_WIDTH_FRAC); //**ACCUM_WIDTH_FRAC
             
             // Check against tolerance
             if (error_real_float > tolerance_float || error_imag_float > tolerance_float) begin
@@ -410,8 +410,8 @@ module dft_accumulation_cordic_tmux_tb ();
         end
         
         $display("    Max error: Real=%f, Imag=%f", 
-                 $itor(longint'(max_error_real)) / (2.0**40), //**ACCUM_WIDTH_FRAC
-                 $itor(longint'(max_error_imag)) / (2.0**40)); //**ACCUM_WIDTH_FRAC
+                 $itor(longint'(max_error_real)) / (2.0**ACCUM_WIDTH_FRAC), //**ACCUM_WIDTH_FRAC
+                 $itor(longint'(max_error_imag)) / (2.0**ACCUM_WIDTH_FRAC)); //**ACCUM_WIDTH_FRAC
     endtask
 
 endmodule

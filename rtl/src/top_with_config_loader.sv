@@ -21,14 +21,14 @@ module top_with_config_loader #(
     parameter integer IQ_WIDTH_FRAC = 14,
     parameter integer WINDOW_WIDTH = 16,
     parameter integer WINDOW_WIDTH_FRAC = 14,
-    parameter integer ACCUM_WIDTH = 64,
-    parameter integer ACCUM_WIDTH_FRAC = 56,
+    parameter integer ACCUM_WIDTH = 48,
+    parameter integer ACCUM_WIDTH_FRAC = 40,
     parameter integer NUM_BINS = 24,
     
     // --- Oscillator Parameters ---
-    parameter integer OSC_WIDTH = 32,
-    parameter integer OSC_WIDTH_FRAC = 30,
-    parameter integer PHASE_WIDTH = 32, //32
+    parameter integer OSC_WIDTH = 24,
+    parameter integer OSC_WIDTH_FRAC = 22,
+    parameter integer PHASE_WIDTH = 24, //32
     
     // --- Power Conversion Parameters ---
     parameter integer POWER_INPUT_WIDTH = 32,
@@ -37,7 +37,7 @@ module top_with_config_loader #(
     
     // --- Timing Parameters ---
     parameter integer WINDOW_SIZE = 256,
-    parameter integer OSC_LATENCY = 36,
+    parameter integer OSC_LATENCY = 28,
     parameter integer COUNTER_WIDTH = 16,
     parameter integer SAMPLE_COUNT_WIDTH = 16,
     
@@ -119,6 +119,8 @@ module top_with_config_loader #(
     logic bw_valid;
     logic bw_busy;
     logic threshold_ok;
+
+    localparam integer STAGE1_WIDTH = 24;
     
     //--------------------------------------------------------------------------
     // Module Instantiations
@@ -164,7 +166,8 @@ module top_with_config_loader #(
         .COUNTER_WIDTH      (COUNTER_WIDTH),
         .SAMPLE_COUNT_WIDTH (SAMPLE_COUNT_WIDTH),
         .TMUX_COUNTER_WIDTH (TMUX_COUNTER_WIDTH),
-        .CYCLES_PER_SAMPLE  (CYCLES_PER_SAMPLE)
+        .CYCLES_PER_SAMPLE  (CYCLES_PER_SAMPLE),
+        .STAGE1_WIDTH       (STAGE1_WIDTH)
     ) u_spectral_power_estimator (
         .clk_i          (clk_i),
         .rst_ni         (rst_ni),

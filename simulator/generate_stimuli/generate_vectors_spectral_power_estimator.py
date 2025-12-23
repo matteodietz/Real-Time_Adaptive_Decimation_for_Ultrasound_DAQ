@@ -284,13 +284,13 @@ def main():
     hw_params = {
         'IQ_WIDTH': 16,
         'WINDOW_WIDTH': 16,
-        'ACCUM_WIDTH': 64,
-        'ACCUM_FRAC': 56,
-        'POWER_INPUT_WIDTH': 32,
+        'ACCUM_WIDTH':36,
+        'ACCUM_FRAC': 28,
+        'POWER_INPUT_WIDTH': 24,
         'POWER_WIDTH': 8,
         'POWER_FRAC': 0,
-        'PHASE_WIDTH': 32,
-        'OSC_LATENCY': 36,
+        'PHASE_WIDTH': 16,
+        'OSC_LATENCY': 20,
         'WINDOW_SIZE': 256
     }
     

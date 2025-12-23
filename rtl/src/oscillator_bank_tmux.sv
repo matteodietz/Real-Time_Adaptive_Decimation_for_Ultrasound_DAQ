@@ -36,7 +36,7 @@ module oscillator_bank_tmux #(
 
     localparam int BINS_PER_CORDIC = NUM_BINS / 2;
     // CORDIC Latency changes when changing the i/o widths of the CORDIC IP!
-    localparam int CORDIC_LATENCY = 28;
+    localparam int CORDIC_LATENCY = 20; //28
 
     // =========================================================================
     // Phase Accumulators (24 total, updated once every 12 cycles)

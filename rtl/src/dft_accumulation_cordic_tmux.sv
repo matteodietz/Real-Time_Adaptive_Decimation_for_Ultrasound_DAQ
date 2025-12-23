@@ -6,11 +6,12 @@ module dft_accumulation_cordic_tmux #(
     parameter integer ACCUM_WIDTH = 48,
     parameter integer ACCUM_WIDTH_FRAC = 40,
     parameter integer NUM_BINS = 24,
-    parameter integer OSC_WIDTH = 24, //32
-    parameter integer OSC_WIDTH_FRAC = 22, //30
-    parameter integer PHASE_WIDTH = 24, //32
+    parameter integer OSC_WIDTH = 24,
+    parameter integer OSC_WIDTH_FRAC = 22,
+    parameter integer PHASE_WIDTH = 24,
     parameter integer SAMPLE_COUNT_WIDTH = 16,
-    parameter integer COUNTER_WIDTH = 5        // clog2(NUM_BINS) = 5 bits for 0-23
+    parameter integer COUNTER_WIDTH = 5,        // clog2(NUM_BINS) = 5 bits for 0-23
+    parameter integer STAGE1_WIDTH = 24
 )(
     input  logic clk_i,
     input  logic rst_ni,
@@ -35,8 +36,8 @@ module dft_accumulation_cordic_tmux #(
     input  logic signed [WINDOW_WIDTH-1:0] window_coeff_i,
     
     // Outputs
-    output logic signed [48-1:0] A_real_o[NUM_BINS], // accum_width-1
-    output logic signed [48-1:0] A_imag_o[NUM_BINS], // accum_width-1
+    output logic signed [ACCUM_WIDTH-1:0] A_real_o[NUM_BINS],
+    output logic signed [ACCUM_WIDTH-1:0] A_imag_o[NUM_BINS], 
     output logic valid_o,
     output logic busy_o
 );
@@ -123,23 +124,23 @@ module dft_accumulation_cordic_tmux #(
     logic [SAMPLE_COUNT_WIDTH-1:0] sample_count_q, sample_count_d;
 
     // --- Pipeline Stage 1: Window Multiplication (held for 12 cycles) ---
-    logic signed [IQ_WIDTH+WINDOW_WIDTH-1:0] x_weighted_real_q, x_weighted_real_d;
-    logic signed [IQ_WIDTH+WINDOW_WIDTH-1:0] x_weighted_imag_q, x_weighted_imag_d;
+    logic signed [STAGE1_WIDTH-1:0] x_weighted_real_q, x_weighted_real_d; //iq_width+window_width-1
+    logic signed [STAGE1_WIDTH-1:0] x_weighted_imag_q, x_weighted_imag_d; //iq_width+window_width-1
     logic windowed_sample_valid_q, windowed_sample_valid_d;
     logic windowed_last_sample_q, windowed_last_sample_d;
     logic [COUNTER_WIDTH-1:0] windowed_cycle_count_q, windowed_cycle_count_d;
 
     // --- Pipeline Stage 2: Complex Multiplication (2 bins per cycle) ---
-    logic signed [IQ_WIDTH+WINDOW_WIDTH+OSC_WIDTH-1:0] prod_real_q[2], prod_real_d[2];
-    logic signed [IQ_WIDTH+WINDOW_WIDTH+OSC_WIDTH-1:0] prod_imag_q[2], prod_imag_d[2];
+    logic signed [STAGE1_WIDTH+OSC_WIDTH-1:0] prod_real_q[2], prod_real_d[2];
+    logic signed [STAGE1_WIDTH+OSC_WIDTH-1:0] prod_imag_q[2], prod_imag_d[2];
     
     logic sample_valid_stage2_q, sample_valid_stage2_d;
     logic last_sample_stage2_q, last_sample_stage2_d;
     logic [COUNTER_WIDTH-1:0] prod_bin_counter_q, prod_bin_counter_d;  // Which bin pair (0-11)
 
     // --- Accumulators ---
-    logic signed [56-1:0] A_real_q[NUM_BINS], A_real_d[NUM_BINS]; //accum_width-1
-    logic signed [56-1:0] A_imag_q[NUM_BINS], A_imag_d[NUM_BINS]; //accum_width-1
+    logic signed [ACCUM_WIDTH-1:0] A_real_q[NUM_BINS], A_real_d[NUM_BINS];
+    logic signed [ACCUM_WIDTH-1:0] A_imag_q[NUM_BINS], A_imag_d[NUM_BINS];
 
     // -------------------------------------------------------------------------
     // Sequential Logic
@@ -198,6 +199,11 @@ module dft_accumulation_cordic_tmux #(
     // Combinational Logic: Stage 1 (Windowing - held for 12 cycles)
     // -------------------------------------------------------------------------
     always_comb begin
+        // Declare temporary full-width variables for the multiply
+        logic signed [IQ_WIDTH+WINDOW_WIDTH-1:0] mult_real_full;
+        logic signed [IQ_WIDTH+WINDOW_WIDTH-1:0] mult_imag_full;
+        localparam int TRUNC_BITS = (IQ_WIDTH + WINDOW_WIDTH) - STAGE1_WIDTH;
+
         x_weighted_real_d = x_weighted_real_q;
         x_weighted_imag_d = x_weighted_imag_q;
         windowed_sample_valid_d = windowed_sample_valid_q;
@@ -206,8 +212,15 @@ module dft_accumulation_cordic_tmux #(
         
         if (sample_valid_i && (state_q == ACCUMULATE) && (tmux_counter_q == '0)) begin
             // New sample: compute windowed values
-            x_weighted_real_d = $signed(i_sample_i) * $signed(window_coeff_i);
-            x_weighted_imag_d = $signed(q_sample_i) * $signed(window_coeff_i);
+            mult_real_full = $signed(i_sample_i) * $signed(window_coeff_i);
+            mult_imag_full = $signed(q_sample_i) * $signed(window_coeff_i);
+
+            // Round and Truncate
+            // We add '1' at the MSB of the part we are throwing away (Round Half Up behavior)
+            // Then shift right to drop the bits.
+            x_weighted_real_d = (mult_real_full + (1'sb1 << (TRUNC_BITS-1))) >>> TRUNC_BITS;
+            x_weighted_imag_d = (mult_imag_full + (1'sb1 << (TRUNC_BITS-1))) >>> TRUNC_BITS;
+
             windowed_sample_valid_d = 1'b1;
             windowed_last_sample_d = last_sample_i;
             windowed_cycle_count_d = '0;
@@ -254,8 +267,8 @@ module dft_accumulation_cordic_tmux #(
             automatic int bin1 = windowed_cycle_count_q + BINS_PER_CORDIC;  // 12-23
             
             // Complex multiplication for bin0
-            logic signed [IQ_WIDTH+WINDOW_WIDTH+OSC_WIDTH-1:0] xr_wr_0, xi_wi_0, xr_wi_0, xi_wr_0;
-            logic signed [IQ_WIDTH+WINDOW_WIDTH+OSC_WIDTH-1:0] xr_wr_1, xi_wi_1, xr_wi_1, xi_wr_1;
+            logic signed [STAGE1_WIDTH+OSC_WIDTH-1:0] xr_wr_0, xi_wi_0, xr_wi_0, xi_wr_0;
+            logic signed [STAGE1_WIDTH+OSC_WIDTH-1:0] xr_wr_1, xi_wi_1, xr_wi_1, xi_wr_1;
 
             xr_wr_0 = x_weighted_real_q * W_real_internal[bin0];
             xi_wi_0 = x_weighted_imag_q * W_imag_internal[bin0];
@@ -287,7 +300,8 @@ module dft_accumulation_cordic_tmux #(
     // -------------------------------------------------------------------------
     // Combinational Logic: Accumulation & State (2 bins per cycle)
     // -------------------------------------------------------------------------
-    localparam int SHIFT_AMOUNT = IQ_WIDTH_FRAC + WINDOW_WIDTH_FRAC + OSC_WIDTH_FRAC - 48; //-accum_width_frac
+    localparam int PROD_FRAC = (IQ_WIDTH_FRAC + WINDOW_WIDTH_FRAC - (IQ_WIDTH + WINDOW_WIDTH - STAGE1_WIDTH)) + OSC_WIDTH_FRAC;
+    localparam int SHIFT_AMOUNT = PROD_FRAC - ACCUM_WIDTH_FRAC;
     
     always_comb begin
         state_d = state_q;
@@ -354,8 +368,8 @@ module dft_accumulation_cordic_tmux #(
     // -------------------------------------------------------------------------
     always_comb begin
         for (int k = 0; k < NUM_BINS; k++) begin
-            A_real_o[k] = A_real_q[k][56-1:56-48];
-            A_imag_o[k] = A_imag_q[k][56-1:56-48];
+            A_real_o[k] = A_real_q[k];
+            A_imag_o[k] = A_imag_q[k];
         end
     end
     

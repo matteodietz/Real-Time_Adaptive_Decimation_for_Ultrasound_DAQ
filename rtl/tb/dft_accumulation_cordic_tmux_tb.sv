@@ -11,17 +11,18 @@ module dft_accumulation_cordic_tmux_tb ();
     localparam integer IQ_WIDTH_FRAC = 14;
     localparam integer WINDOW_WIDTH = 16;
     localparam integer WINDOW_WIDTH_FRAC = 14;
-    localparam integer ACCUM_WIDTH = 64; //64 //48
-    localparam integer ACCUM_WIDTH_FRAC = 56; //56 //40
-    localparam integer OSC_WIDTH = 24;  //32
-    localparam integer OSC_WIDTH_FRAC = 22; //30
-    localparam integer PHASE_WIDTH = 24; //32
+    localparam integer ACCUM_WIDTH = 48;
+    localparam integer ACCUM_WIDTH_FRAC = 40;
+    localparam integer OSC_WIDTH = 24;  
+    localparam integer OSC_WIDTH_FRAC = 22; 
+    localparam integer PHASE_WIDTH = 24; 
     localparam integer NUM_BINS = 24;
     localparam integer SAMPLE_COUNT_WIDTH = 16;
     localparam integer COUNTER_WIDTH = 5;
+    localparam integer STAGE1_WIDTH = 24;
     
     // Timing constants
-    localparam integer CORDIC_LATENCY = 28; //36
+    localparam integer CORDIC_LATENCY = 28; 
     localparam integer WINDOWING_LATENCY = 1;
     localparam integer CYCLES_PER_SAMPLE = 12;  // NUM_BINS/2 - counter cycles per sample
     localparam integer OSC_EARLY_START = CORDIC_LATENCY - WINDOWING_LATENCY; // 35 cycles
@@ -48,8 +49,8 @@ module dft_accumulation_cordic_tmux_tb ();
     logic signed [IQ_WIDTH-1:0] q_sample;
     logic signed [WINDOW_WIDTH-1:0] window_coeff;
     
-    logic signed [48-1:0] act_A_real[NUM_BINS]; // accum_width-1
-    logic signed [48-1:0] act_A_imag[NUM_BINS]; // accum_width-1
+    logic signed [ACCUM_WIDTH-1:0] act_A_real[NUM_BINS]; // accum_width-1
+    logic signed [ACCUM_WIDTH-1:0] act_A_imag[NUM_BINS]; // accum_width-1
     logic act_valid;
     logic act_busy;
 
@@ -78,7 +79,8 @@ module dft_accumulation_cordic_tmux_tb ();
         .OSC_WIDTH_FRAC(OSC_WIDTH_FRAC),
         .PHASE_WIDTH(PHASE_WIDTH),
         .SAMPLE_COUNT_WIDTH(SAMPLE_COUNT_WIDTH),
-        .COUNTER_WIDTH(COUNTER_WIDTH)
+        .COUNTER_WIDTH(COUNTER_WIDTH),
+        .STAGE1_WIDTH(STAGE1_WIDTH)
     ) dut (
         .clk_i(clk),
         .rst_ni(rst_n),
@@ -103,8 +105,8 @@ module dft_accumulation_cordic_tmux_tb ();
     logic signed [IQ_WIDTH-1:0] q_samples[MAX_SAMPLES];
     logic signed [WINDOW_WIDTH-1:0] window_coeffs[MAX_SAMPLES];
     
-    logic signed [48-1:0] exp_A_real[NUM_BINS]; //accum_width-1
-    logic signed [48-1:0] exp_A_imag[NUM_BINS]; //accum_width-1
+    logic signed [ACCUM_WIDTH-1:0] exp_A_real[NUM_BINS];
+    logic signed [ACCUM_WIDTH-1:0] exp_A_imag[NUM_BINS];
 
     // --- Test Sequencer and Checker ---
     initial begin: checker_block

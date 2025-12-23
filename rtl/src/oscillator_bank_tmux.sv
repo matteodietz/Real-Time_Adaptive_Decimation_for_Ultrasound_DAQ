@@ -7,6 +7,7 @@
 //            Outputs are stored in registers for each bin
 //
 ////////////////////////////////////////////////////////////////////////////////
+
 module oscillator_bank_tmux #(
     parameter int NUM_BINS = 24,           // MUST BE EVEN
     parameter int OSC_WIDTH = 32,
@@ -34,7 +35,8 @@ module oscillator_bank_tmux #(
 );
 
     localparam int BINS_PER_CORDIC = NUM_BINS / 2;
-    localparam int CORDIC_LATENCY = 28; //36
+    // CORDIC Latency changes when changing the i/o widths of the CORDIC IP!
+    localparam int CORDIC_LATENCY = 28;
 
     // =========================================================================
     // Phase Accumulators (24 total, updated once every 12 cycles)

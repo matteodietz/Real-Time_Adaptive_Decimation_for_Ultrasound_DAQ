@@ -22,7 +22,7 @@ module spectral_power_estimator_tmux_tb();
     localparam integer PHASE_WIDTH = 16;
     
     // Power Conversion Parameters
-    localparam integer POWER_INPUT_WIDTH = 24;
+    localparam integer POWER_INPUT_WIDTH = 18;
     localparam integer POWER_WIDTH = 8;
     localparam integer POWER_FRAC = 0;
     

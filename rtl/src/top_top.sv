@@ -15,7 +15,7 @@ module top_top (
     localparam integer OSC_WIDTH = 16;
     localparam integer OSC_WIDTH_FRAC = 14;
     localparam integer PHASE_WIDTH = 16;
-    localparam integer POWER_INPUT_WIDTH = 24;
+    localparam integer POWER_INPUT_WIDTH = 18;
     localparam integer POWER_WIDTH = 8;
     localparam integer POWER_FRAC = 0;
     localparam integer WINDOW_SIZE = 256;

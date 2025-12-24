@@ -23,23 +23,23 @@ module top_with_config_loader_tb();
     localparam integer IQ_WIDTH_FRAC = 14;
     localparam integer WINDOW_WIDTH = 16;
     localparam integer WINDOW_WIDTH_FRAC = 14;
-    localparam integer ACCUM_WIDTH = 48;
-    localparam integer ACCUM_WIDTH_FRAC = 24;
+    localparam integer ACCUM_WIDTH = 36;
+    localparam integer ACCUM_WIDTH_FRAC = 28;
     localparam integer NUM_BINS = 24;
     
     // Oscillator Parameters
-    localparam integer OSC_WIDTH = 24;
-    localparam integer OSC_WIDTH_FRAC = 22;
-    localparam integer PHASE_WIDTH = 24;
+    localparam integer OSC_WIDTH = 16;
+    localparam integer OSC_WIDTH_FRAC = 14;
+    localparam integer PHASE_WIDTH = 16;
     
     // Power Conversion Parameters
-    localparam integer POWER_INPUT_WIDTH = 32;
+    localparam integer POWER_INPUT_WIDTH = 18;
     localparam integer POWER_WIDTH = 8;
     localparam integer POWER_FRAC = 0;
     
     // Timing Parameters
     localparam integer WINDOW_SIZE = 256;
-    localparam integer OSC_LATENCY = 28;
+    localparam integer OSC_LATENCY = 20;
     localparam integer COUNTER_WIDTH = 16;
     localparam integer SAMPLE_COUNT_WIDTH = 16;
     
@@ -405,12 +405,65 @@ module top_with_config_loader_tb();
             
             $display("  Timing controller enabled and cleared");
             
+            // // Step 3: Stream all samples (each held for 12 cycles) and watch for valid
+            // $display("  Streaming %0d samples (each held for %0d cycles)...", 
+            //         num_samples_read, CYCLES_PER_SAMPLE);
+            
+            // valid_captured = 1'b0;
+            
+            // for (int n = 0; n < num_samples_read; n++) begin
+            //     automatic int window_idx;
+                
+            //     // Set up sample data at the beginning of the 12-cycle period
+            //     #1;
+            //     sample_valid = 1'b1;
+            //     i_sample = i_samples[n];
+            //     q_sample = q_samples[n];
+                
+            //     // Window coefficients only apply during the DFT window
+            //     if (n < delay_cycles_read) begin
+            //         window_coeff = '0;
+            //     end else begin
+            //         window_idx = (n - delay_cycles_read) % window_size_read;
+            //         window_coeff = window_coeffs[window_idx];
+            //     end
+
+            //     // Hold sample for 12 cycles
+            //     for (int cycle = 0; cycle < CYCLES_PER_SAMPLE; cycle++) begin
+            //         @(posedge clk);
+                    
+            //         // Check if valid was asserted during this sample period
+            //         if (valid && !valid_captured) begin
+            //             valid_captured = 1'b1;
+            //             $display("  Valid signal captured during sample %0d, cycle %0d", n, cycle);
+                        
+            //             // Let the current cycle complete, then check results
+            //             @(posedge clk);
+            //             check_result(csv_file, angle, channel, window_number,
+            //                        exp_f1_left, exp_f2_left, exp_L1_left, exp_L2_left,
+            //                        exp_f1_right, exp_f2_right, exp_L1_right, exp_L2_right,
+            //                        n_errs);
+                        
+            //             // Break out of both loops
+            //             break;
+            //         end
+            //     end
+                
+            //     // If valid was captured, exit outer loop too
+            //     if (valid_captured) break;
+                
+            //     // Progress indicator
+            //     if (n % 512 == 0 && n > 0) begin
+            //         $display("    Processed %0d/%0d samples...", n, num_samples_read);
+            //     end
+            // end
+
             // Step 3: Stream all samples (each held for 12 cycles) and watch for valid
             $display("  Streaming %0d samples (each held for %0d cycles)...", 
                     num_samples_read, CYCLES_PER_SAMPLE);
-            
+
             valid_captured = 1'b0;
-            
+
             for (int n = 0; n < num_samples_read; n++) begin
                 automatic int window_idx;
                 
@@ -440,9 +493,9 @@ module top_with_config_loader_tb();
                         // Let the current cycle complete, then check results
                         @(posedge clk);
                         check_result(csv_file, angle, channel, window_number,
-                                   exp_f1_left, exp_f2_left, exp_L1_left, exp_L2_left,
-                                   exp_f1_right, exp_f2_right, exp_L1_right, exp_L2_right,
-                                   n_errs);
+                                exp_f1_left, exp_f2_left, exp_L1_left, exp_L2_left,
+                                exp_f1_right, exp_f2_right, exp_L1_right, exp_L2_right,
+                                n_errs);
                         
                         // Break out of both loops
                         break;
@@ -457,6 +510,11 @@ module top_with_config_loader_tb();
                     $display("    Processed %0d/%0d samples...", n, num_samples_read);
                 end
             end
+
+            // Deassert control signals
+            @(posedge clk);
+            #1;
+            sample_valid = 1'b0;
             
             // Deassert control signals
             @(posedge clk);

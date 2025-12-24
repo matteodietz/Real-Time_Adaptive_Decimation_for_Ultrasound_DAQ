@@ -181,7 +181,7 @@ module spectral_power_estimator_tmux #(
     //     .busy_o             (dft_busy)
     // );
 
-    (* DONT_TOUCH = "true" *)
+    // (* DONT_TOUCH = "true" *)
     dft_accumulation_cordic_tmux_streaming #(
         .IQ_WIDTH           (IQ_WIDTH),
         .IQ_WIDTH_FRAC      (IQ_WIDTH_FRAC),

@@ -286,7 +286,7 @@ def main():
         'WINDOW_WIDTH': 16,
         'ACCUM_WIDTH':36,
         'ACCUM_FRAC': 28,
-        'POWER_INPUT_WIDTH': 24,
+        'POWER_INPUT_WIDTH': 18,
         'POWER_WIDTH': 8,
         'POWER_FRAC': 0,
         'PHASE_WIDTH': 16,

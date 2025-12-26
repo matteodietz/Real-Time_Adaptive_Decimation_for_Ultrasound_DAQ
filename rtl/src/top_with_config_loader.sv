@@ -88,6 +88,8 @@ module top_with_config_loader #(
     output logic [FREQ_BIN_WIDTH-1:0] f2_right_o,
     output logic [POWER_WIDTH-1:0] L1_right_o,
     output logic [POWER_WIDTH-1:0] L2_right_o,
+
+    output logic [POWER_WIDTH-1:0] abs_threshold_o,
     
     // Valid output (bandwidth detection complete)
     output logic valid_o
@@ -116,6 +118,7 @@ module top_with_config_loader #(
     logic [FREQ_BIN_WIDTH-1:0] f2_right;
     logic [POWER_WIDTH-1:0] L1_right;
     logic [POWER_WIDTH-1:0] L2_right;
+    logic [POWER_WIDTH-1:0] abs_threshold;
     logic bw_valid;
     logic bw_busy;
     logic threshold_ok;
@@ -206,6 +209,7 @@ module top_with_config_loader #(
         .f2_right_o     (f2_right),
         .L1_right_o     (L1_right),
         .L2_right_o     (L2_right),
+        .abs_threshold_o(abs_threshold),
         .valid_o        (bw_valid),
         .threshold_ok_o (threshold_ok),
         .busy_o         (bw_busy)
@@ -229,6 +233,8 @@ module top_with_config_loader #(
     assign f2_right_o = f2_right;
     assign L1_right_o = L1_right;
     assign L2_right_o = L2_right;
+
+    assign abs_threshold_o = abs_threshold;
     
     assign valid_o = bw_valid;
 

@@ -311,21 +311,35 @@ def generate_test_case(test_name, baseline_iq_data, fs_baseline, S_bins,
     # Frequency steps (32-bit unsigned)
     freq_steps_hw = freq_steps
     
-    # Frequency bins (16-bit signed, Hz as integer)
-    freq_bins_hw = []
-    for freq in freqs_sorted:
-        # Store frequency in Hz as signed 16-bit integer
-        freq_val = int(freq) & 0xFFFF
-        freq_bins_hw.append(freq_val)
+    # # Frequency bins (16-bit signed, Hz as integer)
+    # freq_bins_hw = []
+    # for freq in freqs_sorted:
+    #     # Store frequency in Hz as signed 16-bit integer
+    #     freq_val = int(freq) & 0xFFFF
+    #     freq_bins_hw.append(freq_val)
     
-    # --- Format Expected Outputs ---
+    # # --- Format Expected Outputs ---
     
-    def fix_freq(f):
-        """Convert frequency in Hz to fixed point, return 0 if None"""
-        if f is None:
-            return 0
-        # Store as signed 16-bit integer in Hz
-        return int(f) & 0xFFFF
+    # def fix_freq(f):
+    #     """Convert frequency in Hz to fixed point, return 0 if None"""
+    #     if f is None:
+    #         return 0
+    #     # Store as signed 16-bit integer in Hz
+    #     return int(f) & 0xFFFF
+
+    # --- UPDATED: Frequency Bins are just Indices ---
+    # We create a list [0, 1, 2, ... K-1]
+    freq_bins_hw = list(range(len(S_bins)))
+    
+    # Helper to convert Frequency Float to Index
+    def fix_freq(f_val):
+        if f_val is None: return 0
+        # Find the index of this frequency in the sorted list
+        # We use np.isclose to handle potential float precision issues
+        idx = np.where(np.isclose(freqs_sorted, f_val))[0]
+        if len(idx) > 0:
+            return int(idx[0])
+        return 0
     
     def fix_pwr(p):
         """Convert power in dB to fixed point, return 0 if None"""
@@ -490,7 +504,7 @@ Available datasets:
         'PHASE_WIDTH': 16,
         'OSC_LATENCY': 20,
         'WINDOW_SIZE': 256,
-        'FREQ_BIN_WIDTH': 16,
+        'FREQ_BIN_WIDTH': 5, # 16
         'THRESHOLD_DROP': 30  # 30 dB
     }
     

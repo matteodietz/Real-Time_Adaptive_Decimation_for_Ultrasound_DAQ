@@ -27,6 +27,7 @@ module bandwidth_edge_detector #(
     output logic [FREQ_BIN_WIDTH-1:0]   f2_right_o,     // Higher frequency bin
     output logic [POWER_WIDTH-1:0]      L1_right_o,     // Power at f1 (below threshold)
     output logic [POWER_WIDTH-1:0]      L2_right_o,     // Power at f2 (above threshold)
+    output logic [POWER_WIDTH-1:0]      abs_threshold_o,
     
     // Status outputs
     output logic                        valid_o,        // Output valid (both edges found)
@@ -154,6 +155,7 @@ module bandwidth_edge_detector #(
     assign f2_right_o = f2_right;
     assign L1_right_o = L1_right;
     assign L2_right_o = L2_right;
+    assign abs_threshold_o = abs_threshold;
     
     // Threshold status output (combinational)
     assign threshold_ok_o = threshold_ok;

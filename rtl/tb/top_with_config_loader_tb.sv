@@ -44,7 +44,7 @@ module top_with_config_loader_tb();
     localparam integer SAMPLE_COUNT_WIDTH = 16;
     
     // Bandwidth Detection Parameters
-    localparam integer FREQ_BIN_WIDTH = 16;
+    localparam integer FREQ_BIN_WIDTH = 5; //16
     localparam logic [POWER_WIDTH-1:0] THRESHOLD_DROP = 8'h1E; // 30 dB
     
     // Config Loader Parameters
@@ -94,6 +94,8 @@ module top_with_config_loader_tb();
     logic [FREQ_BIN_WIDTH-1:0] f2_right;
     logic [POWER_WIDTH-1:0] L1_right;
     logic [POWER_WIDTH-1:0] L2_right;
+
+    logic [POWER_WIDTH-1:0] abs_threshold;
     
     // Status outputs
     logic valid;
@@ -157,6 +159,7 @@ module top_with_config_loader_tb();
         .f2_right_o              (f2_right),
         .L1_right_o              (L1_right),
         .L2_right_o              (L2_right),
+        .abs_threshold_o         (abs_threshold),
         .valid_o                 (valid)
     );
 
@@ -233,7 +236,7 @@ module top_with_config_loader_tb();
         $fwrite(csv_file, "exp_f1_right,exp_f2_right,exp_L1_right,exp_L2_right,");
         $fwrite(csv_file, "act_f1_left,act_f2_left,act_L1_left,act_L2_left,");
         $fwrite(csv_file, "act_f1_right,act_f2_right,act_L1_right,act_L2_right,");
-        $fwrite(csv_file, "warning,error\n");
+        $fwrite(csv_file, "abs_threshold,warning,error\n");
         
         // Skip header lines (14 lines)
         for (int i = 0; i < 14; i++) begin
@@ -495,7 +498,7 @@ module top_with_config_loader_tb();
                         check_result(csv_file, angle, channel, window_number,
                                 exp_f1_left, exp_f2_left, exp_L1_left, exp_L2_left,
                                 exp_f1_right, exp_f2_right, exp_L1_right, exp_L2_right,
-                                n_errs);
+                                abs_threshold, n_errs);
                         
                         // Break out of both loops
                         break;
@@ -547,7 +550,7 @@ module top_with_config_loader_tb();
                     check_result(csv_file, angle, channel, window_number,
                                exp_f1_left, exp_f2_left, exp_L1_left, exp_L2_left,
                                exp_f1_right, exp_f2_right, exp_L1_right, exp_L2_right,
-                               n_errs);
+                               abs_threshold, n_errs);
                 end
             end
             
@@ -594,6 +597,7 @@ module top_with_config_loader_tb();
         input logic [FREQ_BIN_WIDTH-1:0] expected_f2_right,
         input logic [POWER_WIDTH-1:0] expected_L1_right,
         input logic [POWER_WIDTH-1:0] expected_L2_right,
+        input logic [POWER_WIDTH-1:0] actual_abs_threshold,
         inout integer error_count
     );
         automatic logic has_error = 1'b0;
@@ -663,7 +667,7 @@ module top_with_config_loader_tb();
         $fwrite(csv_file, "%0d,%0d,%0d,%0d,", expected_f1_right, expected_f2_right, expected_L1_right, expected_L2_right);
         $fwrite(csv_file, "%0d,%0d,%0d,%0d,", f1_left, f2_left, L1_left, L2_left);
         $fwrite(csv_file, "%0d,%0d,%0d,%0d,", f1_right, f2_right, L1_right, L2_right);
-        $fwrite(csv_file, "%0d,%0d\n", has_warning, has_error);
+        $fwrite(csv_file, "%0d,%0d,%0d\n", actual_abs_threshold, has_warning, has_error);
         
         // Update error count
         if (has_error) begin

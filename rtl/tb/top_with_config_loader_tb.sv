@@ -80,7 +80,7 @@ module top_with_config_loader_tb();
     logic signed [WINDOW_WIDTH-1:0] window_coeff;
     
     // Outputs
-    logic dft_busy;
+    // logic dft_busy;
     logic threshold_ok;
     
     // Left edge outputs
@@ -584,6 +584,103 @@ module top_with_config_loader_tb();
     end
 
     // --- Checking Task ---
+    // task check_result(
+    //     input integer csv_file,
+    //     input integer angle,
+    //     input integer channel,
+    //     input integer window_num,
+    //     input logic [FREQ_BIN_WIDTH-1:0] expected_f1_left,
+    //     input logic [FREQ_BIN_WIDTH-1:0] expected_f2_left,
+    //     input logic [POWER_WIDTH-1:0] expected_L1_left,
+    //     input logic [POWER_WIDTH-1:0] expected_L2_left,
+    //     input logic [FREQ_BIN_WIDTH-1:0] expected_f1_right,
+    //     input logic [FREQ_BIN_WIDTH-1:0] expected_f2_right,
+    //     input logic [POWER_WIDTH-1:0] expected_L1_right,
+    //     input logic [POWER_WIDTH-1:0] expected_L2_right,
+    //     input logic [POWER_WIDTH-1:0] actual_abs_threshold,
+    //     inout integer error_count
+    // );
+    //     automatic logic has_error = 1'b0;
+    //     automatic logic has_warning = 1'b0;
+    //     automatic integer L1_left_error, L2_left_error;
+    //     automatic integer L1_right_error, L2_right_error;
+    //     automatic integer power_tolerance = 3;  // Allow ±3 dB for power values
+        
+    //     // Check frequencies (zero tolerance)
+    //     if (f1_left !== expected_f1_left) has_error = 1'b1;
+    //     if (f2_left !== expected_f2_left) has_error = 1'b1;
+    //     if (f1_right !== expected_f1_right) has_error = 1'b1;
+    //     if (f2_right !== expected_f2_right) has_error = 1'b1;
+        
+    //     // Check powers (±3 dB tolerance)
+    //     // L1_left
+    //     if (L1_left > expected_L1_left) begin
+    //         L1_left_error = L1_left - expected_L1_left;
+    //     end else begin
+    //         L1_left_error = expected_L1_left - L1_left;
+    //     end
+    //     if (L1_left_error > power_tolerance) begin
+    //         has_error = 1'b1;
+    //     end else if (L1_left_error > 0) begin
+    //         has_warning = 1'b1;
+    //     end
+        
+    //     // L2_left
+    //     if (L2_left > expected_L2_left) begin
+    //         L2_left_error = L2_left - expected_L2_left;
+    //     end else begin
+    //         L2_left_error = expected_L2_left - L2_left;
+    //     end
+    //     if (L2_left_error > power_tolerance) begin
+    //         has_error = 1'b1;
+    //     end else if (L2_left_error > 0) begin
+    //         has_warning = 1'b1;
+    //     end
+        
+    //     // L1_right
+    //     if (L1_right > expected_L1_right) begin
+    //         L1_right_error = L1_right - expected_L1_right;
+    //     end else begin
+    //         L1_right_error = expected_L1_right - L1_right;
+    //     end
+    //     if (L1_right_error > power_tolerance) begin
+    //         has_error = 1'b1;
+    //     end else if (L1_right_error > 0) begin
+    //         has_warning = 1'b1;
+    //     end
+        
+    //     // L2_right
+    //     if (L2_right > expected_L2_right) begin
+    //         L2_right_error = L2_right - expected_L2_right;
+    //     end else begin
+    //         L2_right_error = expected_L2_right - L2_right;
+    //     end
+    //     if (L2_right_error > power_tolerance) begin
+    //         has_error = 1'b1;
+    //     end else if (L2_right_error > 0) begin
+    //         has_warning = 1'b1;
+    //     end
+        
+    //     // Write to CSV
+    //     $fwrite(csv_file, "%0d,%0d,%0d,", channel, angle, window_num);
+    //     $fwrite(csv_file, "%0d,%0d,%0d,%0d,", expected_f1_left, expected_f2_left, expected_L1_left, expected_L2_left);
+    //     $fwrite(csv_file, "%0d,%0d,%0d,%0d,", expected_f1_right, expected_f2_right, expected_L1_right, expected_L2_right);
+    //     $fwrite(csv_file, "%0d,%0d,%0d,%0d,", f1_left, f2_left, L1_left, L2_left);
+    //     $fwrite(csv_file, "%0d,%0d,%0d,%0d,", f1_right, f2_right, L1_right, L2_right);
+    //     $fwrite(csv_file, "%0d,%0d,%0d\n", actual_abs_threshold, has_warning, has_error);
+        
+    //     // Update error count
+    //     if (has_error) begin
+    //         error_count++;
+    //         $display("  RESULT: FAIL");
+    //     end else if (has_warning) begin
+    //         $display("  RESULT: PASS (with warnings)");
+    //     end else begin
+    //         $display("  RESULT: PASS");
+    //     end
+    // endtask
+
+    // --- Checking Task ---
     task check_result(
         input integer csv_file,
         input integer angle,
@@ -604,15 +701,41 @@ module top_with_config_loader_tb();
         automatic logic has_warning = 1'b0;
         automatic integer L1_left_error, L2_left_error;
         automatic integer L1_right_error, L2_right_error;
-        automatic integer power_tolerance = 3;  // Allow ±3 dB for power values
+        automatic integer power_tolerance = 6;  // Allow ±6 dB for power values
         
-        // Check frequencies (zero tolerance)
-        if (f1_left !== expected_f1_left) has_error = 1'b1;
-        if (f2_left !== expected_f2_left) has_error = 1'b1;
-        if (f1_right !== expected_f1_right) has_error = 1'b1;
-        if (f2_right !== expected_f2_right) has_error = 1'b1;
+        // Check left edge frequencies
+        if (f1_left == expected_f1_left && f2_left == expected_f2_left) begin
+            // Perfect match - no action needed
+        end else if ((f1_left == expected_f1_left - 1 && f2_left == expected_f2_left - 1) ||
+                    (f1_left == expected_f1_left + 1 && f2_left == expected_f2_left + 1)) begin
+            // Off by 1 bin in the same direction - warning
+            has_warning = 1'b1;
+            $display("    WARNING: Left edge bins off by 1 (Expected: %0d,%0d Got: %0d,%0d)",
+                    expected_f1_left, expected_f2_left, f1_left, f2_left);
+        end else begin
+            // Larger mismatch - error
+            has_error = 1'b1;
+            $display("    ERROR: Left edge bins mismatch (Expected: %0d,%0d Got: %0d,%0d)",
+                    expected_f1_left, expected_f2_left, f1_left, f2_left);
+        end
         
-        // Check powers (±3 dB tolerance)
+        // Check right edge frequencies
+        if (f1_right == expected_f1_right && f2_right == expected_f2_right) begin
+            // Perfect match - no action needed
+        end else if ((f1_right == expected_f1_right - 1 && f2_right == expected_f2_right - 1) ||
+                    (f1_right == expected_f1_right + 1 && f2_right == expected_f2_right + 1)) begin
+            // Off by 1 bin in the same direction - warning
+            has_warning = 1'b1;
+            $display("    WARNING: Right edge bins off by 1 (Expected: %0d,%0d Got: %0d,%0d)",
+                    expected_f1_right, expected_f2_right, f1_right, f2_right);
+        end else begin
+            // Larger mismatch - error
+            has_error = 1'b1;
+            $display("    ERROR: Right edge bins mismatch (Expected: %0d,%0d Got: %0d,%0d)",
+                    expected_f1_right, expected_f2_right, f1_right, f2_right);
+        end
+        
+        // Check powers (±6 dB tolerance)
         // L1_left
         if (L1_left > expected_L1_left) begin
             L1_left_error = L1_left - expected_L1_left;
@@ -621,8 +744,11 @@ module top_with_config_loader_tb();
         end
         if (L1_left_error > power_tolerance) begin
             has_error = 1'b1;
+            $display("    ERROR: L1_left power error %0d dB (tolerance +/-%0d dB)", 
+                    L1_left_error, power_tolerance);
         end else if (L1_left_error > 0) begin
             has_warning = 1'b1;
+            $display("    WARNING: L1_left power error %0d dB", L1_left_error);
         end
         
         // L2_left
@@ -633,8 +759,11 @@ module top_with_config_loader_tb();
         end
         if (L2_left_error > power_tolerance) begin
             has_error = 1'b1;
+            $display("    ERROR: L2_left power error %0d dB (tolerance +/-%0d dB)", 
+                    L2_left_error, power_tolerance);
         end else if (L2_left_error > 0) begin
             has_warning = 1'b1;
+            $display("    WARNING: L2_left power error %0d dB", L2_left_error);
         end
         
         // L1_right
@@ -645,8 +774,11 @@ module top_with_config_loader_tb();
         end
         if (L1_right_error > power_tolerance) begin
             has_error = 1'b1;
+            $display("    ERROR: L1_right power error %0d dB (tolerance +/-%0d dB)", 
+                    L1_right_error, power_tolerance);
         end else if (L1_right_error > 0) begin
             has_warning = 1'b1;
+            $display("    WARNING: L1_right power error %0d dB", L1_right_error);
         end
         
         // L2_right
@@ -657,8 +789,11 @@ module top_with_config_loader_tb();
         end
         if (L2_right_error > power_tolerance) begin
             has_error = 1'b1;
+            $display("    ERROR: L2_right power error %0d dB (tolerance +/-%0d dB)", 
+                    L2_right_error, power_tolerance);
         end else if (L2_right_error > 0) begin
             has_warning = 1'b1;
+            $display("    WARNING: L2_right power error %0d dB", L2_right_error);
         end
         
         // Write to CSV

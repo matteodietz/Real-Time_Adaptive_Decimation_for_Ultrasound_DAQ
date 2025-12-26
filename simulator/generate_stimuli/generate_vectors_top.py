@@ -449,7 +449,7 @@ def write_vector_file(test_cases, output_path):
             
             f.write("\n")
     
-    print(f"\n✓ Test vectors written to: {output_path}")
+    print(f"\n Test vectors written to: {output_path}")
 
 
 def main():
@@ -479,7 +479,7 @@ Available datasets:
                         default='contrast_speckle')
     parser.add_argument('-n', '--num_tests', 
                         type=int, 
-                        default=5,
+                        default=10,
                         help='Number of test cases to generate (default: 5)')
     
     args = parser.parse_args()
@@ -529,11 +529,11 @@ Available datasets:
         rf_data, angles, _, _, fs_picmus, mod_freq, _, _, _ = load_picmus_rf_data(
             rf_path, iq_path, scan_path
         )
-        print(f"✓ Loaded PICMUS data")
+        print(f"  Loaded PICMUS data")
         print(f"  Modulation frequency: {mod_freq/1e6:.2f} MHz")
         print(f"  PICMUS sample rate: {fs_picmus/1e6:.2f} MHz")
     except Exception as e:
-        print(f"✗ Failed to load PICMUS data: {e}")
+        print(f"  Failed to load PICMUS data: {e}")
         sys.exit(1)
     
     # --- AFE Processing Parameters ---
@@ -569,7 +569,7 @@ Available datasets:
         decimation_factor=baseline_decimation,
         adc_sample_rate=adc_rate
     )
-    print(f"✓ AFE processing complete. fs_baseline = {fs_baseline/1e6:.2f} MHz")
+    print(f" AFE processing complete. fs_baseline = {fs_baseline/1e6:.2f} MHz")
     
     # Calculate maximum IQ magnitude for normalization
     max_iq = np.max(np.abs(baseline_iq_data_full))
@@ -584,7 +584,7 @@ Available datasets:
     print(f"Valid window range: 0 to {num_windows_total - 1}")
     
     # Select windows from second half
-    second_half_start = num_windows_total // 2
+    last_third_start = 2 * num_windows_total // 3
     
     # --- Generate Test Cases ---
     print("\n--- Generating Test Cases ---")
@@ -594,7 +594,7 @@ Available datasets:
     
     for i in range(num_test_cases):
         # Random window from second half
-        window_num = random.randint(second_half_start, num_windows_total - 1)
+        window_num = random.randint(last_third_start, num_windows_total - 1)
         
         # Random channel
         channel = random.randint(1, 127)
@@ -620,9 +620,9 @@ Available datasets:
             )
             
             test_cases.append(tc)
-            print(f"  ✓ Test case generated")
+            print(f"  Test case generated")
         except Exception as e:
-            print(f"  ✗ Failed: {e}")
+            print(f"  Failed: {e}")
             continue
     
     # --- Write Output File ---
@@ -632,7 +632,7 @@ Available datasets:
     output_dir.mkdir(parents=True, exist_ok=True)
     
     # Create filename with dataset info
-    if args.dataset_type == 'experiments' and args.dataset_name == 'contrast_speckle' and args.num_tests == 5:
+    if args.dataset_type == 'experiments' and args.dataset_name == 'contrast_speckle' and args.num_tests == 10:
         output_filename = "top_vectors.txt"
     else:
         output_filename = f"top_vectors_{args.dataset_type}_{args.dataset_name}.txt"

@@ -1,480 +1,3 @@
-# """
-# analyze_results.py
-
-# Analyzes the functional accuracy of the FPGA Top Level Simulation.
-# Compares hardware results (from CSV) against a high-precision Ground Truth 
-# calculated on the fly using standard SciPy methods.
-# """
-
-# import pandas as pd
-# import numpy as np
-# from scipy import signal
-# import argparse
-# from pathlib import Path
-# import sys
-
-# # -----------------------------------------------------------------------------
-# # 1. Setup Paths & Imports
-# # -----------------------------------------------------------------------------
-# try:
-#     # Resolve path to: bachelor_thesis/simulator/src
-#     # Current script: bachelor_thesis/rtl/sim_results/analyze_results.py
-#     CURRENT_DIR = Path(__file__).resolve().parent
-#     SIMULATOR_SRC = CURRENT_DIR.parent.parent / "simulator" / "src"
-    
-#     if not SIMULATOR_SRC.exists():
-#         raise FileNotFoundError(f"Simulator src not found at {SIMULATOR_SRC}")
-        
-#     sys.path.insert(0, str(SIMULATOR_SRC))
-
-#     from afe_interface_rf import load_picmus_rf_data
-#     from virtual_afe import run_virtual_afe_processing
-
-# except ImportError as e:
-#     print(f"Error importing simulator modules: {e}")
-#     sys.exit(1)
-
-# # -----------------------------------------------------------------------------
-# # 2. Configuration
-# # -----------------------------------------------------------------------------
-# DATASET_CONFIG = {
-#     'experiments': {
-#         'contrast_speckle': ('contrast_speckle_expe_dataset_rf.hdf5', 'contrast_speckle_expe_dataset_iq.hdf5', 'contrast_speckle_expe_scan.hdf5'),
-#         'resolution_distorsion': ('resolution_distorsion_expe_dataset_rf.hdf5', 'resolution_distorsion_expe_dataset_iq.hdf5', 'resolution_distorsion_expe_scan.hdf5')
-#     },
-#     'in_vivo': {
-#         'carotid_cross': ('carotid_cross_expe_dataset_rf.hdf5', 'carotid_cross_expe_dataset_iq.hdf5', 'carotid_cross_expe_scan.hdf5'),
-#         'carotid_long': ('carotid_long_expe_dataset_rf.hdf5', 'carotid_long_expe_dataset_iq.hdf5', 'carotid_long_expe_scan.hdf5')
-#     },
-#     'simulation': {
-#         'contrast_speckle': ('contrast_speckle_simu_dataset_rf.hdf5', 'contrast_speckle_simu_dataset_iq.hdf5', 'contrast_speckle_simu_scan.hdf5'),
-#         'resolution_distorsion': ('resolution_distorsion_simu_dataset_rf.hdf5', 'resolution_distorsion_simu_dataset_iq.hdf5', 'resolution_distorsion_simu_scan.hdf5')
-#     }
-# }
-
-# def get_dataset_paths(dataset_type, dataset_name):
-#     sim_root = SIMULATOR_SRC.parent
-#     base = sim_root / "datasets" / dataset_type / dataset_name
-#     files = DATASET_CONFIG[dataset_type][dataset_name]
-#     return base/files[0], base/files[1], base/files[2]
-
-# # -----------------------------------------------------------------------------
-# # 3. Ground Truth Calculation
-# # -----------------------------------------------------------------------------
-# def calculate_ground_truth_edges(time_window_data, fs, threshold_drop_db=30.0):
-#     """
-#     Calculates the True Bandwidth Edges of a signal window using High-Res FFT.
-#     """
-#     # 1. Compute High-Resolution Spectrum (Zero-padded for precision)
-#     # Using a simple Periodogram (FFT of windowed signal) matches the 
-#     # "instantaneous bandwidth" concept of the FPGA STFT better than Welch averaging.
-#     n_fft = 256
-#     win = signal.windows.hann(len(time_window_data))
-    
-#     # Compute Spectrum
-#     spectrum = np.abs(np.fft.fft(time_window_data * win, n=n_fft))**2
-#     freqs = np.fft.fftfreq(n_fft, d=1/fs)
-    
-#     # Shift to center DC
-#     spectrum_shifted = np.fft.fftshift(spectrum)
-#     freqs_shifted = np.fft.fftshift(freqs)
-    
-#     # 2. Convert to dB and Normalize
-#     peak_val = np.max(spectrum_shifted)
-#     if peak_val == 0:
-#         return float('nan'), float('nan')
-        
-#     spectrum_db = 10 * np.log10(spectrum_shifted + 1e-20)
-#     spectrum_db_norm = spectrum_db - np.max(spectrum_db)
-    
-#     # 3. Find Edges (-30dB)
-#     threshold = -threshold_drop_db
-    
-#     # Find all indices above threshold
-#     above_idx = np.where(spectrum_db_norm > threshold)[0]
-    
-#     if len(above_idx) > 0:
-#         # Outermost crossings
-#         idx_left = above_idx[0]
-#         idx_right = above_idx[-1]
-        
-#         # Get Frequencies (MHz)
-#         f_left_mhz = freqs_shifted[idx_left] / 1e6
-#         f_right_mhz = freqs_shifted[idx_right] / 1e6
-        
-#         return f_left_mhz, f_right_mhz
-#     else:
-#         return float('nan'), float('nan')
-
-# # -----------------------------------------------------------------------------
-# # 4. Main Analysis Logic
-# # -----------------------------------------------------------------------------
-# def main():
-#     parser = argparse.ArgumentParser(description="Analyze FPGA Results vs Ground Truth")
-#     parser.add_argument('csv_file', type=str, help="Path to the Results CSV file")
-#     parser.add_argument('--type', type=str, default='experiments', help="Dataset Type")
-#     parser.add_argument('--name', type=str, default='contrast_speckle', help="Dataset Name")
-#     parser.add_argument('--threshold', type=float, default=30.0, help="Threshold Drop in dB (default 30)")
-#     args = parser.parse_args()
-
-#     csv_path = Path(args.csv_file)
-#     if not csv_path.exists():
-#         print(f"Error: CSV file not found at {csv_path}")
-#         sys.exit(1)
-
-#     print("="*60)
-#     print(f"Analyzing Results: {csv_path.name}")
-#     print(f"Dataset:           {args.type}/{args.name}")
-#     print("="*60)
-
-#     # --- Load Dataset (Heavy Operation - Once) ---
-#     print("Loading PICMUS Dataset...")
-#     try:
-#         rf_path, iq_path, scan_path = get_dataset_paths(args.type, args.name)
-#         rf_data, angles, _, _, fs_picmus, mod_freq, _, _, _ = load_picmus_rf_data(rf_path, iq_path, scan_path)
-        
-#         # Run AFE to get baseline IQ
-#         adc_rate = 125e6
-#         decimation = 4
-#         center_angle_idx = np.argmin(np.abs(angles))
-        
-#         print("Running Virtual AFE...")
-#         baseline_iq, _, fs_baseline = run_virtual_afe_processing(
-#             rf_data, center_angle_idx, fs_picmus, mod_freq, decimation, adc_rate
-#         )
-#     except Exception as e:
-#         print(f"Failed to load/process dataset: {e}")
-#         sys.exit(1)
-
-#     # --- Process Results CSV ---
-#     df = pd.read_csv(csv_path)
-    
-#     # Lists to store ground truth
-#     gt_f_left = []
-#     gt_f_right = []
-    
-#     # STFT Params
-#     nperseg = 256
-#     hop = nperseg // 2
-
-#     print(f"Processing {len(df)} test cases...")
-
-#     for index, row in df.iterrows():
-#         # 1. Extract Test Params
-#         channel = int(row['channel'])
-#         window_idx = int(row['window'])
-        
-#         # 2. Extract Signal Window
-#         start_samp = window_idx * hop
-#         end_samp = start_samp + nperseg
-        
-#         if end_samp > baseline_iq.shape[0]:
-#             print(f"Warning: Window {window_idx} out of bounds.")
-#             gt_f_left.append(float('nan'))
-#             gt_f_right.append(float('nan'))
-#             continue
-
-#         time_window = baseline_iq[start_samp:end_samp, channel]
-        
-#         # 3. Calculate Ground Truth
-#         f_l, f_r = calculate_ground_truth_edges(time_window, fs_baseline, args.threshold)
-        
-#         gt_f_left.append(f_l)
-#         gt_f_right.append(f_r)
-
-#     # --- Add Ground Truth to DataFrame ---
-#     df['GT_F_Left_MHz'] = gt_f_left
-#     df['GT_F_Right_MHz'] = gt_f_right
-    
-#     # --- Display Preview ---
-#     print("\nAnalysis Complete. Preview:")
-#     cols = ['channel', 'window', 'GT_F_Left_MHz', 'GT_F_Right_MHz']
-#     print(df[cols].head())
-    
-#     # Optional: Save augmented CSV
-#     output_csv = csv_path.parent / f"analyzed_{csv_path.name}"
-#     df.to_csv(output_csv, index=False)
-#     print(f"\nSaved analyzed results to: {output_csv}")
-
-# if __name__ == "__main__":
-#     main()
-
-# """
-# analyze_results.py
-
-# Analyzes the functional accuracy of the FPGA Top Level Simulation.
-# 1. Calculates High-Precision Ground Truth (FFT based) for every test case.
-# 2. Maps Hardware Bin Indices (0..23) back to Physical Frequencies (MHz).
-# 3. Performs Linear Interpolation on Hardware results to find f_star.
-# 4. Compares f_star against Ground Truth.
-# """
-
-# import pandas as pd
-# import numpy as np
-# from scipy import signal
-# import argparse
-# from pathlib import Path
-# import sys
-
-# # -----------------------------------------------------------------------------
-# # 1. Setup Paths & Imports
-# # -----------------------------------------------------------------------------
-# try:
-#     CURRENT_DIR = Path(__file__).resolve().parent
-#     SIMULATOR_SRC = CURRENT_DIR.parent.parent / "simulator" / "src"
-    
-#     if not SIMULATOR_SRC.exists():
-#         raise FileNotFoundError(f"Simulator src not found at {SIMULATOR_SRC}")
-        
-#     sys.path.insert(0, str(SIMULATOR_SRC))
-
-#     from afe_interface_rf import load_picmus_rf_data
-#     from virtual_afe import run_virtual_afe_processing
-
-# except ImportError as e:
-#     print(f"Error importing simulator modules: {e}")
-#     sys.exit(1)
-
-# # -----------------------------------------------------------------------------
-# # 2. Configuration
-# # -----------------------------------------------------------------------------
-# DATASET_CONFIG = {
-#     'experiments': {
-#         'contrast_speckle': ('contrast_speckle_expe_dataset_rf.hdf5', 'contrast_speckle_expe_dataset_iq.hdf5', 'contrast_speckle_expe_scan.hdf5'),
-#         'resolution_distorsion': ('resolution_distorsion_expe_dataset_rf.hdf5', 'resolution_distorsion_expe_dataset_iq.hdf5', 'resolution_distorsion_expe_scan.hdf5')
-#     },
-#     'in_vivo': {
-#         'carotid_cross': ('carotid_cross_expe_dataset_rf.hdf5', 'carotid_cross_expe_dataset_iq.hdf5', 'carotid_cross_expe_scan.hdf5'),
-#         'carotid_long': ('carotid_long_expe_dataset_rf.hdf5', 'carotid_long_expe_dataset_iq.hdf5', 'carotid_long_expe_scan.hdf5')
-#     },
-#     'simulation': {
-#         'contrast_speckle': ('contrast_speckle_simu_dataset_rf.hdf5', 'contrast_speckle_simu_dataset_iq.hdf5', 'contrast_speckle_simu_scan.hdf5'),
-#         'resolution_distorsion': ('resolution_distorsion_simu_dataset_rf.hdf5', 'resolution_distorsion_simu_dataset_iq.hdf5', 'resolution_distorsion_simu_scan.hdf5')
-#     }
-# }
-
-# def get_dataset_paths(dataset_type, dataset_name):
-#     sim_root = SIMULATOR_SRC.parent
-#     base = sim_root / "datasets" / dataset_type / dataset_name
-#     files = DATASET_CONFIG[dataset_type][dataset_name]
-#     return base/files[0], base/files[1], base/files[2]
-
-# # -----------------------------------------------------------------------------
-# # 3. Helpers: Interpolation & Frequencies
-# # -----------------------------------------------------------------------------
-# def get_sorted_frequency_bins(mod_freq):
-#     """
-#     Reconstructs the exact S_bins array used in generation.
-#     Returns: Sorted numpy array of frequencies in Hz.
-#     """
-#     delta_f = 0.25e6 
-#     half_bw_est = mod_freq / 2
-
-#     s_coarse = np.linspace(-mod_freq, mod_freq, 8)
-#     s_fine_left = np.linspace(-half_bw_est - delta_f, -half_bw_est + delta_f, 8) 
-#     s_fine_right = np.linspace(half_bw_est - delta_f, half_bw_est + delta_f, 8) 
-    
-#     # Concatenate and Sort (Crucial: HW indices correspond to sorted array)
-#     S_bins = np.unique(np.concatenate([s_coarse, s_fine_left, s_fine_right]))
-#     return np.sort(S_bins)
-
-# def linear_interpolate_hw(f1, f2, L1, L2, abs_threshold):
-#     """
-#     Performs the final linear interpolation to find the precise edge frequency.
-#     Matches the logic used in the complete system model.
-#     """
-#     # Check for NaNs or invalid inputs
-#     if any(np.isnan(v) for v in [f1, f2, L1, L2]):
-#         return float('nan')
-        
-#     if (L2 - L1) == 0:
-#         return float('nan') # Avoid division by zero
-
-#     # Standard linear interpolation formula
-#     # f_star = f1 + (f2 - f1) * (threshold - L1) / (L2 - L1)
-#     f_star = f1 + (f2 - f1) * (abs_threshold - L1) / (L2 - L1)
-#     return f_star
-
-# # -----------------------------------------------------------------------------
-# # 4. Ground Truth Calculation
-# # -----------------------------------------------------------------------------
-# def calculate_ground_truth_edges(time_window_data, fs, threshold_drop_db=30.0):
-#     """
-#     Calculates the True Bandwidth Edges using High-Res FFT.
-#     """
-#     n_fft = 256 
-#     win = signal.windows.hann(len(time_window_data))
-    
-#     spectrum = np.abs(np.fft.fft(time_window_data * win, n=n_fft))**2
-#     freqs = np.fft.fftfreq(n_fft, d=1/fs)
-    
-#     spectrum_shifted = np.fft.fftshift(spectrum)
-#     freqs_shifted = np.fft.fftshift(freqs)
-    
-#     peak_val = np.max(spectrum_shifted)
-#     if peak_val == 0:
-#         return float('nan'), float('nan')
-        
-#     spectrum_db = 10 * np.log10(spectrum_shifted + 1e-20)
-#     spectrum_db_norm = spectrum_db - np.max(spectrum_db)
-    
-#     threshold = -threshold_drop_db
-#     above_idx = np.where(spectrum_db_norm > threshold)[0]
-    
-#     if len(above_idx) > 0:
-#         idx_left = above_idx[0]
-#         idx_right = above_idx[-1]
-#         f_left_mhz = freqs_shifted[idx_left] / 1e6
-#         f_right_mhz = freqs_shifted[idx_right] / 1e6
-#         return f_left_mhz, f_right_mhz
-#     else:
-#         return float('nan'), float('nan')
-
-# # -----------------------------------------------------------------------------
-# # 5. Main Analysis Logic
-# # -----------------------------------------------------------------------------
-# def main():
-#     parser = argparse.ArgumentParser(description="Analyze FPGA Results vs Ground Truth")
-#     parser.add_argument('csv_file', type=str, help="Path to the Results CSV file")
-#     parser.add_argument('--type', type=str, default='experiments', help="Dataset Type")
-#     parser.add_argument('--name', type=str, default='contrast_speckle', help="Dataset Name")
-#     parser.add_argument('--threshold', type=float, default=30.0, help="Threshold Drop in dB")
-#     args = parser.parse_args()
-
-#     csv_path = Path(args.csv_file)
-#     if not csv_path.exists():
-#         print(f"Error: CSV file not found at {csv_path}")
-#         sys.exit(1)
-
-#     print("="*60)
-#     print(f"Analyzing Results: {csv_path.name}")
-#     print(f"Dataset:           {args.type}/{args.name}")
-#     print("="*60)
-
-#     # --- Load Dataset ---
-#     print("Loading PICMUS Dataset...")
-#     try:
-#         rf_path, iq_path, scan_path = get_dataset_paths(args.type, args.name)
-#         rf_data, angles, _, _, fs_picmus, mod_freq, _, _, _ = load_picmus_rf_data(rf_path, iq_path, scan_path)
-        
-#         # Run AFE
-#         adc_rate = 125e6
-#         decimation = 4
-#         center_angle_idx = np.argmin(np.abs(angles))
-        
-#         print("Running Virtual AFE...")
-#         baseline_iq, _, fs_baseline = run_virtual_afe_processing(
-#             rf_data, center_angle_idx, fs_picmus, mod_freq, decimation, adc_rate
-#         )
-#     except Exception as e:
-#         print(f"Failed to load/process dataset: {e}")
-#         sys.exit(1)
-
-#     # --- Reconstruct Frequency Bins ---
-#     sorted_bins_hz = get_sorted_frequency_bins(mod_freq)
-    
-#     # Helper to map Index -> MHz
-#     def map_idx_to_mhz(idx):
-#         if np.isnan(idx) or idx < 0 or idx >= len(sorted_bins_hz):
-#             return float('nan')
-#         return sorted_bins_hz[int(idx)] / 1e6
-
-#     # --- Process CSV ---
-#     df = pd.read_csv(csv_path)
-    
-#     # 1. Calculate Ground Truth (High Res FFT)
-#     gt_f_left = []
-#     gt_f_right = []
-#     nperseg = 256
-#     hop = nperseg // 2
-
-#     print(f"Processing {len(df)} test cases...")
-
-#     for index, row in df.iterrows():
-#         channel = int(row['channel'])
-#         window_idx = int(row['window'])
-        
-#         start_samp = window_idx * hop
-#         end_samp = start_samp + nperseg
-        
-#         if end_samp > baseline_iq.shape[0]:
-#             gt_f_left.append(float('nan'))
-#             gt_f_right.append(float('nan'))
-#             continue
-
-#         time_window = baseline_iq[start_samp:end_samp, channel]
-#         f_l, f_r = calculate_ground_truth_edges(time_window, fs_baseline, args.threshold)
-        
-#         gt_f_left.append(f_l)
-#         gt_f_right.append(f_r)
-
-#     df['GT_F_Left_MHz'] = gt_f_left
-#     df['GT_F_Right_MHz'] = gt_f_right
-
-#     # 2. Hardware: Map Indices to MHz and Interpolate
-    
-#     # --- Left Edge ---
-#     # Map raw indices to MHz frequencies
-#     f1_L_mhz = df['act_f1_left'].apply(map_idx_to_mhz)
-#     f2_L_mhz = df['act_f2_left'].apply(map_idx_to_mhz)
-    
-#     # Interpolate using hardware power values and threshold
-#     # Note: apply with lambda allows row-wise operation
-#     df['ACT_F_Star_Left_MHz'] = df.apply(
-#         lambda row: linear_interpolate_hw(
-#             map_idx_to_mhz(row['act_f1_left']), 
-#             map_idx_to_mhz(row['act_f2_left']), 
-#             row['act_L1_left'], 
-#             row['act_L2_left'], 
-#             row['abs_threshold']
-#         ), axis=1
-#     )
-
-#     # --- Right Edge ---
-#     df['ACT_F_Star_Right_MHz'] = df.apply(
-#         lambda row: linear_interpolate_hw(
-#             map_idx_to_mhz(row['act_f1_right']), 
-#             map_idx_to_mhz(row['act_f2_right']), 
-#             row['act_L1_right'], 
-#             row['act_L2_right'], 
-#             row['abs_threshold']
-#         ), axis=1
-#     )
-
-#     # 3. Calculate Errors
-    
-#     # Error Left: abs(GT - EST)
-#     df['Error_Left_MHz'] = np.abs(df['GT_F_Left_MHz'] - df['ACT_F_Star_Left_MHz'])
-    
-#     # Error Right: abs(GT - EST)
-#     df['Error_Right_MHz'] = np.abs(df['GT_F_Right_MHz'] - df['ACT_F_Star_Right_MHz'])
-    
-#     # Max Bandwidth Edge Error
-#     # |max(|GT_L|, |GT_R|) - max(|EST_L|, |EST_R|)|
-#     # This represents the error in estimating the "outermost" frequency component
-#     gt_max_abs = np.maximum(np.abs(df['GT_F_Left_MHz']), np.abs(df['GT_F_Right_MHz']))
-#     est_max_abs = np.maximum(np.abs(df['ACT_F_Star_Left_MHz']), np.abs(df['ACT_F_Star_Right_MHz']))
-    
-#     df['Error_Max_Abs_Edge_MHz'] = np.abs(gt_max_abs - est_max_abs)
-
-#     # --- Display Preview ---
-#     print("\nAnalysis Complete. Results Preview:")
-#     preview_cols = [
-#         'channel', 
-#         'GT_F_Left_MHz', 'ACT_F_Star_Left_MHz', 'Error_Left_MHz',
-#         'GT_F_Right_MHz', 'ACT_F_Star_Right_MHz', 'Error_Right_MHz',
-#         'Error_Max_Abs_Edge_MHz'
-#     ]
-#     print(df[preview_cols].head())
-    
-#     # Save
-#     output_csv = csv_path.parent / f"analyzed_{csv_path.name}"
-#     df.to_csv(output_csv, index=False)
-#     print(f"\nSaved analyzed results to: {output_csv}")
-
-# if __name__ == "__main__":
-#     main()
-
 """
 analyze_results.py
 
@@ -718,7 +241,7 @@ def main():
     )
 
     # -------------------------------------------------------------------------
-    # 3. Calculate Derived Metrics (New Section)
+    # 3. Calculate Derived Metrics
     # -------------------------------------------------------------------------
     
     # A. Bandwidth (Right - Left)
@@ -731,15 +254,14 @@ def main():
     
     # C. Decimation Factor M
     # M = floor(125 / (4 * MaxAbs))
-    # Note: 125 MHz ADC Rate, 4x Oversampling Requirement
     def calc_decimation(max_freq):
         # Handle cases where max_freq is small or nan
         if np.isnan(max_freq) or max_freq <= 0.1: 
-            return 1.0 # Safe fallback (no decimation) or indicative of error
+            return 1.0 
         
         fs_min = 4.0 * max_freq
         if fs_min >= 125.0:
-            return 1.0 # Cannot decimate if required rate > 125
+            return 1.0 
             
         return np.floor(125.0 / fs_min)
 
@@ -770,28 +292,32 @@ def main():
     err_left = valid_df['ACT_F_Star_Left_MHz'] - valid_df['GT_F_Left_MHz']
     mae_left = np.mean(np.abs(err_left))
     std_left = np.std(err_left)
+    # NEW: MAPE Left
+    mape_left = np.mean(np.abs(err_left / valid_df['GT_F_Left_MHz'])) * 100
 
     # Metric 2: Right Edge Accuracy
     err_right = valid_df['ACT_F_Star_Right_MHz'] - valid_df['GT_F_Right_MHz']
     mae_right = np.mean(np.abs(err_right))
     std_right = np.std(err_right)
+    # NEW: MAPE Right
+    mape_right = np.mean(np.abs(err_right / valid_df['GT_F_Right_MHz'])) * 100
 
     # Metric 3: Total Bandwidth Accuracy
     err_bw = valid_df['BW_ACT_MHz'] - valid_df['BW_GT_MHz']
     mae_bw = np.mean(np.abs(err_bw))
-    bias_bw = np.mean(err_bw) # Mean Signed Error (+ means overestimation)
+    bias_bw = np.mean(err_bw) 
     mape_bw = np.mean(np.abs(err_bw / valid_df['BW_GT_MHz'])) * 100
 
     # Metric 4: Safety Check (Overshoot)
     # Check if estimated bandwidth covers the ground truth bandwidth
-    # Ideally: Est_Left <= GT_Left  AND  Est_Right >= GT_Right (Wider or Equal)
-    # Or simply: Est_BW >= GT_BW
     safe_bw_count = np.sum(valid_df['BW_ACT_MHz'] >= valid_df['BW_GT_MHz'])
     safety_ratio = (safe_bw_count / valid_cases) * 100
 
     # Metric 5: Nyquist / Max Edge Error
     err_max_edge = np.abs(valid_df['MaxAbs_ACT_MHz'] - valid_df['MaxAbs_GT_MHz'])
     mae_max_edge = np.mean(err_max_edge)
+    # NEW: MAPE Max Edge
+    mape_max_edge = np.mean(np.abs(err_max_edge / valid_df['MaxAbs_GT_MHz'])) * 100
 
     # Metric 6: Decimation Accuracy
     # Exact Match
@@ -799,15 +325,16 @@ def main():
     dec_accuracy = (dec_matches / valid_cases) * 100
     
     # Safe Decimation (Estimated M <= Ground Truth M)
-    # Lower M means higher sampling rate = Safe. Higher M means undersampling = Dangerous.
     dec_safe_count = np.sum(valid_df['M_ACT'] <= valid_df['M_GT'])
     dec_safety_ratio = (dec_safe_count / valid_cases) * 100
 
-    print("\n--- 1. Edge Accuracy [MHz] ---")
-    print(f"Left Edge MAE:      {mae_left:.4f}")
-    print(f"Left Edge StdDev:   {std_left:.4f}")
-    print(f"Right Edge MAE:     {mae_right:.4f}")
-    print(f"Right Edge StdDev:  {std_right:.4f}")
+    print("\n--- 1. Edge Accuracy ---")
+    print(f"Left Edge MAE:      {mae_left:.4f} MHz")
+    print(f"Left Edge MAPE:     {mape_left:.2f} %")
+    print(f"Left Edge StdDev:   {std_left:.4f} MHz")
+    print(f"Right Edge MAE:     {mae_right:.4f} MHz")
+    print(f"Right Edge MAPE:    {mape_right:.2f} %")
+    print(f"Right Edge StdDev:  {std_right:.4f} MHz")
     
     print("\n--- 2. Bandwidth Estimation ---")
     print(f"BW MAE:             {mae_bw:.4f} MHz")
@@ -817,6 +344,7 @@ def main():
     
     print("\n--- 3. Sampling Rate & Decimation ---")
     print(f"Max Edge MAE:       {mae_max_edge:.4f} MHz")
+    print(f"Max Edge MAPE:      {mape_max_edge:.2f} %")
     print(f"Decimation Match:   {dec_accuracy:.1f} % (M_est == M_gt)")
     print(f"Decimation Safety:  {dec_safety_ratio:.1f} % (M_est <= M_gt)")
     

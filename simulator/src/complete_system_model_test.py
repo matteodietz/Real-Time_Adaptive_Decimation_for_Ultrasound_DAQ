@@ -53,8 +53,8 @@ if __name__ == '__main__':
     
     # --- 3. Select ONE STFT Window to Analyze ---
     nperseg = 256
-    channel_to_test = 64
-    window_num_to_test = 29
+    channel_to_test = 37 #64
+    window_num_to_test = 34 #29
     hop = nperseg // 2
 
     total_samples = baseline_iq_data.shape[0]
@@ -163,63 +163,151 @@ if __name__ == '__main__':
     psd_db_welch_norm = 10 * np.log10(psd_welch_shifted + 1e-20)
     psd_db_welch_norm -= np.max(psd_db_welch_norm)
 
+    # # --- 7. Plotting ---
+    # plt.figure(figsize=(14, 7))
+    
+    # # Ground truth PSD
+    # plt.plot(freqs_welch_shifted / 1e6, psd_db_welch_norm, 'k-', 
+    #          label=f'Ground Truth PSD ({nperseg}-pt Welch)', alpha=0.6, linewidth=2)
+
+    # # # Calculate normalized PSD from DFT bins for plotting
+    # win = signal.windows.get_window('hann', nperseg)
+    # enbw_scaling = fs_baseline * np.sum(win**2)
+    
+    # freqs1 = np.array(list(dft_bins.keys()))
+    # powers1 = np.abs(np.array(list(dft_bins.values())))**2
+    # psd1 = powers1
+    # db1_norm = 3 * np.floor(np.log2(psd1))
+    # db1_norm -= np.max(db1_norm)
+    
+    # # Plot DFT bins
+    # plt.plot(freqs1 / 1e6, db1_norm, 'bo', markersize=6, 
+    #          label=f'DFT Bins (PSD, |S|={len(S_bins)})', alpha=0.7)
+    
+    # # Plot edge detection points
+    # if f1_left is not None and f2_left is not None:
+    #     plt.plot([f1_left/1e6, f2_left/1e6], 
+    #             [L1_left - max_power_hw, L2_left - max_power_hw], 
+    #             'rs-', markersize=8, linewidth=2, 
+    #             label='Left Edge Points', alpha=0.8)
+    
+    # if f1_right is not None and f2_right is not None:
+    #     plt.plot([f1_right/1e6, f2_right/1e6], 
+    #             [L1_right - max_power_hw, L2_right - max_power_hw], 
+    #             'gs-', markersize=8, linewidth=2, 
+    #             label='Right Edge Points', alpha=0.8)
+    
+    # # Plot final interpolated edges
+    # if not np.isnan(f_left_final):
+    #     plt.axvline(x=f_left_final/1e6, color='r', linestyle='--', linewidth=2,
+    #                label=f'Est. Lower Edge ({f_left_final/1e6:.3f} MHz)')
+    
+    # if not np.isnan(f_right_final):
+    #     plt.axvline(x=f_right_final/1e6, color='g', linestyle='--', linewidth=2,
+    #                label=f'Est. Upper Edge ({f_right_final/1e6:.3f} MHz)')
+    
+    # # Plot threshold line
+    # threshold_normalized = -threshold_db
+    # plt.axhline(y=threshold_normalized, color='orange', linestyle=':', linewidth=2,
+    #            label=f'{threshold_db} dB Threshold')
+    
+    # plt.title(f'Hardware-Accurate Bandwidth Estimation (Window #{window_num_to_test}, Channel {channel_to_test})')
+    # plt.xlabel('Frequency (MHz)')
+    # plt.ylabel('Power (dB relative to peak)')
+    # plt.legend(loc='best')
+    # plt.grid(True, alpha=0.3)
+    # plt.xlim([min(freqs_welch_shifted)/1e6, max(freqs_welch_shifted)/1e6])
+    # plt.tight_layout()
+    # plt.show()
+    
+    # print("\n--- Test Complete ---")
+    
     # --- 7. Plotting ---
+    
+    # 1. Configure Fonts to match LaTeX / Times New Roman style
+    plt.rcParams.update({
+        "font.family": "serif",
+        "font.serif": ["Times New Roman", "Times", "DejaVu Serif", "serif"],
+        "mathtext.fontset": "cm",  # Computer Modern for math text
+        "font.size": 12,
+        "axes.labelsize": 12,
+        "axes.titlesize": 14,
+        "legend.fontsize": 11
+    })
+
     plt.figure(figsize=(14, 7))
     
-    # Ground truth PSD
-    plt.plot(freqs_welch_shifted / 1e6, psd_db_welch_norm, 'k-', 
-             label=f'Ground Truth PSD ({nperseg}-pt Welch)', alpha=0.6, linewidth=2)
+    # 2. Ground truth PSD (Lighter Grey)
+    # Using 'silver' or 'gray' with alpha makes it visible but background
+    plt.plot(freqs_welch_shifted / 1e6, psd_db_welch_norm, color='dimgray', alpha=0.8, linewidth=2, 
+             label=r'Ground Truth PSD')
 
-    # Calculate normalized PSD from DFT bins for plotting
+    # 3. Calculate normalized PSD from DFT bins (Content Preserved)
     win = signal.windows.get_window('hann', nperseg)
     enbw_scaling = fs_baseline * np.sum(win**2)
     
     freqs1 = np.array(list(dft_bins.keys()))
     powers1 = np.abs(np.array(list(dft_bins.values())))**2
-    psd1 = powers1 / enbw_scaling
-    db1_norm = 3 * np.ceil(np.log2(psd1))
-    # db1_norm = 10 * np.log10(psd1 + 1e-20)
+    psd1 = powers1 
+    # Using floor to match hardware bit truncation logic
+    db1_norm = 3 * np.floor(np.log2(psd1 + 1e-20)) 
     db1_norm -= np.max(db1_norm)
-    # db1_norm = db1_norm - np.max(10 * np.log10(psd_welch_shifted + 1e-20))
     
-    # Plot DFT bins
-    plt.plot(freqs1 / 1e6, db1_norm, 'bo', markersize=6, 
-             label=f'DFT Bins (PSD, |S|={len(S_bins)})', alpha=0.7)
+    # 4. Plot DFT bins (Black Points)
+    plt.plot(freqs1 / 1e6, db1_norm, 'ko', markersize=6, 
+             label=r'DFT Bins (HW Model)', alpha=0.9)
     
-    # Plot edge detection points
+    # 5. Plot Left Edge Points (Red)
     if f1_left is not None and f2_left is not None:
+        # Note: We align Y-axis by subtracting max_power_hw from the absolute integer values
         plt.plot([f1_left/1e6, f2_left/1e6], 
                 [L1_left - max_power_hw, L2_left - max_power_hw], 
                 'rs-', markersize=8, linewidth=2, 
-                label='Left Edge Points', alpha=0.8)
+                label=r'Left Edge Points', alpha=0.9)
     
+    # 6. Plot Right Edge Points (Blue)
     if f1_right is not None and f2_right is not None:
         plt.plot([f1_right/1e6, f2_right/1e6], 
                 [L1_right - max_power_hw, L2_right - max_power_hw], 
-                'gs-', markersize=8, linewidth=2, 
-                label='Right Edge Points', alpha=0.8)
+                'bs-', markersize=8, linewidth=2, 
+                label=r'Right Edge Points', alpha=0.9)
     
-    # Plot final interpolated edges
+    # 7. Plot Interpolated Lines
     if not np.isnan(f_left_final):
         plt.axvline(x=f_left_final/1e6, color='r', linestyle='--', linewidth=2,
-                   label=f'Est. Lower Edge ({f_left_final/1e6:.3f} MHz)')
+                   label=rf'Est. Lower Edge ({f_left_final/1e6:.2f} MHz)')
     
     if not np.isnan(f_right_final):
-        plt.axvline(x=f_right_final/1e6, color='g', linestyle='--', linewidth=2,
-                   label=f'Est. Upper Edge ({f_right_final/1e6:.3f} MHz)')
+        plt.axvline(x=f_right_final/1e6, color='b', linestyle='--', linewidth=2,
+                   label=rf'Est. Upper Edge ({f_right_final/1e6:.2f} MHz)')
     
-    # Plot threshold line
+    # 8. Plot Threshold Line (Orange)
     threshold_normalized = -threshold_db
     plt.axhline(y=threshold_normalized, color='orange', linestyle=':', linewidth=2,
-               label=f'{threshold_db} dB Threshold')
+               label=rf'-{threshold_db} dB Threshold')
     
-    plt.title(f'Hardware-Accurate Bandwidth Estimation (Window #{window_num_to_test}, Channel {channel_to_test})')
-    plt.xlabel('Frequency (MHz)')
-    plt.ylabel('Power (dB relative to peak)')
-    plt.legend(loc='best')
+    # 9. Labels and Styling
+    # Using r"" strings allows LaTeX formatting like \textbf
+    plt.title(r"Hardware-Accurate Bandwidth Estimation", fontweight="bold")
+    plt.xlabel(r"Frequency (MHz)")
+    plt.ylabel(r"Power (dB relative to peak)")
+    plt.legend(loc='lower right', frameon=True)
     plt.grid(True, alpha=0.3)
     plt.xlim([min(freqs_welch_shifted)/1e6, max(freqs_welch_shifted)/1e6])
+    
     plt.tight_layout()
-    plt.show()
+    #  plt.show()
+
+    # Define the output path and create the directory if it doesn't exist
+    plots_dir = Path(__file__).resolve().parent / "plots"
+    plots_dir.mkdir(parents=True, exist_ok=True) # exist_ok=True prevents an error if the folder already exists
+    file_name = "hw_accurate_bw_estimation.png"
+    output_path = plots_dir / file_name
+
+    # Save the figure to the specified path
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
+    
+    print(f"\nSUCCESS: Plot saved to {output_path}")
+    plt.close()
     
     print("\n--- Test Complete ---")

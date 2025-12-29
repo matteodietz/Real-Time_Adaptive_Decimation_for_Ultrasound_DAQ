@@ -130,7 +130,7 @@ module top_with_config_loader #(
     //--------------------------------------------------------------------------
     
     // 0. Configuration Loader
-    (* DONT_TOUCH = "true" *)
+    // (* DONT_TOUCH = "true" *)
     config_loader #(
         .PHASE_WIDTH     (PHASE_WIDTH),
         .FREQ_BIN_WIDTH  (FREQ_BIN_WIDTH),
@@ -188,7 +188,7 @@ module top_with_config_loader #(
     );
     
     // 2. Bandwidth Edge Detector
-    (* DONT_TOUCH = "true" *)
+    // (* DONT_TOUCH = "true" *)
     bandwidth_edge_detector #(
         .POWER_WIDTH        (POWER_WIDTH),
         .POWER_FRAC         (POWER_FRAC),

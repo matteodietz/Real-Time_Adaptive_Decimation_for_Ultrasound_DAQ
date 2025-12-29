@@ -48,7 +48,7 @@ module top_with_config_loader_tb();
     localparam logic [POWER_WIDTH-1:0] THRESHOLD_DROP = 8'h1E; // 30 dB
     
     // Config Loader Parameters
-    localparam integer CONFIG_DATA_WIDTH = 32;
+    localparam integer CONFIG_DATA_WIDTH = 16;
     
     // Time-multiplexing parameters
     localparam integer TMUX_COUNTER_WIDTH = 5;

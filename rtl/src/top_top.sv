@@ -1,7 +1,15 @@
 module top_top (
     input  logic clk_i,
     input  logic rst_ni,
-    output logic valid_o
+    output logic valid_o,
+    output logic [5-1:0] f1_left_o,
+    output logic [5-1:0] f2_left_o,
+    output logic [8-1:0] L1_left_o,
+    output logic [8-1:0] L2_left_o,
+    output logic [5-1:0] f1_right_o,
+    output logic [5-1:0] f2_right_o,
+    output logic [8-1:0] L1_right_o,
+    output logic [8-1:0] L2_right_o
 );
 
     // --- Internal parameter definitions (matching wrapper defaults) ---
@@ -22,9 +30,9 @@ module top_top (
     localparam integer OSC_LATENCY = 20;
     localparam integer COUNTER_WIDTH = 16;
     localparam integer SAMPLE_COUNT_WIDTH = 16;
-    localparam integer FREQ_BIN_WIDTH = 16;
+    localparam integer FREQ_BIN_WIDTH = 5;
     localparam logic [POWER_WIDTH-1:0] THRESHOLD_DROP = 8'h1E;
-    localparam integer CONFIG_DATA_WIDTH = 24;
+    localparam integer CONFIG_DATA_WIDTH = 16;
 
     // --- Internal wires for wrapper I/O ---
     // Configuration Loading Interface
@@ -67,6 +75,14 @@ module top_top (
     
     // Connect internal valid to output
     assign valid_o = valid_internal;
+    assign f1_left_o = f1_left;
+    assign f2_left_o = f2_left;
+    assign L1_left_o = L1_left;
+    assign L2_left_o = L2_left;
+    assign f1_right_o = f1_right;
+    assign f2_right_o = f2_right;
+    assign L1_right_o = L1_right;
+    assign L2_right_o = L2_right;
 
     // --- Instantiate wrapper with DONT_TOUCH attribute ---
     (* DONT_TOUCH = "true" *)

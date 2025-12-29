@@ -17,10 +17,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 module config_loader #(
-    parameter integer PHASE_WIDTH = 32,
-    parameter integer FREQ_BIN_WIDTH = 16,
+    parameter integer PHASE_WIDTH = 16,
+    parameter integer FREQ_BIN_WIDTH = 5,
     parameter integer NUM_BINS = 24,
-    parameter integer DATA_WIDTH = 32  // Max of PHASE_WIDTH and FREQ_BIN_WIDTH
+    parameter integer DATA_WIDTH = 16  // Max of PHASE_WIDTH and FREQ_BIN_WIDTH
 )(
     input  logic clk_i,
     input  logic rst_ni,

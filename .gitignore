@@ -3,6 +3,9 @@ simulator/datasets/*/
 
 # Ignore ancient directory
 simulator/src/ancient
+# Ignore all ancient directories
+**/ancient/
+
 
 # Ignore macOS metadata files
 **/.DS_Store

@@ -153,9 +153,9 @@ module oscillator_bank_tmux_streaming #(
     // Note: Negation is combinational but very fast (invert + add 1)
     // The multiplication that follows will absorb this delay
     assign cos_out_0_o = cos_raw_0;
-    assign sin_out_0_o = -sin_raw_0;  // DFT requires -j*sin
+    assign sin_out_0_o = sin_raw_0;  // DFT requires -j*sin // removed negation
     assign cos_out_1_o = cos_raw_1;
-    assign sin_out_1_o = -sin_raw_1;  // DFT requires -j*sin
+    assign sin_out_1_o = sin_raw_1;  // DFT requires -j*sin // removed negation
     
     assign output_bin_0_o = output_bin_0;
     assign output_bin_1_o = output_bin_1;

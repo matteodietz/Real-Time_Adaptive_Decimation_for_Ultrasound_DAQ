@@ -216,16 +216,34 @@ def generate_test_case(test_name, baseline_iq_data, fs_baseline, S_bins,
     hann_window = signal.windows.hann(nperseg)
     print(f"  Generated Hann window coefficients")
     
-    # --- Calculate Frequency Steps for Oscillators ---
+    # # --- Calculate Frequency Steps for Oscillators ---
+    # freq_steps = []
+    # for freq in S_bins:
+    #     normalized_freq = freq / fs_baseline
+    #     freq_step = normalized_freq * (2 ** PHASE_WIDTH)
+    #     if freq_step < 0:
+    #         freq_step += (2.0 ** PHASE_WIDTH)
+    #     freq_steps.append(int(freq_step) & ((1 << PHASE_WIDTH) - 1))
+    
+    # print(f"  Calculated {len(freq_steps)} frequency steps for oscillators")
+
+    # --- Calculate Negative Frequency Steps for Oscillators ---
     freq_steps = []
     for freq in S_bins:
         normalized_freq = freq / fs_baseline
-        freq_step = normalized_freq * (2 ** PHASE_WIDTH)
-        if freq_step < 0:
-            freq_step += (2.0 ** PHASE_WIDTH)
-        freq_steps.append(int(freq_step) & ((1 << PHASE_WIDTH) - 1))
+        
+        # Calculate the positive step magnitude
+        raw_step = normalized_freq * (2 ** PHASE_WIDTH)
+        
+        # Negate it! This creates the backward rotation (e^-jtheta)
+        # Use round() to be precise, or int() for truncation
+        neg_step = -round(raw_step) 
+        
+        # Apply mask to convert the negative number to its unsigned bit representation
+        # Python handles the 2's complement wrap-around here automatically
+        freq_steps.append(neg_step & ((1 << PHASE_WIDTH) - 1))
     
-    print(f"  Calculated {len(freq_steps)} frequency steps for oscillators")
+    print(f"  Calculated {len(freq_steps)} negative frequency steps for oscillators")
     
     # --- Run Software DFT Model ---
     print("  Running streaming_dft_processor...")
@@ -417,7 +435,7 @@ def write_vector_file(test_cases, output_path):
             
             # Frequency steps
             for fs in tc['freq_steps_hw']:
-                f.write(f"{fs & 0xFFFFFF:06x} ")
+                f.write(f"{fs & 0xFFFF:04x} ")
             f.write("\n")
             
             # Frequency bins

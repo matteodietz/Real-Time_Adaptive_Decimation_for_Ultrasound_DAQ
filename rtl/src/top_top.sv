@@ -33,6 +33,8 @@ module top_top (
     localparam integer FREQ_BIN_WIDTH = 5;
     localparam logic [POWER_WIDTH-1:0] THRESHOLD_DROP = 8'h1E;
     localparam integer CONFIG_DATA_WIDTH = 16;
+    localparam integer TMUX_COUNTER_WIDTH = 5;
+    localparam integer CYCLES_PER_SAMPLE = 12;
 
     // --- Internal wires for wrapper I/O ---
     // Configuration Loading Interface
@@ -106,7 +108,9 @@ module top_top (
         .SAMPLE_COUNT_WIDTH(SAMPLE_COUNT_WIDTH),
         .FREQ_BIN_WIDTH(FREQ_BIN_WIDTH),
         .THRESHOLD_DROP(THRESHOLD_DROP),
-        .CONFIG_DATA_WIDTH(CONFIG_DATA_WIDTH)
+        .CONFIG_DATA_WIDTH(CONFIG_DATA_WIDTH),
+        .TMUX_COUNTER_WIDTH (TMUX_COUNTER_WIDTH),
+        .CYCLES_PER_SAMPLE  (CYCLES_PER_SAMPLE)
     ) u_top_with_config_loader (
         .clk_i(clk_i),
         .rst_ni(rst_ni),

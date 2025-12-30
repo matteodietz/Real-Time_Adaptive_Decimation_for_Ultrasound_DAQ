@@ -1,18 +1,16 @@
-// X = Delay until relevant window - osc latency
-// Y = Oscillator latency = 36
-// Z = Window length * CYCLES_PER_SAMPLE = 256 * N
+// X = Delay until relevant window - osc latency = initial_delay
+// Y = Oscillator latency = 20 = osc_delay
+// Z = Window length * CYCLES_PER_SAMPLE = 256 * N = window_delay
 
 module counter_controller #(
-    parameter int unsigned COUNTER_WIDTH_X = 16,
-    parameter int unsigned COUNTER_WIDTH_Y = 16,
-    parameter int unsigned COUNTER_WIDTH_Z = 16,
+    parameter int unsigned COUNTER_WIDTH = 16,
     parameter int unsigned N = 12  // Time-multiplexing factor
 ) (
     input  logic                         clk_i,
     input  logic                         rst_ni,
-    input  logic [COUNTER_WIDTH_X-1:0]   X,
-    input  logic [COUNTER_WIDTH_Y-1:0]   Y,
-    input  logic [COUNTER_WIDTH_Z-1:0]   Z,
+    input  logic [COUNTER_WIDTH-1:0]     initial_delay,
+    input  logic [COUNTER_WIDTH-1:0]     osc_delay,
+    input  logic [COUNTER_WIDTH-1:0]     window_delay,
     input  logic                         clear_i,
     input  logic                         enable_i,
     
@@ -25,7 +23,7 @@ module counter_controller #(
 );
 
     // Counter registers
-    logic [COUNTER_WIDTH_X-1:0] count_d, count_q;
+    logic [COUNTER_WIDTH-1:0] count_d, count_q;
     
     // Control signal registers
     logic osc_reset_d, osc_reset_q;
@@ -65,43 +63,43 @@ module counter_controller #(
             // We want specific values at specific count_q values
             // So we set _d signals one cycle early
             
-            if (count_q == X - 1) begin
+            if (count_q == initial_delay - 1) begin
                 // Next cycle (count_q = X): osc_reset_q should be 1
                 osc_reset_d = 1'b1;
             end
             
-            if (count_q == X) begin
+            if (count_q == initial_delay) begin
                 // Next cycle (count_q = X+1): osc_reset_q should be 0
                 osc_reset_d = 1'b0;
             end
             
-            if (count_q == X + 1) begin
+            if (count_q == initial_delay + 1) begin
                 // Next cycle (count_q = X+2): osc_enable_q and osc_phase_tvalid_q should be 1
                 osc_enable_d = 1'b1;
                 osc_phase_tvalid_d = 1'b1;
             end
             
-            if (count_q == X + Y - 2) begin
+            if (count_q == initial_delay + osc_delay - 2) begin
                 // Next cycle (count_q = X+Y-1): start_q should be 1
                 start_d = 1'b1;
             end
             
-            if (count_q == X + Y - 1) begin
+            if (count_q == initial_delay + osc_delay - 1) begin
                 // Next cycle (count_q = X+Y): start_q should be 0
                 start_d = 1'b0;
             end
             
-            if (count_q == X + Y) begin
+            if (count_q == initial_delay + osc_delay) begin
                 // Next cycle (count_q = X+Y+1): sample_valid_q should be 1
                 sample_valid_d = 1'b1;
             end
             
-            if (count_q == X + Y + Z - N) begin
+            if (count_q == initial_delay + osc_delay + window_delay - N) begin
                 // Next cycle (count_q = X+Y+Z-(N-1)): last_sample_q should be 1
                 last_sample_d = 1'b1;
             end
             
-            if (count_q == X + Y + Z) begin
+            if (count_q == initial_delay + osc_delay + window_delay) begin
                 // Next cycle (count_q = X+Y+Z+1): all signals go to 0
                 sample_valid_d = 1'b0;
                 last_sample_d = 1'b0;

@@ -21,8 +21,8 @@ def generate_test_vectors(output_file):
     
     # Test configuration
     NUM_BINS_OPTIONS = [24] 
-    POWER_WIDTH = 32
-    POWER_FRAC = 16  # Q16.16 format
+    POWER_WIDTH = 8
+    POWER_FRAC = 0  # Q16.16 format
     POWER_INT  = POWER_WIDTH - POWER_FRAC
     IS_SIGNED  = False # The log_power output is Unsigned
     
@@ -88,9 +88,9 @@ def generate_test_vectors(output_file):
     # 50 Random Iterations
     for k in range(50):
         for num_bins in NUM_BINS_OPTIONS:
-            # Generate random values between 0 and 65535 (2^16 - 1)
-            # This fills the Integer part of the Q16.16 format
-            power_values = np.random.uniform(0, 65535, num_bins).tolist()
+            # Generate random values between 0 and 255 (2^8 - 1)
+            # This fills the Integer part of the Q8.0 format
+            power_values = np.random.uniform(0, 255, num_bins).tolist()
             expected_max = max(power_values)
             
             test_cases.append({
@@ -129,11 +129,11 @@ def generate_test_vectors(output_file):
             # Convert inputs using shared function
             for val in test['values']:
                 fixed_val = float_to_fixed_point(val, POWER_INT, POWER_FRAC, signed=IS_SIGNED)
-                f.write(f"{fixed_val:08x}\n")
+                f.write(f"{fixed_val:02x}\n")
             
             # Convert expected output using shared function
             expected_fixed = float_to_fixed_point(test['expected'], POWER_INT, POWER_FRAC, signed=IS_SIGNED)
-            f.write(f"{expected_fixed:08x}\n")
+            f.write(f"{expected_fixed:02x}\n")
             
             f.write("\n")
     

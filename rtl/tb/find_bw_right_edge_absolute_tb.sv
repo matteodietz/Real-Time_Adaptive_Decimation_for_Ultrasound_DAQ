@@ -1,4 +1,4 @@
-module find_bw_left_edge_absolute_tb ();
+module find_bw_right_edge_absolute_tb ();
 
     timeunit 1ns;
     timeprecision 1ps;
@@ -12,7 +12,7 @@ module find_bw_left_edge_absolute_tb ();
     localparam integer NUM_ACCUMS     = 24; // As per Python script
 
     // --- Hardcoded Threshold ---
-    // 30.0 dB
+    // 30.0 dB in Q10.8 format: 30 * 256 = 7680 = 0x1E00
     localparam logic [POWER_WIDTH-1:0] FORCED_THRESHOLD = 8'h1E;
 
     // --- Signals ---
@@ -43,7 +43,7 @@ module find_bw_left_edge_absolute_tb ();
     end
 
     // --- DUT Instantiation ---
-    find_bw_left_edge_absolute #(
+    find_bw_right_edge_absolute #(
         .POWER_WIDTH    (POWER_WIDTH),
         .IDX_WIDTH (IDX_WIDTH),
         .NUM_ACCUMS     (NUM_ACCUMS)
@@ -80,7 +80,7 @@ module find_bw_left_edge_absolute_tb ();
         abs_threshold_stim = 'b0;
 
         // Open the vector file
-        file = $fopen("/home/bsc25h10/mdietz/bachelors_thesis/rtl/simvectors/find_bw_left_edge_vectors_absolute.txt", "r");
+        file = $fopen("/home/bsc25h10/mdietz/bachelors_thesis/rtl/simvectors/find_bw_right_edge_vectors_absolute.txt", "r");
         if (file == 0) begin
             $display("ERROR: Could not open vector file.");
             $stop;
@@ -202,9 +202,7 @@ module find_bw_left_edge_absolute_tb ();
 
 endmodule
 
-
-
-// module find_bw_left_edge_absolute_tb ();
+// module find_bw_right_edge_absolute_tb ();
 
 //     timeunit 1ns;
 //     timeprecision 1ps;
@@ -243,7 +241,7 @@ endmodule
 //     end
 
 //     // --- DUT Instantiation ---
-//     find_bw_left_edge_absolute #(
+//     find_bw_right_edge_absolute #(
 //         .POWER_WIDTH (POWER_WIDTH),
 //         .NUM_ACCUMS  (NUM_ACCUMS)
 //     ) dut (
@@ -277,13 +275,13 @@ endmodule
 //         abs_threshold_stim = '0;
 
 //         // Open the vector file
-//         file = $fopen("/home/bsc25h10/mdietz/bachelors_thesis/rtl/simvectors/find_bw_left_edge_vectors_absolute.txt", "r");
+//         file = $fopen("/home/bsc25h10/mdietz/bachelors_thesis/rtl/simvectors/find_bw_right_edge_vectors_absolute.txt", "r");
 //         if (file == 0) begin
 //             $display("ERROR: Could not open vector file.");
 //             $stop;
 //         end
 
-//         $display("=== Starting find_bw_left_edge_absolute Testbench ===");
+//         $display("=== Starting find_bw_right_edge_absolute Testbench ===");
 //         $display("  POWER_WIDTH = %0d", POWER_WIDTH);
 //         $display("  NUM_ACCUMS = %0d", NUM_ACCUMS);
 //         $display("  INDEX_WIDTH = %0d", INDEX_WIDTH);

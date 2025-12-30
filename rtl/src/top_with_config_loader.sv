@@ -21,32 +21,32 @@ module top_with_config_loader #(
     parameter integer IQ_WIDTH_FRAC = 14,
     parameter integer WINDOW_WIDTH = 16,
     parameter integer WINDOW_WIDTH_FRAC = 14,
-    parameter integer ACCUM_WIDTH = 48,
-    parameter integer ACCUM_WIDTH_FRAC = 40,
+    parameter integer ACCUM_WIDTH = 36,
+    parameter integer ACCUM_WIDTH_FRAC = 28,
     parameter integer NUM_BINS = 24,
     
     // --- Oscillator Parameters ---
-    parameter integer OSC_WIDTH = 24,
-    parameter integer OSC_WIDTH_FRAC = 22,
-    parameter integer PHASE_WIDTH = 24, //32
+    parameter integer OSC_WIDTH = 16,
+    parameter integer OSC_WIDTH_FRAC = 14,
+    parameter integer PHASE_WIDTH = 16, //32
     
     // --- Power Conversion Parameters ---
-    parameter integer POWER_INPUT_WIDTH = 32,
+    parameter integer POWER_INPUT_WIDTH = 18,
     parameter integer POWER_WIDTH = 8,
     parameter integer POWER_FRAC = 0,
     
     // --- Timing Parameters ---
     parameter integer WINDOW_SIZE = 256,
-    parameter integer OSC_LATENCY = 28,
+    parameter integer OSC_LATENCY = 20,
     parameter integer COUNTER_WIDTH = 16,
     parameter integer SAMPLE_COUNT_WIDTH = 16,
     
     // --- Bandwidth Detection Parameters ---
-    parameter integer FREQ_BIN_WIDTH = 16,
+    parameter integer FREQ_BIN_WIDTH = 5,
     parameter logic [POWER_WIDTH-1:0] THRESHOLD_DROP = 8'h1E,  // 30dB
     
     // --- Config Loader Parameters ---
-    parameter integer CONFIG_DATA_WIDTH = 32,  // Max(PHASE_WIDTH, FREQ_BIN_WIDTH) //32
+    parameter integer CONFIG_DATA_WIDTH = 16,  // Max(PHASE_WIDTH, FREQ_BIN_WIDTH) //32
     parameter integer TMUX_COUNTER_WIDTH = 5,
     parameter integer CYCLES_PER_SAMPLE = 12
 )(
@@ -130,7 +130,6 @@ module top_with_config_loader #(
     //--------------------------------------------------------------------------
     
     // 0. Configuration Loader
-    // (* DONT_TOUCH = "true" *)
     config_loader #(
         .PHASE_WIDTH     (PHASE_WIDTH),
         .FREQ_BIN_WIDTH  (FREQ_BIN_WIDTH),
@@ -188,7 +187,6 @@ module top_with_config_loader #(
     );
     
     // 2. Bandwidth Edge Detector
-    // (* DONT_TOUCH = "true" *)
     bandwidth_edge_detector #(
         .POWER_WIDTH        (POWER_WIDTH),
         .POWER_FRAC         (POWER_FRAC),
@@ -239,3 +237,236 @@ module top_with_config_loader #(
     assign valid_o = bw_valid;
 
 endmodule
+
+// ////////////////////////////////////////////////////////////////////////////////
+// //
+// //  Module: top_with_config_loader
+// //
+// //  Description:
+// //      Top-level module with AXI-Stream configuration loading interface.
+// //      Reduces I/O requirements by loading freq_steps serially instead of
+// //      requiring them all in parallel.
+// //
+// //  Configuration Loading:
+// //      1. Send NUM_BINS freq_steps values via AXI-Stream
+// //      2. Wait for config_valid_o to assert
+// //      3. Assert enable_i to start processing
+// //
+// //  Note: Bandwidth detector outputs bin indices (0-23), not frequency values.
+// //        APU maintains frequency mapping for interpolation.
+// //
+// ////////////////////////////////////////////////////////////////////////////////
+
+// module top_with_config_loader #(
+//     // --- DFT Parameters ---
+//     parameter integer IQ_WIDTH = 16,
+//     parameter integer IQ_WIDTH_FRAC = 14,
+//     parameter integer WINDOW_WIDTH = 16,
+//     parameter integer WINDOW_WIDTH_FRAC = 14,
+//     parameter integer ACCUM_WIDTH = 36,
+//     parameter integer ACCUM_WIDTH_FRAC = 28,
+//     parameter integer NUM_BINS = 24,
+    
+//     // --- Oscillator Parameters ---
+//     parameter integer OSC_WIDTH = 16,
+//     parameter integer OSC_WIDTH_FRAC = 14,
+//     parameter integer PHASE_WIDTH = 16,
+    
+//     // --- Power Conversion Parameters ---
+//     parameter integer POWER_INPUT_WIDTH = 18,
+//     parameter integer POWER_WIDTH = 8,
+//     parameter integer POWER_FRAC = 0,
+    
+//     // --- Timing Parameters ---
+//     parameter integer WINDOW_SIZE = 256,
+//     parameter integer OSC_LATENCY = 20,
+//     parameter integer COUNTER_WIDTH = 16,
+//     parameter integer SAMPLE_COUNT_WIDTH = 16,
+    
+//     // --- Bandwidth Detection Parameters ---
+//     parameter logic [POWER_WIDTH-1:0] THRESHOLD_DROP = 8'h1E,  // 30dB
+    
+//     // --- Config Loader Parameters ---
+//     parameter integer CONFIG_DATA_WIDTH = 16,  // Should match PHASE_WIDTH
+//     parameter integer TMUX_COUNTER_WIDTH = 5,
+//     parameter integer CYCLES_PER_SAMPLE = 12
+// )(
+//     input  logic clk_i,
+//     input  logic rst_ni,
+    
+//     // --- Configuration Loading Interface ---
+//     input  logic [CONFIG_DATA_WIDTH-1:0] s_axis_config_tdata_i,
+//     input  logic s_axis_config_tvalid_i,
+//     output logic s_axis_config_tready_o,
+//     output logic config_valid_o,         // Configuration loaded and ready
+    
+//     // --- Control Interface ---
+//     input  logic enable_i,
+//     input  logic clear_i,
+//     input  logic [COUNTER_WIDTH-1:0] delay_cycles_i,
+    
+//     // --- Data Input (IQ samples + window coefficient) ---
+//     input  logic sample_valid_i,
+//     input  logic signed [IQ_WIDTH-1:0] i_sample_i,
+//     input  logic signed [IQ_WIDTH-1:0] q_sample_i,
+//     input  logic signed [WINDOW_WIDTH-1:0] window_coeff_i,
+    
+//     // --- Outputs ---
+//     // Threshold status
+//     output logic threshold_ok_o,
+    
+//     // Left edge outputs (BIN INDICES, not frequencies)
+//     output logic [$clog2(NUM_BINS)-1:0] f1_left_o,
+//     output logic [$clog2(NUM_BINS)-1:0] f2_left_o,
+//     output logic [POWER_WIDTH-1:0] L1_left_o,
+//     output logic [POWER_WIDTH-1:0] L2_left_o,
+    
+//     // Right edge outputs (BIN INDICES, not frequencies)
+//     output logic [$clog2(NUM_BINS)-1:0] f1_right_o,
+//     output logic [$clog2(NUM_BINS)-1:0] f2_right_o,
+//     output logic [POWER_WIDTH-1:0] L1_right_o,
+//     output logic [POWER_WIDTH-1:0] L2_right_o,
+
+//     output logic [POWER_WIDTH-1:0] abs_threshold_o,
+    
+//     // Valid output (bandwidth detection complete)
+//     output logic valid_o
+// );
+
+//     //--------------------------------------------------------------------------
+//     // Internal Signals
+//     //--------------------------------------------------------------------------
+    
+//     // Configuration arrays from config_loader
+//     logic [PHASE_WIDTH-1:0] freq_steps[NUM_BINS];
+//     logic config_valid;
+    
+//     // Spectral Power Estimator Outputs
+//     logic [POWER_WIDTH-1:0] db_power[NUM_BINS];
+//     logic dft_valid;
+//     logic dft_busy;
+    
+//     // Bandwidth Edge Detector Outputs (BIN INDICES)
+//     logic [$clog2(NUM_BINS)-1:0] f1_left;
+//     logic [$clog2(NUM_BINS)-1:0] f2_left;
+//     logic [POWER_WIDTH-1:0] L1_left;
+//     logic [POWER_WIDTH-1:0] L2_left;
+//     logic [$clog2(NUM_BINS)-1:0] f1_right;
+//     logic [$clog2(NUM_BINS)-1:0] f2_right;
+//     logic [POWER_WIDTH-1:0] L1_right;
+//     logic [POWER_WIDTH-1:0] L2_right;
+//     logic [POWER_WIDTH-1:0] abs_threshold;
+//     logic bw_valid;
+//     logic bw_busy;
+//     logic threshold_ok;
+
+//     localparam integer STAGE1_WIDTH = 24;
+    
+//     //--------------------------------------------------------------------------
+//     // Module Instantiations
+//     //--------------------------------------------------------------------------
+    
+//     // 0. Configuration Loader (freq_steps only)
+//     config_loader #(
+//         .PHASE_WIDTH     (PHASE_WIDTH),
+//         .NUM_BINS        (NUM_BINS),
+//         .DATA_WIDTH      (CONFIG_DATA_WIDTH)
+//     ) u_config_loader (
+//         .clk_i               (clk_i),
+//         .rst_ni              (rst_ni),
+//         .clear_i             (clear_i),
+//         .s_axis_tdata_i      (s_axis_config_tdata_i),
+//         .s_axis_tvalid_i     (s_axis_config_tvalid_i),
+//         .s_axis_tready_o     (s_axis_config_tready_o),
+//         .freq_steps_o        (freq_steps),
+//         .config_valid_o      (config_valid)
+//     );
+    
+//     // 1. Spectral Power Estimator (unchanged)
+//     (* DONT_TOUCH = "true" *)
+//     spectral_power_estimator_tmux #(
+//         .IQ_WIDTH           (IQ_WIDTH),
+//         .IQ_WIDTH_FRAC      (IQ_WIDTH_FRAC),
+//         .WINDOW_WIDTH       (WINDOW_WIDTH),
+//         .WINDOW_WIDTH_FRAC  (WINDOW_WIDTH_FRAC),
+//         .ACCUM_WIDTH        (ACCUM_WIDTH),
+//         .ACCUM_WIDTH_FRAC   (ACCUM_WIDTH_FRAC),
+//         .NUM_BINS           (NUM_BINS),
+//         .OSC_WIDTH          (OSC_WIDTH),
+//         .OSC_WIDTH_FRAC     (OSC_WIDTH_FRAC),
+//         .PHASE_WIDTH        (PHASE_WIDTH),
+//         .POWER_INPUT_WIDTH  (POWER_INPUT_WIDTH),
+//         .POWER_WIDTH        (POWER_WIDTH),
+//         .POWER_FRAC         (POWER_FRAC),
+//         .WINDOW_SIZE        (WINDOW_SIZE),
+//         .OSC_LATENCY        (OSC_LATENCY),
+//         .COUNTER_WIDTH      (COUNTER_WIDTH),
+//         .SAMPLE_COUNT_WIDTH (SAMPLE_COUNT_WIDTH),
+//         .TMUX_COUNTER_WIDTH (TMUX_COUNTER_WIDTH),
+//         .CYCLES_PER_SAMPLE  (CYCLES_PER_SAMPLE),
+//         .STAGE1_WIDTH       (STAGE1_WIDTH)
+//     ) u_spectral_power_estimator (
+//         .clk_i          (clk_i),
+//         .rst_ni         (rst_ni),
+//         .enable_i       (enable_i),
+//         .clear_i        (clear_i),
+//         .delay_cycles_i (delay_cycles_i),
+//         .freq_steps_i   (freq_steps),
+//         .sample_valid_i (sample_valid_i),
+//         .i_sample_i     (i_sample_i),
+//         .q_sample_i     (q_sample_i),
+//         .window_coeff_i (window_coeff_i),
+//         .db_power_o     (db_power),
+//         .valid_o        (dft_valid),
+//         .busy_o         (dft_busy)
+//     );
+    
+//     // 2. Bandwidth Edge Detector (outputs bin indices)
+//     bandwidth_edge_detector #(
+//         .POWER_WIDTH        (POWER_WIDTH),
+//         .POWER_FRAC         (POWER_FRAC),
+//         .THRESHOLD_DROP     (THRESHOLD_DROP),
+//         .NUM_BINS           (NUM_BINS)
+//     ) u_bandwidth_edge_detector (
+//         .clk_i          (clk_i),
+//         .rst_ni         (rst_ni),
+//         .valid_i        (dft_valid),
+//         .db_power_i     (db_power),
+//         // Outputs are bin indices
+//         .f1_left_o      (f1_left),
+//         .f2_left_o      (f2_left),
+//         .L1_left_o      (L1_left),
+//         .L2_left_o      (L2_left),
+//         .f1_right_o     (f1_right),
+//         .f2_right_o     (f2_right),
+//         .L1_right_o     (L1_right),
+//         .L2_right_o     (L2_right),
+//         .abs_threshold_o(abs_threshold),
+//         .valid_o        (bw_valid),
+//         .threshold_ok_o (threshold_ok),
+//         .busy_o         (bw_busy)
+//     );
+    
+//     //--------------------------------------------------------------------------
+//     // Output Assignments
+//     //--------------------------------------------------------------------------
+    
+//     assign config_valid_o = config_valid;
+//     assign threshold_ok_o = threshold_ok;
+    
+//     // Edge outputs are bin indices (0-23)
+//     assign f1_left_o = f1_left;
+//     assign f2_left_o = f2_left;
+//     assign L1_left_o = L1_left;
+//     assign L2_left_o = L2_left;
+    
+//     assign f1_right_o = f1_right;
+//     assign f2_right_o = f2_right;
+//     assign L1_right_o = L1_right;
+//     assign L2_right_o = L2_right;
+
+//     assign abs_threshold_o = abs_threshold;
+    
+//     assign valid_o = bw_valid;
+
+// endmodule

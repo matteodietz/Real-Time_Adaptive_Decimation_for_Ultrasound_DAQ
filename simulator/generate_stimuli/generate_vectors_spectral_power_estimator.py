@@ -137,14 +137,30 @@ def generate_test_case(test_name, baseline_iq_data, fs_baseline, S_bins,
     print(f"  Generated Hann window coefficients")
     
     # --- Step 3: Calculate Frequency Steps for Oscillators ---
-    # freq_step = (target_freq / fs) * 2^PHASE_WIDTH
+    # # freq_step = (target_freq / fs) * 2^PHASE_WIDTH
+    # freq_steps = []
+    # for freq in S_bins:
+    #     normalized_freq = freq / fs_baseline
+    #     freq_step = normalized_freq * (2 ** PHASE_WIDTH)
+    #     if freq_step < 0:
+    #         freq_step += (2.0 ** PHASE_WIDTH)
+    #     freq_steps.append(int(freq_step) & ((1 << PHASE_WIDTH) - 1))
+
+    # --- Calculate Negative Frequency Steps for Oscillators ---
     freq_steps = []
     for freq in S_bins:
         normalized_freq = freq / fs_baseline
-        freq_step = normalized_freq * (2 ** PHASE_WIDTH)
-        if freq_step < 0:
-            freq_step += (2.0 ** PHASE_WIDTH)
-        freq_steps.append(int(freq_step) & ((1 << PHASE_WIDTH) - 1))
+        
+        # Calculate the positive step magnitude
+        raw_step = normalized_freq * (2 ** PHASE_WIDTH)
+        
+        # Negate it! This creates the backward rotation (e^-jtheta)
+        # Use round() to be precise, or int() for truncation
+        neg_step = -round(raw_step) 
+        
+        # Apply mask to convert the negative number to its unsigned bit representation
+        # Python handles the 2's complement wrap-around here automatically
+        freq_steps.append(neg_step & ((1 << PHASE_WIDTH) - 1))
     
     print(f"  Calculated {len(freq_steps)} frequency steps for oscillators")
     
@@ -309,11 +325,11 @@ def main():
         rf_data, angles, _, _, fs_picmus, mod_freq, _, _, _ = load_picmus_rf_data(
             rf_path, iq_path, scan_path
         )
-        print(f"✓ Loaded PICMUS data")
+        print(f"Loaded PICMUS data")
         print(f"  Modulation frequency: {mod_freq/1e6:.2f} MHz")
         print(f"  PICMUS sample rate: {fs_picmus/1e6:.2f} MHz")
     except Exception as e:
-        print(f"✗ Failed to load PICMUS data: {e}")
+        print(f"Failed to load PICMUS data: {e}")
         sys.exit(1)
     
     # --- AFE Processing Parameters ---
@@ -370,7 +386,7 @@ def main():
     print("\n--- Generating Test Cases ---")
     
     test_cases = []
-    num_test_cases = 5
+    num_test_cases = 10
     
     for i in range(num_test_cases):
         # Random window from second half
@@ -400,9 +416,9 @@ def main():
             )
             
             test_cases.append(tc)
-            print(f"  ✓ Test case generated")
+            print(f"  Test case generated")
         except Exception as e:
-            print(f"  ✗ Failed: {e}")
+            print(f"  Failed: {e}")
             continue
     
     # --- Write Output File ---

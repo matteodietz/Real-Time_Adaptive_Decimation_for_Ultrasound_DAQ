@@ -1,45 +1,48 @@
-# Simulation vectors for find_bw_right_edge.sv (ABSOLUTE THRESHOLD)
-# ACCUM_WIDTH = 18 (Unsigned Q10.8 dB)
-# FREQ_BIN_WIDTH = 16
+# Simulation vectors for find_bw_right_edge_absolute.sv
+# Using complete_system_model functions (hardware-accurate)
+# ACCUM_WIDTH = 8 (Unsigned dB, no fractional bits)
+# FREQ_BIN_WIDTH = 5 (5 bits for indices 0-23)
+# Outputs are BIN INDICES, not frequency values
 #
 # Format per test case:
 # TEST_NAME
 # NUM_ACCUMS
 # ABS_THRESHOLD (Calculated as Max - Drop)
-# FREQ_BINS ...
-# POWER_DB ...
-# EXPECTED ...
-# GOLDEN ...
+# FREQ_BINS ... (bin indices 0-23 in hex)
+# POWER_DB ... (hex, space-separated)
+# EXPECTED f1_idx f2_idx L1 L2 valid (indices, not frequencies!)
+# GOLDEN f1_idx f2_idx L1 L2 (indices for reference)
+#
 
 picmus_ch64_win29
 24
-7680
-acac c47b d256 d37b d49f d5c4 d6e8 d80d d931 da56 dc4a f419 be7 23b6 25aa 26cf 27f3 2918 2a3c 2b61 2c85 2daa 3b85 5354 
-0000 0000 0000 0000 0000 0000 0000 0000 04a9 07e3 0e77 1697 1ca6 0a85 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 
-000 000 0000 0000 0
-GOLDEN nan nan nan nan
+57
+00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f 10 11 12 13 14 15 16 17 
+00 09 1b 24 24 27 2d 2d 3f 42 48 51 57 45 36 24 21 24 1b 1e 0f 18 03 00 
+0d 0e 45 36 1
+GOLDEN 13 14 69 54
 
 picmus_ch64_win15
 24
-7680
-acac c47b d256 d37b d49f d5c4 d6e8 d80d d931 da56 dc4a f419 be7 23b6 25aa 26cf 27f3 2918 2a3c 2b61 2c85 2daa 3b85 5354 
-0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 24d3 1195 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 
-000 000 0000 0000 0
-GOLDEN nan nan nan nan
+66
+00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f 10 11 12 13 14 15 16 17 
+00 00 0c 12 12 12 1b 1b 2a 33 36 60 4b 30 27 18 18 0f 0c 09 03 03 00 00 
+0c 0d 4b 30 1
+GOLDEN 12 13 75 48
 
 picmus_ch64_win27
 24
-7680
-acac c47b d256 d37b d49f d5c4 d6e8 d80d d931 da56 dc4a f419 be7 23b6 25aa 26cf 27f3 2918 2a3c 2b61 2c85 2daa 3b85 5354 
-0000 0000 0000 0000 0000 0000 0000 0000 04c2 0a9f 0920 202d 185e 0ccc 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 
-000 000 0000 0000 0
-GOLDEN nan nan nan nan
+60
+00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f 10 11 12 13 14 15 16 17 
+00 12 24 21 27 27 2d 33 3f 45 45 5a 54 48 33 2d 27 21 18 18 18 09 00 00 
+0d 0e 48 33 1
+GOLDEN 13 14 72 51
 
 synth_test_1
 24
-15360
-acac c47b d256 d37b d49f d5c4 d6e8 d80d d931 da56 dc4a f419 be7 23b6 25aa 26cf 27f3 2918 2a3c 2b61 2c85 2daa 3b85 5354 
-1400 5a00 5a00 5a00 1400 1400 1400 1400 1400 1400 1400 1400 1400 1400 1400 1400 1400 1400 1400 1400 1400 1400 1400 1400 
-000 000 0000 0000 0
-GOLDEN nan nan nan nan
+60
+00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f 10 11 12 13 14 15 16 17 
+14 14 14 14 14 14 14 14 14 14 14 14 14 5a 5a 5a 14 14 14 14 5a 5a 5a 14 
+16 17 5a 14 1
+GOLDEN 22 23 90.0 20.0
 

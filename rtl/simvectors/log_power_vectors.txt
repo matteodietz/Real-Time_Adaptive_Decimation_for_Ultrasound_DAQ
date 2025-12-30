@@ -1,201 +1,186 @@
 # Test vectors for complex_to_log_power module
 # Format: Each test case consists of 2 lines:
-# Line 1: I_value Q_value (both 32-bit fixed-point integers)
-# Line 2: Expected_output (8-bit fixed-point integer with 0 fractional bits)
+# Line 1: I_value Q_value (both 18-bit fixed-point integers)
+# Line 2: Expected_output (8-bit fixed-point integer)
 # Lines starting with '#' are comments and should be skipped
 #
 # Test case: Both zero
 0 0
 0
 # Test case: I max positive, Q zero
-2147483647 0
-183
+131071 0
+99
 # Test case: I max negative, Q zero
-2147483648 0
-186
+131072 0
+102
 # Test case: I zero, Q max positive
-0 2147483647
-183
+0 131071
+99
 # Test case: I zero, Q max negative
-0 2147483648
-186
+0 131072
+102
 # Test case: Both max positive
-2147483647 2147483647
-186
+131071 131071
+102
 # Test case: Both max negative
-2147483648 2147483648
-189
+131072 131072
+105
 # Test case: I max pos, Q max neg
-2147483647 2147483648
-186
-# Test case: I max neg, Q max pos
-2147483648 2147483647
-186
+131071 131072
+102
 # Test case: Both minimum positive
 1 1
 3
-# Test case: I minimum positive, Q zero
-1 0
-0
-# Test case: I zero, Q minimum positive
-0 1
-0
-# Test case: I quarter scale, Q zero
-1073741824 0
-180
-# Test case: I zero, Q quarter scale
-0 1073741824
-180
 # Test case: Both quarter scale
-1073741824 1073741824
-183
+65536 65536
+99
 # Test case: Random case 1
-4055129728 3415233107
-177
+44873 125189
+102
 # Test case: Random case 2
-469517205 3478402760
-177
+214685 209556
+96
 # Test case: Random case 3
-1503303399 2245839175
-186
+95335 50126
+99
 # Test case: Random case 4
-2640937117 2565798040
-186
+183767 4653
+96
 # Test case: Random case 5
-2689663988 883847830
-183
+65768 250305
+96
 # Test case: Random case 6
-3785267078 2275300551
-183
+149949 68900
+102
 # Test case: Random case 7
-469435983 144250667
-171
+181447 3533
+96
 # Test case: Random case 8
-738461184 2670261953
-183
+130271 222763
+102
 # Test case: Random case 9
-2981185917 988150326
-183
+64611 185404
+99
 # Test case: Random case 10
-1328398445 1306285567
-183
+203223 105596
+99
 # Test case: Random case 11
-1694787498 2658337626
-186
+39436 82903
+96
 # Test case: Random case 12
-4177687808 1118053159
-180
+225513 224603
+93
 # Test case: Random case 13
-3796422231 1968605677
-183
+157627 174186
+102
 # Test case: Random case 14
-987641452 3223459457
-180
+99987 230896
+99
 # Test case: Random case 15
-3267414925 2837902493
-183
+243010 145233
+99
 # Test case: Random case 16
-949755843 2405073768
-183
+78442 32859
+96
 # Test case: Random case 17
-2170392566 4084803929
-183
+86606 137091
+102
 # Test case: Random case 18
-2145114044 492850108
-186
+233143 204788
+93
 # Test case: Random case 19
-3298047193 2617872040
-183
+82990 165458
+99
 # Test case: Random case 20
-3214987236 1730643506
-183
+96668 36799
+99
 # Test case: Random case 21
-1516564498 394463153
-183
+23429 237467
+90
 # Test case: Random case 22
-4254228353 3791939487
-171
+4363 240275
+84
 # Test case: Random case 23
-2312402186 2956684928
-186
+242209 127957
+99
 # Test case: Random case 24
-3714331349 3287538362
-180
+223290 218508
+93
 # Test case: Random case 25
-1283987309 3817784929
-180
+124396 84072
+102
 # Test case: Random case 26
-2433224932 3705747692
-183
+77891 158164
+99
 # Test case: Random case 27
-3308405697 1453437421
-183
+170397 69168
+99
 # Test case: Random case 28
-2882645251 2421903307
-186
+202820 215443
+96
 # Test case: Random case 29
-2540796426 3967882673
-183
+229475 57823
+96
 # Test case: Random case 30
-3140030266 22041190
-180
+201600 27900
+96
 # Test case: Random case 31
-3609450854 2742714955
-183
+251809 83190
+96
 # Test case: Random case 32
-1231366626 98859747
-180
+13582 93800
+99
 # Test case: Random case 33
-1899457440 226141472
-183
+131499 186195
+102
 # Test case: Random case 34
-3009483092 3764946404
-180
+218096 46422
+93
 # Test case: Random case 35
-3276362543 3945912598
-180
+24790 58785
+93
 # Test case: Random case 36
-1497599921 3937387744
-183
+2047 160253
+99
 # Test case: Random case 37
-2077829466 3213694931
-186
+100037 90044
+102
 # Test case: Random case 38
-2977868760 3729404751
-180
+67103 241086
+96
 # Test case: Random case 39
-3951129588 2355851781
-183
+252051 91968
+96
 # Test case: Random case 40
-3842697981 1891413594
-183
+18085 140054
+99
 # Test case: Random case 41
-3402288729 670008851
-180
+146688 148575
+102
 # Test case: Random case 42
-2951815719 191990170
-180
+138650 238440
+99
 # Test case: Random case 43
-1739764766 3674498311
-183
+93070 125483
+102
 # Test case: Random case 44
-1929610175 606235918
-183
+152580 75617
+102
 # Test case: Random case 45
-3129277928 2348749604
-186
+158800 162929
+102
 # Test case: Random case 46
-1354571971 2985426195
-183
+202667 260956
+93
 # Test case: Random case 47
-3995529758 2396453864
-183
+216254 151428
+99
 # Test case: Random case 48
-2392738224 781883867
-183
+81282 251517
+96
 # Test case: Random case 49
-309967249 24934219
-168
+237799 261464
+87
 # Test case: Random case 50
-884753093 1429288643
-183
+212096 64949
+96

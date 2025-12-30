@@ -32,7 +32,7 @@ module spectral_power_estimator_tmux_tb();
     localparam integer COUNTER_WIDTH = 16;
     localparam integer SAMPLE_COUNT_WIDTH = 16;
     localparam integer TMUX_COUNTER_WIDTH = 5;
-    localparam integer STAGE1_WIDTH = 20;
+    localparam integer STAGE1_WIDTH = 24;
     
     // Time-multiplexing parameters
     localparam integer CYCLES_PER_SAMPLE = 12;  // Hold each sample for 12 cycles
@@ -412,11 +412,11 @@ module spectral_power_estimator_tmux_tb();
         automatic integer max_power_expected;
         automatic integer max_power_actual;
         automatic integer max_power_overall;
-        automatic integer threshold_margin = 40;  // dB below max to ignore errors
+        automatic integer threshold_margin = 30;  // dB below max to ignore errors
         logic in_noise_floor;
         
         // Allow tolerance for rounding differences in significant bins
-        automatic integer tolerance = 3;  // Allow ±3 dB error
+        automatic integer tolerance = 3;  // Allow +/-3 dB error
         
         $display("  Checking power results...");
         

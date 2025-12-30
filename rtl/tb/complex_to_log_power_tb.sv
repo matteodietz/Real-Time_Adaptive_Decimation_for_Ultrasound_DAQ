@@ -7,7 +7,7 @@ module complex_to_log_power_tb ();
     localparam time CLK_PERIOD         = 10ns;
     localparam unsigned RST_CLK_CYCLES = 5;
     
-    localparam integer INPUT_WIDTH  = 32; // As per Python script
+    localparam integer INPUT_WIDTH  = 18; // As per Python script
     localparam integer OUTPUT_WIDTH = 8; // As per Python script
     localparam integer OUTPUT_FRAC  = 0; // As per Python script
 
@@ -110,19 +110,21 @@ module complex_to_log_power_tb ();
             
             $display("\n--- Test Case %0d ---", test_count);
             $display("Input: I = 0x%04h, Q = 0x%04h", in_i, in_q);
-            $display("Expected: db_power = 0x%08h", exp_db_power);
+            $display("Expected: db_power = 0x%02h", exp_db_power);
             
             // --- Drive DUT ---
             i_data   = in_i;
             q_data   = in_q;
             valid_in = 1'b1;
             @(posedge clk);
+            #1;
             valid_in = 1'b0;
             
             // Wait for output (pipeline latency is 3 cycles)
             repeat(3) @(posedge clk);
             
             // Check results
+            #1;
             check_result(exp_db_power, n_errs, test_count);
             
             // @(posedge clk); // Idle cycle before next tc starts

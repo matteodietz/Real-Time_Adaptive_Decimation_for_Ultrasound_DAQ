@@ -189,7 +189,7 @@
 
 module complex_to_log_power_tmux #(
     parameter integer NUM_BINS = 24,
-    parameter integer POWER_INPUT_WIDTH = 32,
+    parameter integer POWER_INPUT_WIDTH = 18,
     parameter integer POWER_WIDTH = 8,
     parameter integer POWER_FRAC = 0,
     parameter integer LATENCY = 5  // Increased from 4 to 5 due to extra pipeline stage

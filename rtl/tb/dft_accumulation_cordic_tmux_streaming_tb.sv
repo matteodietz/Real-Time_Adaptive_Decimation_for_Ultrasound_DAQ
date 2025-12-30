@@ -1,4 +1,4 @@
-module dft_accumulation_cordic_tmux_tb ();
+module dft_accumulation_cordic_tmux_streaming_tb ();
 
     timeunit 1ns;
     timeprecision 1ps;
@@ -67,7 +67,7 @@ module dft_accumulation_cordic_tmux_tb ();
     end
 
     // --- DUT Instantiation ---
-    dft_accumulation_cordic_tmux #(
+    dft_accumulation_cordic_tmux_streaming #(
         .IQ_WIDTH(IQ_WIDTH),
         .IQ_WIDTH_FRAC(IQ_WIDTH_FRAC),
         .WINDOW_WIDTH(WINDOW_WIDTH),
@@ -80,7 +80,8 @@ module dft_accumulation_cordic_tmux_tb ();
         .PHASE_WIDTH(PHASE_WIDTH),
         .SAMPLE_COUNT_WIDTH(SAMPLE_COUNT_WIDTH),
         .COUNTER_WIDTH(COUNTER_WIDTH),
-        .STAGE1_WIDTH(STAGE1_WIDTH)
+        .STAGE1_WIDTH(STAGE1_WIDTH),
+        .CORDIC_LATENCY(CORDIC_LATENCY)
     ) dut (
         .clk_i(clk),
         .rst_ni(rst_n),
@@ -249,7 +250,7 @@ module dft_accumulation_cordic_tmux_tb ();
             $display("  Waiting %0d cycles for CORDIC pipeline...", OSC_EARLY_START);
             // repeat(OSC_EARLY_START-3) @(posedge clk);
             // -3 adjustment for timing (same as non-tmux version)
-            repeat(CORDIC_LATENCY - 4) @(posedge clk);
+            repeat(CORDIC_LATENCY) @(posedge clk);
 
             // Step 4: Start DFT accumulation
             $display("  Starting DFT accumulation...");
@@ -259,6 +260,7 @@ module dft_accumulation_cordic_tmux_tb ();
             // sample_valid = 1'b1;
              @(negedge clk);
              start = 1'b0;
+             @(posedge clk);
             
             // Step 5: Stream samples (each held for 12 cycles)
             $display("  Streaming samples (each held for %0d cycles)...", CYCLES_PER_SAMPLE);
@@ -415,3 +417,4 @@ module dft_accumulation_cordic_tmux_tb ();
     endtask
 
 endmodule
+

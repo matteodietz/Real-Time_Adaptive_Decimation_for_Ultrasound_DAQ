@@ -5,9 +5,9 @@ module counter_controller_tb;
     logic rst_n;
     
     // Inputs
-    logic [15:0] X;
-    logic [15:0] Y;
-    logic [15:0] Z;
+    logic [15:0] INITIAL_DELAY;
+    logic [15:0] OSC_DELAY;
+    logic [15:0] WINDOW_DELAY;
     logic clear;
     logic enable;
     
@@ -21,15 +21,14 @@ module counter_controller_tb;
 
     // Instantiate DUT
     counter_controller #(
-        .COUNTER_WIDTH_X(16),
-        .COUNTER_WIDTH_Y(16),
-        .COUNTER_WIDTH_Z(16)
+        .COUNTER_WIDTH(16),
+        .N(1)
     ) dut (
         .clk_i(clk),
         .rst_ni(rst_n),
-        .X(X),
-        .Y(Y),
-        .Z(Z),
+        .initial_delay(INITIAL_DELAY),
+        .osc_delay(OSC_DELAY),
+        .window_delay(WINDOW_DELAY),
         .clear_i(clear),
         .enable_i(enable),
         .osc_reset(osc_reset),
@@ -50,9 +49,9 @@ module counter_controller_tb;
     initial begin
         // Initialize
         rst_n = 0;
-        X = 20;
-        Y = 36;
-        Z = 4;
+        INITIAL_DELAY = 20;
+        OSC_DELAY = 20;
+        WINDOW_DELAY = 4;
         clear = 0;
         enable = 0;
         

@@ -63,9 +63,9 @@ module spectral_power_estimator_tmux #(
     logic last_sample_internal;
     
     // Counter Controller Inputs
-    logic [COUNTER_WIDTH-1:0] X;
-    logic [COUNTER_WIDTH-1:0] Y;
-    logic [COUNTER_WIDTH-1:0] Z;
+    logic [COUNTER_WIDTH-1:0] INITIAL_DELAY;
+    logic [COUNTER_WIDTH-1:0] OSC_DELAY;
+    logic [COUNTER_WIDTH-1:0] WINDOW_DELAY;
     
     // Gated sample valid
     logic sample_valid_gated;
@@ -94,25 +94,23 @@ module spectral_power_estimator_tmux #(
     // Y = OSC_LATENCY + 1 = 37
     // Z = WINDOW_SIZE = number of samples in window
     
-    assign X = delay_cycles_i - COUNTER_WIDTH'(OSC_LATENCY - 1);
-    assign Y = COUNTER_WIDTH'(OSC_LATENCY);
-    assign Z = COUNTER_WIDTH'(WINDOW_SIZE * CYCLES_PER_SAMPLE);
+    assign INITIAL_DELAY = delay_cycles_i - COUNTER_WIDTH'(OSC_LATENCY - 1);
+    assign OSC_DELAY = COUNTER_WIDTH'(OSC_LATENCY);
+    assign WINDOW_DELAY = COUNTER_WIDTH'(WINDOW_SIZE * CYCLES_PER_SAMPLE);
     
     // =========================================================================
     // 1. Counter Controller (replaces dft_timing_controller)
     // =========================================================================
     
     counter_controller #(
-        .COUNTER_WIDTH_X(COUNTER_WIDTH),
-        .COUNTER_WIDTH_Y(COUNTER_WIDTH),
-        .COUNTER_WIDTH_Z(COUNTER_WIDTH),
+        .COUNTER_WIDTH(COUNTER_WIDTH),
         .N              (CYCLES_PER_SAMPLE)
     ) u_counter_ctrl (
         .clk_i              (clk_i),
         .rst_ni             (rst_ni),
-        .X                  (X),
-        .Y                  (Y),
-        .Z                  (Z),
+        .initial_delay      (INITIAL_DELAY),
+        .osc_delay          (OSC_DELAY),
+        .window_delay       (WINDOW_DELAY),
         .clear_i            (clear_i),
         .enable_i           (enable_i),
         .osc_reset          (osc_reset_internal),

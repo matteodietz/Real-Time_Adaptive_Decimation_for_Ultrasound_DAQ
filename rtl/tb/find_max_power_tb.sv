@@ -18,8 +18,8 @@ module find_max_power_tb();
     localparam unsigned RST_CLK_CYCLES = 5;
     
     // DUT parameters
-    localparam integer POWER_WIDTH = 32;
-    localparam integer POWER_FRAC = 16;
+    localparam integer POWER_WIDTH = 8;
+    localparam integer POWER_FRAC = 0;
     localparam integer NUM_BINS = 24; // Fixed to 24
     
     // Clock and reset

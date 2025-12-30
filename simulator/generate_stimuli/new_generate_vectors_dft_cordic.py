@@ -56,17 +56,33 @@ def generate_test_case(test_name, iq_data, fs, freq_bins, window_type,
     # Generate window coefficients
     window_coeffs = signal.windows.get_window(window_type, N)
     
-    # Calculate frequency steps for CORDIC oscillator bank
-    # freq_step = (f_bin / f_sample) * 2^PHASE_WIDTH
-    freq_steps = np.zeros(K, dtype=np.uint32)
+    # # Calculate frequency steps for CORDIC oscillator bank
+    # # freq_step = (f_bin / f_sample) * 2^PHASE_WIDTH
+    # freq_steps = np.zeros(K, dtype=np.uint32)
+    # for k in range(K):
+    #     normalized_freq = freqs_sorted[k] / fs
+    #     # Map to phase accumulator range (0 to 2^PHASE_WIDTH represents 0 to 2*pi)
+    #     step_real = normalized_freq * (2.0 ** phase_width)
+    #     # Handle wrap-around for negative frequencies
+    #     if step_real < 0:
+    #         step_real += (2.0 ** phase_width)
+    #     freq_steps[k] = int(step_real) & ((1 << phase_width) - 1)
+
+    # --- Calculate Negative Frequency Steps for Oscillators ---
+    freq_steps = []
     for k in range(K):
         normalized_freq = freqs_sorted[k] / fs
-        # Map to phase accumulator range (0 to 2^PHASE_WIDTH represents 0 to 2*pi)
-        step_real = normalized_freq * (2.0 ** phase_width)
-        # Handle wrap-around for negative frequencies
-        if step_real < 0:
-            step_real += (2.0 ** phase_width)
-        freq_steps[k] = int(step_real) & ((1 << phase_width) - 1)
+        
+        # Calculate the positive step magnitude
+        raw_step = normalized_freq * (2 ** phase_width)
+        
+        # Negate it! This creates the backward rotation (e^-jtheta)
+        # Use round() to be precise, or int() for truncation
+        neg_step = -round(raw_step) 
+        
+        # Apply mask to convert the negative number to its unsigned bit representation
+        # Python handles the 2's complement wrap-around here automatically
+        freq_steps.append(neg_step & ((1 << phase_width) - 1))
     
     print(f"  Frequency steps (hex): {[hex(s) for s in freq_steps]}")
     
@@ -110,7 +126,7 @@ def generate_test_case(test_name, iq_data, fs, freq_bins, window_type,
                        for w in window_coeffs]
     
     # Expected accumulator outputs: Q8.56 format
-    accum_frac_bits = 32 # 56
+    accum_frac_bits = 28 # 56
     accum_int_bits = accum_width - accum_frac_bits
     
     # IMPORTANT: We must scale the expected golden result by the same factor
@@ -220,7 +236,7 @@ def main():
     # Hardware parameters
     IQ_WIDTH = 16           # Q2.14
     WINDOW_WIDTH = 16       # Q2.14
-    ACCUM_WIDTH = 40        # Q8.56 # 64
+    ACCUM_WIDTH = 36        # Q8.56 # 64
     OSC_WIDTH = 16          # CORDIC output width #32
     PHASE_WIDTH = 16        # Phase accumulator width #32
     NUM_BINS = 24           # Maximum

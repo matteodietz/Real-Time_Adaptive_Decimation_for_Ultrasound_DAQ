@@ -159,7 +159,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 module complex_to_log_power #(
-    parameter int INPUT_WIDTH   = 32,
+    parameter int INPUT_WIDTH   = 18,
     parameter int OUTPUT_WIDTH  = 8,
     parameter int OUTPUT_FRAC   = 0
 ) (

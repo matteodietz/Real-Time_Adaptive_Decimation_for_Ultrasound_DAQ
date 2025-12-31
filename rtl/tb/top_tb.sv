@@ -9,7 +9,7 @@
 //
 // //////////////////////////////////////////////////////////////////////////////
 
-module top_with_config_loader_tb();
+module top_tb();
 
     timeunit 1ns;
     timeprecision 1ps;
@@ -113,7 +113,7 @@ module top_with_config_loader_tb();
     end
 
     // --- DUT Instantiation ---
-    top_with_config_loader #(
+    top #(
         .IQ_WIDTH           (IQ_WIDTH),
         .IQ_WIDTH_FRAC      (IQ_WIDTH_FRAC),
         .WINDOW_WIDTH       (WINDOW_WIDTH),
@@ -192,17 +192,60 @@ module top_with_config_loader_tb();
         static integer test_count = 0;
         logic valid_captured;
         
+        // Dataset selection variables
+        string dataset_type;
+        string dataset_name;
+        string vector_filename;
+        string csv_filename;
         string vector_path;
         string csv_path;
         
-        $display("=== Starting Top Module with Config Loader Testbench (Time-Multiplexed) ===");
+        // Get dataset parameters from command line or use defaults
+        if (!$value$plusargs("DATASET_TYPE=%s", dataset_type)) begin
+            dataset_type = "experiments";
+            $display("INFO: Using default DATASET_TYPE=experiments");
+        end
         
-        // Build file paths
-        vector_path = "/home/bsc25h10/mdietz/bachelors_thesis/rtl/simvectors/top_vectors.txt";
-        csv_path = "/home/bsc25h10/mdietz/bachelors_thesis/rtl/sim_results/top_with_config_loader_tmux_results.csv";
+        if (!$value$plusargs("DATASET_NAME=%s", dataset_name)) begin
+            dataset_name = "contrast_speckle";
+            $display("INFO: Using default DATASET_NAME=contrast_speckle");
+        end
+        
+        $display("=== Starting Top Module Testbench ===");
+        $display("Dataset Type: %s", dataset_type);
+        $display("Dataset Name: %s", dataset_name);
+        
+        // Build file paths based on dataset
+        vector_filename = {dataset_type, "_", dataset_name};
+        csv_filename = {dataset_type, "_", dataset_name};
+        
+        vector_path = {"/home/bsc25h10/mdietz/bachelors_thesis/rtl/simvectors/top_vectors_", vector_filename, ".txt"};
+        csv_path = {"/home/bsc25h10/mdietz/bachelors_thesis/rtl/sim_results/top_results_", csv_filename, ".csv"};
         
         $display("Vector file: %s", vector_path);
         $display("Results file: %s", csv_path);
+        
+
+        // integer file, status, csv_file;
+        // string line, test_name;
+        // integer num_bins_read, num_samples_read, window_size_read;
+        // integer delay_cycles_read, osc_latency_read, threshold_drop_read;
+        // integer angle, channel, window_number;
+        // static integer n_errs = 0;
+        // static integer test_count = 0;
+        // logic valid_captured;
+        
+        // string vector_path;
+        // string csv_path;
+        
+        // $display("=== Starting Top Module with Config Loader Testbench (Time-Multiplexed) ===");
+        
+        // // Build file paths
+        // vector_path = "/home/bsc25h10/mdietz/bachelors_thesis/rtl/simvectors/top_vectors.txt";
+        // csv_path = "/home/bsc25h10/mdietz/bachelors_thesis/rtl/sim_results/top_with_config_loader_tmux_results.csv";
+        
+        // $display("Vector file: %s", vector_path);
+        // $display("Results file: %s", csv_path);
         
         // Initialize signals
         enable = 1'b0;
@@ -513,12 +556,19 @@ module top_with_config_loader_tb();
 
         $fclose(file);
         $fclose(csv_file);
-        
+
         $display("\n========================================");
         $display("Test Summary");
         $display("========================================");
+        $display("Dataset: %s/%s", dataset_type, dataset_name); 
         $display("Total test cases: %0d", test_count);
         $display("Total errors:     %0d", n_errs);
+                
+        // $display("\n========================================");
+        // $display("Test Summary");
+        // $display("========================================");
+        // $display("Total test cases: %0d", test_count);
+        // $display("Total errors:     %0d", n_errs);
         
         if (n_errs > 0) begin
             $display("\n*** TEST FAILED ***");
@@ -529,6 +579,141 @@ module top_with_config_loader_tb();
         
         $finish;
     end
+
+    // --- Checking Task ---
+    // task check_result(
+    //     input integer csv_file,
+    //     input integer angle,
+    //     input integer channel,
+    //     input integer window_num,
+    //     input logic [FREQ_BIN_WIDTH-1:0] expected_f1_left,
+    //     input logic [FREQ_BIN_WIDTH-1:0] expected_f2_left,
+    //     input logic [POWER_WIDTH-1:0] expected_L1_left,
+    //     input logic [POWER_WIDTH-1:0] expected_L2_left,
+    //     input logic [FREQ_BIN_WIDTH-1:0] expected_f1_right,
+    //     input logic [FREQ_BIN_WIDTH-1:0] expected_f2_right,
+    //     input logic [POWER_WIDTH-1:0] expected_L1_right,
+    //     input logic [POWER_WIDTH-1:0] expected_L2_right,
+    //     input logic [POWER_WIDTH-1:0] actual_abs_threshold,
+    //     inout integer error_count
+    // );
+    //     automatic logic has_error = 1'b0;
+    //     automatic logic has_warning = 1'b0;
+    //     automatic integer L1_left_error, L2_left_error;
+    //     automatic integer L1_right_error, L2_right_error;
+    //     automatic integer power_tolerance = 6;  // Allow ±6 dB for power values
+        
+    //     // Check left edge frequencies
+    //     if (f1_left == expected_f1_left && f2_left == expected_f2_left) begin
+    //         // Perfect match - no action needed
+    //     end else if ((f1_left == expected_f1_left - 1 && f2_left == expected_f2_left - 1) ||
+    //                 (f1_left == expected_f1_left + 1 && f2_left == expected_f2_left + 1)) begin
+    //         // Off by 1 bin in the same direction - warning
+    //         has_warning = 1'b1;
+    //         $display("    WARNING: Left edge bins off by 1 (Expected: %0d,%0d Got: %0d,%0d)",
+    //                 expected_f1_left, expected_f2_left, f1_left, f2_left);
+    //     end else begin
+    //         // Larger mismatch - error
+    //         has_error = 1'b1;
+    //         $display("    ERROR: Left edge bins mismatch (Expected: %0d,%0d Got: %0d,%0d)",
+    //                 expected_f1_left, expected_f2_left, f1_left, f2_left);
+    //     end
+        
+    //     // Check right edge frequencies
+    //     if (f1_right == expected_f1_right && f2_right == expected_f2_right) begin
+    //         // Perfect match - no action needed
+    //     end else if ((f1_right == expected_f1_right - 1 && f2_right == expected_f2_right - 1) ||
+    //                 (f1_right == expected_f1_right + 1 && f2_right == expected_f2_right + 1)) begin
+    //         // Off by 1 bin in the same direction - warning
+    //         has_warning = 1'b1;
+    //         $display("    WARNING: Right edge bins off by 1 (Expected: %0d,%0d Got: %0d,%0d)",
+    //                 expected_f1_right, expected_f2_right, f1_right, f2_right);
+    //     end else begin
+    //         // Larger mismatch - error
+    //         has_error = 1'b1;
+    //         $display("    ERROR: Right edge bins mismatch (Expected: %0d,%0d Got: %0d,%0d)",
+    //                 expected_f1_right, expected_f2_right, f1_right, f2_right);
+    //     end
+        
+    //     // Check powers (with tolerance)
+    //     // L1_left
+    //     if (L1_left > expected_L1_left) begin
+    //         L1_left_error = L1_left - expected_L1_left;
+    //     end else begin
+    //         L1_left_error = expected_L1_left - L1_left;
+    //     end
+    //     if (L1_left_error > power_tolerance) begin
+    //         has_error = 1'b1;
+    //         $display("    ERROR: L1_left power error %0d dB (tolerance +/-%0d dB)", 
+    //                 L1_left_error, power_tolerance);
+    //     end else if (L1_left_error > 0) begin
+    //         has_warning = 1'b1;
+    //         $display("    WARNING: L1_left power error %0d dB", L1_left_error);
+    //     end
+        
+    //     // L2_left
+    //     if (L2_left > expected_L2_left) begin
+    //         L2_left_error = L2_left - expected_L2_left;
+    //     end else begin
+    //         L2_left_error = expected_L2_left - L2_left;
+    //     end
+    //     if (L2_left_error > power_tolerance) begin
+    //         has_error = 1'b1;
+    //         $display("    ERROR: L2_left power error %0d dB (tolerance +/-%0d dB)", 
+    //                 L2_left_error, power_tolerance);
+    //     end else if (L2_left_error > 0) begin
+    //         has_warning = 1'b1;
+    //         $display("    WARNING: L2_left power error %0d dB", L2_left_error);
+    //     end
+        
+    //     // L1_right
+    //     if (L1_right > expected_L1_right) begin
+    //         L1_right_error = L1_right - expected_L1_right;
+    //     end else begin
+    //         L1_right_error = expected_L1_right - L1_right;
+    //     end
+    //     if (L1_right_error > power_tolerance) begin
+    //         has_error = 1'b1;
+    //         $display("    ERROR: L1_right power error %0d dB (tolerance +/-%0d dB)", 
+    //                 L1_right_error, power_tolerance);
+    //     end else if (L1_right_error > 0) begin
+    //         has_warning = 1'b1;
+    //         $display("    WARNING: L1_right power error %0d dB", L1_right_error);
+    //     end
+        
+    //     // L2_right
+    //     if (L2_right > expected_L2_right) begin
+    //         L2_right_error = L2_right - expected_L2_right;
+    //     end else begin
+    //         L2_right_error = expected_L2_right - L2_right;
+    //     end
+    //     if (L2_right_error > power_tolerance) begin
+    //         has_error = 1'b1;
+    //         $display("    ERROR: L2_right power error %0d dB (tolerance +/-%0d dB)", 
+    //                 L2_right_error, power_tolerance);
+    //     end else if (L2_right_error > 0) begin
+    //         has_warning = 1'b1;
+    //         $display("    WARNING: L2_right power error %0d dB", L2_right_error);
+    //     end
+        
+    //     // Write to CSV
+    //     $fwrite(csv_file, "%0d,%0d,%0d,", channel, angle, window_num);
+    //     $fwrite(csv_file, "%0d,%0d,%0d,%0d,", expected_f1_left, expected_f2_left, expected_L1_left, expected_L2_left);
+    //     $fwrite(csv_file, "%0d,%0d,%0d,%0d,", expected_f1_right, expected_f2_right, expected_L1_right, expected_L2_right);
+    //     $fwrite(csv_file, "%0d,%0d,%0d,%0d,", f1_left, f2_left, L1_left, L2_left);
+    //     $fwrite(csv_file, "%0d,%0d,%0d,%0d,", f1_right, f2_right, L1_right, L2_right);
+    //     $fwrite(csv_file, "%0d,%0d,%0d\n", actual_abs_threshold, has_warning, has_error);
+        
+    //     // Update error count
+    //     if (has_error) begin
+    //         error_count++;
+    //         $display("  RESULT: FAIL");
+    //     end else if (has_warning) begin
+    //         $display("  RESULT: PASS (with warnings)");
+    //     end else begin
+    //         $display("  RESULT: PASS");
+    //     end
+    // endtask
 
     // --- Checking Task ---
     task check_result(
@@ -551,17 +736,97 @@ module top_with_config_loader_tb();
         automatic logic has_warning = 1'b0;
         automatic integer L1_left_error, L2_left_error;
         automatic integer L1_right_error, L2_right_error;
-        automatic integer power_tolerance = 6;  // Allow ±6 dB for power values
+        automatic integer power_tolerance = 6;  // Allow +/-6 dB for power values
+        automatic integer aligned_power_error = 0;
         
-        // Check left edge frequencies
+        // Initialize error values
+        L1_left_error = 0;
+        L2_left_error = 0;
+        L1_right_error = 0;
+        L2_right_error = 0;
+        
+        // =========================================================================
+        // Check LEFT edge frequencies and powers
+        // =========================================================================
         if (f1_left == expected_f1_left && f2_left == expected_f2_left) begin
-            // Perfect match - no action needed
-        end else if ((f1_left == expected_f1_left - 1 && f2_left == expected_f2_left - 1) ||
-                    (f1_left == expected_f1_left + 1 && f2_left == expected_f2_left + 1)) begin
-            // Off by 1 bin in the same direction - warning
+            // Perfect match - check all power values normally
+            
+            // L1_left
+            if (L1_left > expected_L1_left) begin
+                L1_left_error = L1_left - expected_L1_left;
+            end else begin
+                L1_left_error = expected_L1_left - L1_left;
+            end
+            if (L1_left_error > power_tolerance) begin
+                has_error = 1'b1;
+                $display("    ERROR: L1_left power error %0d dB (tolerance +/-%0d dB)", 
+                        L1_left_error, power_tolerance);
+            end else if (L1_left_error > 0) begin
+                has_warning = 1'b1;
+                $display("    WARNING: L1_left power error %0d dB", L1_left_error);
+            end
+            
+            // L2_left
+            if (L2_left > expected_L2_left) begin
+                L2_left_error = L2_left - expected_L2_left;
+            end else begin
+                L2_left_error = expected_L2_left - L2_left;
+            end
+            if (L2_left_error > power_tolerance) begin
+                has_error = 1'b1;
+                $display("    ERROR: L2_left power error %0d dB (tolerance +/-%0d dB)", 
+                        L2_left_error, power_tolerance);
+            end else if (L2_left_error > 0) begin
+                has_warning = 1'b1;
+                $display("    WARNING: L2_left power error %0d dB", L2_left_error);
+            end
+            
+        end else if (f1_left == expected_f1_left + 1 && f2_left == expected_f2_left + 1) begin
+            // Bins shifted RIGHT by 1 - compare overlapping bin
+            // Expected f2 (bin N+1) aligns with Actual f1 (bin N+1)
+            // So compare expected_L2_left with L1_left
             has_warning = 1'b1;
-            $display("    WARNING: Left edge bins off by 1 (Expected: %0d,%0d Got: %0d,%0d)",
+            $display("    WARNING: Left edge bins off by +1 (Expected: %0d,%0d Got: %0d,%0d)",
                     expected_f1_left, expected_f2_left, f1_left, f2_left);
+            
+            if (L1_left > expected_L2_left) begin
+                aligned_power_error = L1_left - expected_L2_left;
+            end else begin
+                aligned_power_error = expected_L2_left - L1_left;
+            end
+            
+            if (aligned_power_error > power_tolerance) begin
+                has_error = 1'b1;
+                $display("    ERROR: Left aligned power error %0d dB (comparing expected_L2=%0d with L1=%0d, tolerance +/-%0d dB)", 
+                        aligned_power_error, expected_L2_left, L1_left, power_tolerance);
+            end else if (aligned_power_error > 0) begin
+                $display("    WARNING: Left aligned power error %0d dB (comparing expected_L2=%0d with L1=%0d)", 
+                        aligned_power_error, expected_L2_left, L1_left);
+            end
+            
+        end else if (f1_left == expected_f1_left - 1 && f2_left == expected_f2_left - 1) begin
+            // Bins shifted LEFT by 1 - compare overlapping bin
+            // Expected f1 (bin N) aligns with Actual f2 (bin N)
+            // So compare expected_L1_left with L2_left
+            has_warning = 1'b1;
+            $display("    WARNING: Left edge bins off by -1 (Expected: %0d,%0d Got: %0d,%0d)",
+                    expected_f1_left, expected_f2_left, f1_left, f2_left);
+            
+            if (L2_left > expected_L1_left) begin
+                aligned_power_error = L2_left - expected_L1_left;
+            end else begin
+                aligned_power_error = expected_L1_left - L2_left;
+            end
+            
+            if (aligned_power_error > power_tolerance) begin
+                has_error = 1'b1;
+                $display("    ERROR: Left aligned power error %0d dB (comparing expected_L1=%0d with L2=%0d, tolerance +/-%0d dB)", 
+                        aligned_power_error, expected_L1_left, L2_left, power_tolerance);
+            end else if (aligned_power_error > 0) begin
+                $display("    WARNING: Left aligned power error %0d dB (comparing expected_L1=%0d with L2=%0d)", 
+                        aligned_power_error, expected_L1_left, L2_left);
+            end
+            
         end else begin
             // Larger mismatch - error
             has_error = 1'b1;
@@ -569,81 +834,89 @@ module top_with_config_loader_tb();
                     expected_f1_left, expected_f2_left, f1_left, f2_left);
         end
         
-        // Check right edge frequencies
+        // =========================================================================
+        // Check RIGHT edge frequencies and powers
+        // =========================================================================
         if (f1_right == expected_f1_right && f2_right == expected_f2_right) begin
-            // Perfect match - no action needed
-        end else if ((f1_right == expected_f1_right - 1 && f2_right == expected_f2_right - 1) ||
-                    (f1_right == expected_f1_right + 1 && f2_right == expected_f2_right + 1)) begin
-            // Off by 1 bin in the same direction - warning
+            // Perfect match - check all power values normally
+            
+            // L1_right
+            if (L1_right > expected_L1_right) begin
+                L1_right_error = L1_right - expected_L1_right;
+            end else begin
+                L1_right_error = expected_L1_right - L1_right;
+            end
+            if (L1_right_error > power_tolerance) begin
+                has_error = 1'b1;
+                $display("    ERROR: L1_right power error %0d dB (tolerance +/-%0d dB)", 
+                        L1_right_error, power_tolerance);
+            end else if (L1_right_error > 0) begin
+                has_warning = 1'b1;
+                $display("    WARNING: L1_right power error %0d dB", L1_right_error);
+            end
+            
+            // L2_right
+            if (L2_right > expected_L2_right) begin
+                L2_right_error = L2_right - expected_L2_right;
+            end else begin
+                L2_right_error = expected_L2_right - L2_right;
+            end
+            if (L2_right_error > power_tolerance) begin
+                has_error = 1'b1;
+                $display("    ERROR: L2_right power error %0d dB (tolerance +/-%0d dB)", 
+                        L2_right_error, power_tolerance);
+            end else if (L2_right_error > 0) begin
+                has_warning = 1'b1;
+                $display("    WARNING: L2_right power error %0d dB", L2_right_error);
+            end
+            
+        end else if (f1_right == expected_f1_right + 1 && f2_right == expected_f2_right + 1) begin
+            // Bins shifted RIGHT by 1 - compare overlapping bin
             has_warning = 1'b1;
-            $display("    WARNING: Right edge bins off by 1 (Expected: %0d,%0d Got: %0d,%0d)",
+            $display("    WARNING: Right edge bins off by +1 (Expected: %0d,%0d Got: %0d,%0d)",
                     expected_f1_right, expected_f2_right, f1_right, f2_right);
+            
+            if (L1_right > expected_L2_right) begin
+                aligned_power_error = L1_right - expected_L2_right;
+            end else begin
+                aligned_power_error = expected_L2_right - L1_right;
+            end
+            
+            if (aligned_power_error > power_tolerance) begin
+                has_error = 1'b1;
+                $display("    ERROR: Right aligned power error %0d dB (comparing expected_L2=%0d with L1=%0d, tolerance +/-%0d dB)", 
+                        aligned_power_error, expected_L2_right, L1_right, power_tolerance);
+            end else if (aligned_power_error > 0) begin
+                $display("    WARNING: Right aligned power error %0d dB (comparing expected_L2=%0d with L1=%0d)", 
+                        aligned_power_error, expected_L2_right, L1_right);
+            end
+            
+        end else if (f1_right == expected_f1_right - 1 && f2_right == expected_f2_right - 1) begin
+            // Bins shifted LEFT by 1 - compare overlapping bin
+            has_warning = 1'b1;
+            $display("    WARNING: Right edge bins off by -1 (Expected: %0d,%0d Got: %0d,%0d)",
+                    expected_f1_right, expected_f2_right, f1_right, f2_right);
+            
+            if (L2_right > expected_L1_right) begin
+                aligned_power_error = L2_right - expected_L1_right;
+            end else begin
+                aligned_power_error = expected_L1_right - L2_right;
+            end
+            
+            if (aligned_power_error > power_tolerance) begin
+                has_error = 1'b1;
+                $display("    ERROR: Right aligned power error %0d dB (comparing expected_L1=%0d with L2=%0d, tolerance +/-%0d dB)", 
+                        aligned_power_error, expected_L1_right, L2_right, power_tolerance);
+            end else if (aligned_power_error > 0) begin
+                $display("    WARNING: Right aligned power error %0d dB (comparing expected_L1=%0d with L2=%0d)", 
+                        aligned_power_error, expected_L1_right, L2_right);
+            end
+            
         end else begin
             // Larger mismatch - error
             has_error = 1'b1;
             $display("    ERROR: Right edge bins mismatch (Expected: %0d,%0d Got: %0d,%0d)",
                     expected_f1_right, expected_f2_right, f1_right, f2_right);
-        end
-        
-        // Check powers (±6 dB tolerance)
-        // L1_left
-        if (L1_left > expected_L1_left) begin
-            L1_left_error = L1_left - expected_L1_left;
-        end else begin
-            L1_left_error = expected_L1_left - L1_left;
-        end
-        if (L1_left_error > power_tolerance) begin
-            has_error = 1'b1;
-            $display("    ERROR: L1_left power error %0d dB (tolerance +/-%0d dB)", 
-                    L1_left_error, power_tolerance);
-        end else if (L1_left_error > 0) begin
-            has_warning = 1'b1;
-            $display("    WARNING: L1_left power error %0d dB", L1_left_error);
-        end
-        
-        // L2_left
-        if (L2_left > expected_L2_left) begin
-            L2_left_error = L2_left - expected_L2_left;
-        end else begin
-            L2_left_error = expected_L2_left - L2_left;
-        end
-        if (L2_left_error > power_tolerance) begin
-            has_error = 1'b1;
-            $display("    ERROR: L2_left power error %0d dB (tolerance +/-%0d dB)", 
-                    L2_left_error, power_tolerance);
-        end else if (L2_left_error > 0) begin
-            has_warning = 1'b1;
-            $display("    WARNING: L2_left power error %0d dB", L2_left_error);
-        end
-        
-        // L1_right
-        if (L1_right > expected_L1_right) begin
-            L1_right_error = L1_right - expected_L1_right;
-        end else begin
-            L1_right_error = expected_L1_right - L1_right;
-        end
-        if (L1_right_error > power_tolerance) begin
-            has_error = 1'b1;
-            $display("    ERROR: L1_right power error %0d dB (tolerance +/-%0d dB)", 
-                    L1_right_error, power_tolerance);
-        end else if (L1_right_error > 0) begin
-            has_warning = 1'b1;
-            $display("    WARNING: L1_right power error %0d dB", L1_right_error);
-        end
-        
-        // L2_right
-        if (L2_right > expected_L2_right) begin
-            L2_right_error = L2_right - expected_L2_right;
-        end else begin
-            L2_right_error = expected_L2_right - L2_right;
-        end
-        if (L2_right_error > power_tolerance) begin
-            has_error = 1'b1;
-            $display("    ERROR: L2_right power error %0d dB (tolerance +/-%0d dB)", 
-                    L2_right_error, power_tolerance);
-        end else if (L2_right_error > 0) begin
-            has_warning = 1'b1;
-            $display("    WARNING: L2_right power error %0d dB", L2_right_error);
         end
         
         // Write to CSV

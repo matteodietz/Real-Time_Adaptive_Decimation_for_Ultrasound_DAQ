@@ -34,10 +34,38 @@ if {[file exists ${project_dir}/${project_name}.xpr]} {
     return -code error "Project file missing"
 }
 
+
+# 2.5. Generate IP Simulation Files & Clean Up Sources
+puts "Generating IP simulation files..."
+
+# Upgrade IP if needed
+upgrade_ip -quiet [get_ips]
+
+# Generate simulation products
+generate_target simulation [get_ips]
+
+# CRITICAL FOR BATCH MODE: Export IP files to the correct lib directories
+export_ip_user_files -of_objects [get_ips] -no_script -sync -force -quiet
+
+puts "IP simulation files generated and exported."
+
+# --- Disable IP Demo Testbenches ---
+# Vivado adds 'tb_cordic_0.vhd' to sim_1. We must disable it 
+# because it conflicts with the compilation flow of the actual design.
+set garbage_tbs [get_files -quiet -all -filter {NAME =~ *demo_tb* || NAME =~ *tb_cordic_0*}]
+if {$garbage_tbs ne ""} {
+    puts "Removing Xilinx IP demo testbenches from simulation context: $garbage_tbs"
+    set_property used_in_simulation false $garbage_tbs
+}
+
+
 # 3. Simulation Setup
 set_property top top_tb [get_filesets sim_1]
 set_property top_lib xil_defaultlib [get_filesets sim_1]
+
+# Re-scan the compilation order after disabling the garbage files
 update_compile_order -fileset sim_1
+
 
 # 4. Clear any existing simulation options
 set_property -name {xsim.elaborate.xelab.more_options} -value "" -objects [get_filesets sim_1]

@@ -1,4 +1,4 @@
-module top_top (
+module top_wrapper (
     input  logic clk_i,
     input  logic rst_ni,
     output logic valid_o,
@@ -88,7 +88,7 @@ module top_top (
 
     // --- Instantiate wrapper with DONT_TOUCH attribute ---
     (* DONT_TOUCH = "true" *)
-    top_with_config_loader #(
+    top #(
         .IQ_WIDTH(IQ_WIDTH),
         .IQ_WIDTH_FRAC(IQ_WIDTH_FRAC),
         .WINDOW_WIDTH(WINDOW_WIDTH),

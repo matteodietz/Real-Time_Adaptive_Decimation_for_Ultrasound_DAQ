@@ -15,7 +15,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-module top_with_config_loader #(
+module top #(
     // --- DFT Parameters ---
     parameter integer IQ_WIDTH = 16,
     parameter integer IQ_WIDTH_FRAC = 14,

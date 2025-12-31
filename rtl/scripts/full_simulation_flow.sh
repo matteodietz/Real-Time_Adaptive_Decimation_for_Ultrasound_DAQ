@@ -58,7 +58,7 @@ for dataset in "${DATASETS[@]}"; do
     read -r dataset_type dataset_name <<< "$dataset"
     echo -e "${YELLOW}Generating: ${dataset_type}/${dataset_name}${NC}"
     
-    python generate_vectors_top.py "$dataset_type" "$dataset_name" -n "$NUM_TESTS"
+    python generate_vectors_top.py -t "$dataset_type" -d "$dataset_name" -n "$NUM_TESTS"
     
     if [ $? -ne 0 ]; then
         echo -e "${RED}ERROR: Vector generation failed.${NC}"

@@ -66,12 +66,17 @@ def get_sorted_frequency_bins(mod_freq):
     Reconstructs the exact S_bins array used in generation.
     Returns: Sorted numpy array of frequencies in Hz.
     """
-    delta_f = 0.25e6 
+    delta_f = 1e6 # 1e6 very coarse, 0.5e6 medium, 0.25e6 finde
     half_bw_est = mod_freq / 2
+
+    # half_bw_est_left = 2.26e6 # for in vivo datasets for the refinement step
+    # half_bw_est_right = 1.7e6 # for in vivo datasets for the refinement step
 
     s_coarse = np.linspace(-mod_freq, mod_freq, 8)
     s_fine_left = np.linspace(-half_bw_est - delta_f, -half_bw_est + delta_f, 8) 
     s_fine_right = np.linspace(half_bw_est - delta_f, half_bw_est + delta_f, 8) 
+    # s_fine_left = np.linspace(-half_bw_est_left - delta_f, -half_bw_est_left + delta_f, 8)
+    # s_fine_right = np.linspace(half_bw_est_right - delta_f, half_bw_est_right + delta_f, 8)
     
     # Concatenate and Sort (Crucial: HW indices correspond to sorted array)
     S_bins = np.unique(np.concatenate([s_coarse, s_fine_left, s_fine_right]))
@@ -101,7 +106,7 @@ def calculate_ground_truth_edges(time_window_data, fs, threshold_drop_db=30.0):
     """
     Calculates the True Bandwidth Edges using High-Res FFT.
     """
-    n_fft = 4096 
+    n_fft = 256 
     win = signal.windows.hann(len(time_window_data))
     
     spectrum = np.abs(np.fft.fft(time_window_data * win, n=n_fft))**2
@@ -114,7 +119,7 @@ def calculate_ground_truth_edges(time_window_data, fs, threshold_drop_db=30.0):
     if peak_val == 0:
         return float('nan'), float('nan')
         
-    spectrum_db = 10 * np.log10(spectrum_shifted + 1e-20)
+    spectrum_db = 10 * np.log10(spectrum_shifted)
     spectrum_db_norm = spectrum_db - np.max(spectrum_db)
     
     threshold = -threshold_drop_db
@@ -171,6 +176,30 @@ def main():
 
     # --- Reconstruct Frequency Bins ---
     sorted_bins_hz = get_sorted_frequency_bins(mod_freq)
+
+    # ===== ADD THIS SECTION HERE =====
+    print("\n" + "="*80)
+    print(" FREQUENCY BIN CONFIGURATION")
+    print("="*80)
+    print(f"Total bins: {len(sorted_bins_hz)}")
+    print(f"Modulation frequency: {mod_freq/1e6:.4f} MHz")
+    print(f"\nBin mapping (Index → Frequency):")
+    print("-" * 40)
+    for idx, freq in enumerate(sorted_bins_hz):
+        freq_mhz = freq / 1e6
+        
+        # Identify which region this bin belongs to
+        if -2.51e6 <= freq <= -2.01e6:
+            region = "FINE LEFT"
+        elif 1.45e6 <= freq <= 1.95e6:
+            region = "FINE RIGHT"
+        else:
+            region = "COARSE"
+        
+        print(f"  Bin {idx:2d}: {freq_mhz:+8.4f} MHz  ({region})")
+
+    print("="*80 + "\n")
+    # ===== END OF ADDED SECTION =====
     
     # Helper to map Index -> MHz
     def map_idx_to_mhz(idx):
@@ -210,6 +239,18 @@ def main():
     df['GT_F_Left_MHz'] = gt_f_left
     df['GT_F_Right_MHz'] = gt_f_right
 
+    # Add to analyze_results.py after calculating GT edges:
+    print(f"\nRight Edge Distribution:")
+    print(f"  Mean GT Right Edge: {df['GT_F_Right_MHz'].mean():.3f} MHz")
+    print(f"  Expected bin center: {1.7e6/1e6:.3f} MHz")
+    print(f"  Difference: {abs(df['GT_F_Right_MHz'].mean() - 1.7e6/1e6):.3f} MHz")
+
+    # Add to analyze_results.py after calculating GT edges:
+    print(f"\nLeft Edge Distribution:")
+    print(f"  Mean GT Left Edge: {df['GT_F_Left_MHz'].mean():.3f} MHz")
+    print(f"  Expected bin center: {-2.26e6/1e6:.3f} MHz")
+    print(f"  Difference: {abs(df['GT_F_Left_MHz'].mean() - (-2.26e6)/1e6):.3f} MHz")
+
     # 2. Hardware: Map Indices to MHz and Interpolate
     
     # Map raw indices to MHz frequencies
@@ -239,6 +280,79 @@ def main():
             row['abs_threshold']
         ), axis=1
     )
+
+    # # ===== ADD THIS SECTION HERE =====
+    # # -------------------------------------------------------------------------
+    # # DETAILED CASE-BY-CASE COMPARISON
+    # # -------------------------------------------------------------------------
+    # print("\n" + "="*80)
+    # print(" DETAILED EDGE COMPARISON (Test Case by Test Case)")
+    # print("="*80)
+
+    # for idx, row in df.iterrows():
+    #     print(f"\n--- Test Case {idx+1}: Channel {int(row['channel'])}, Window {int(row['window'])} ---")
+        
+    #     # Calculate bandwidth on the fly
+    #     bw_gt = row['GT_F_Right_MHz'] - row['GT_F_Left_MHz']
+    #     bw_act = row['ACT_F_Star_Right_MHz'] - row['ACT_F_Star_Left_MHz']
+        
+    #     # Ground Truth
+    #     print(f"  GROUND TRUTH (FFT):")
+    #     print(f"    Left Edge:  {row['GT_F_Left_MHz']:.4f} MHz")
+    #     print(f"    Right Edge: {row['GT_F_Right_MHz']:.4f} MHz")
+    #     print(f"    Bandwidth:  {bw_gt:.4f} MHz")
+        
+    #     # Hardware Raw Bins
+    #     print(f"\n  HARDWARE RAW (Bin Indices):")
+    #     print(f"    Left:  f1={int(row['act_f1_left']):2d}, f2={int(row['act_f2_left']):2d} | L1={int(row['act_L1_left']):3d} dB, L2={int(row['act_L2_left']):3d} dB")
+    #     print(f"    Right: f1={int(row['act_f1_right']):2d}, f2={int(row['act_f2_right']):2d} | L1={int(row['act_L1_right']):3d} dB, L2={int(row['act_L2_right']):3d} dB")
+    #     print(f"    Threshold: {int(row['abs_threshold'])} dB")
+        
+    #     # Hardware Mapped to Frequencies
+    #     f1_L = map_idx_to_mhz(row['act_f1_left'])
+    #     f2_L = map_idx_to_mhz(row['act_f2_left'])
+    #     f1_R = map_idx_to_mhz(row['act_f1_right'])
+    #     f2_R = map_idx_to_mhz(row['act_f2_right'])
+        
+    #     print(f"\n  HARDWARE BINS → FREQUENCIES:")
+    #     print(f"    Left:  f1={f1_L:.4f} MHz, f2={f2_L:.4f} MHz")
+    #     print(f"    Right: f1={f1_R:.4f} MHz, f2={f2_R:.4f} MHz")
+        
+    #     # Hardware After Interpolation
+    #     print(f"\n  HARDWARE INTERPOLATED (Final):")
+    #     print(f"    Left Edge:  {row['ACT_F_Star_Left_MHz']:.4f} MHz")
+    #     print(f"    Right Edge: {row['ACT_F_Star_Right_MHz']:.4f} MHz")
+    #     print(f"    Bandwidth:  {bw_act:.4f} MHz")
+        
+    #     # Errors (check for NaN to avoid division issues)
+    #     if not (np.isnan(row['GT_F_Left_MHz']) or np.isnan(row['ACT_F_Star_Left_MHz'])):
+    #         err_left = row['ACT_F_Star_Left_MHz'] - row['GT_F_Left_MHz']
+    #         mape_left = abs(err_left / row['GT_F_Left_MHz']) * 100
+    #     else:
+    #         err_left = float('nan')
+    #         mape_left = float('nan')
+        
+    #     if not (np.isnan(row['GT_F_Right_MHz']) or np.isnan(row['ACT_F_Star_Right_MHz'])):
+    #         err_right = row['ACT_F_Star_Right_MHz'] - row['GT_F_Right_MHz']
+    #         mape_right = abs(err_right / row['GT_F_Right_MHz']) * 100
+    #     else:
+    #         err_right = float('nan')
+    #         mape_right = float('nan')
+        
+    #     if not (np.isnan(bw_gt) or np.isnan(bw_act)):
+    #         err_bw = bw_act - bw_gt
+    #         mape_bw = abs(err_bw / bw_gt) * 100
+    #     else:
+    #         err_bw = float('nan')
+    #         mape_bw = float('nan')
+        
+    #     print(f"\n  ERRORS:")
+    #     print(f"    Left:  {err_left:+.4f} MHz ({mape_left:.2f}% MAPE)")
+    #     print(f"    Right: {err_right:+.4f} MHz ({mape_right:.2f}% MAPE)")
+    #     print(f"    BW:    {err_bw:+.4f} MHz ({mape_bw:.2f}% MAPE)")
+
+    # print("\n" + "="*80)
+    # # ===== END OF ADDED SECTION =====
 
     # -------------------------------------------------------------------------
     # 3. Calculate Derived Metrics

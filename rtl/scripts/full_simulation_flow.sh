@@ -42,8 +42,8 @@ declare -a DATASETS=(
     "experiments resolution_distorsion"
     "in_vivo carotid_cross"
     "in_vivo carotid_long"
-    "simulation contrast_speckle"
-    "simulation resolution_distorsion"
+    # "simulation contrast_speckle"
+    # "simulation resolution_distorsion"
 )
 
 #==============================================================================

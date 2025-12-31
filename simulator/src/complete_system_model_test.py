@@ -27,9 +27,9 @@ if __name__ == '__main__':
     except NameError:
         SIMULATOR_ROOT = Path.cwd().parent
     
-    rf_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_dataset_rf.hdf5"
-    iq_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_dataset_iq.hdf5"
-    scan_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_scan.hdf5"
+    rf_path = SIMULATOR_ROOT / "datasets/in_vivo/carotid_long/carotid_long_expe_dataset_rf.hdf5" # "datasets/experiments/contrast_speckle/contrast_speckle_expe_dataset_rf.hdf5"
+    iq_path = SIMULATOR_ROOT / "datasets/in_vivo/carotid_long/carotid_long_expe_dataset_iq.hdf5" # "datasets/experiments/contrast_speckle/contrast_speckle_expe_dataset_iq.hdf5"
+    scan_path = SIMULATOR_ROOT / "datasets/in_vivo/carotid_long/carotid_long_expe_scan.hdf5" # "datasets/experiments/contrast_speckle/contrast_speckle_expe_scan.hdf5"
     
     adc_rate = 125e6
     baseline_decimation = 4
@@ -53,8 +53,8 @@ if __name__ == '__main__':
     
     # --- 3. Select ONE STFT Window to Analyze ---
     nperseg = 256
-    channel_to_test = 37 #64
-    window_num_to_test = 34 #29
+    channel_to_test = 96 #37
+    window_num_to_test = 11 #34
     hop = nperseg // 2
 
     total_samples = baseline_iq_data.shape[0]
@@ -78,7 +78,7 @@ if __name__ == '__main__':
     time_window_data = time_window_data_raw * scale_factor
 
     # --- 4. Define Analysis Parameters ---
-    delta_f = 0.25e6 
+    delta_f = 0.5e6 
     half_bw_est = mod_freq / 2
 
     s_coarse = np.linspace(-mod_freq, mod_freq, 8)

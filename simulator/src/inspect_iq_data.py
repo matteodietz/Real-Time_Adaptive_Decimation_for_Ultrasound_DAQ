@@ -199,11 +199,6 @@ if __name__ == '__main__':
     ax2.legend(loc='lower right')
     ax2.grid(True)
 
-    # --- overall figure title and saving ---
-    fig.suptitle(
-        'Comparison of Generated vs. Ground Truth I/Q Data (Fixed Test Case)',
-        fontsize=18
-    )
 
     # adjust layout to prevent titles from overlapping
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])

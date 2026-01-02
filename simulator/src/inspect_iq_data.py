@@ -18,9 +18,13 @@ if __name__ == '__main__':
         SIMULATOR_ROOT = Path.cwd().parent
     
     # change dataset as needed
-    rf_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_dataset_rf.hdf5"
-    iq_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_dataset_iq.hdf5"
-    scan_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_scan.hdf5"
+    # rf_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_dataset_rf.hdf5"
+    # iq_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_dataset_iq.hdf5"
+    # scan_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_scan.hdf5"
+
+    rf_path = SIMULATOR_ROOT / "datasets/in_vivo/carotid_long/carotid_long_expe_dataset_rf.hdf5"
+    iq_path = SIMULATOR_ROOT / "datasets/in_vivo/carotid_long/carotid_long_expe_dataset_iq.hdf5"
+    scan_path = SIMULATOR_ROOT / "datasets/in_vivo/carotid_long/carotid_long_expe_scan.hdf5"
     
     adc_rate = 125e6
     decimation_for_generation = 1 
@@ -41,7 +45,7 @@ if __name__ == '__main__':
     num_points_to_trim = 20
     
     channel_for_plot = 64
-    angle_for_plot = np.argmin(np.abs(angles_iq))
+    angle_for_plot = np.argmin(np.abs(angles_iq)) # = center angle = 37
     
     total_angles, total_channels, _ = picmus_iq_data.shape
     
@@ -130,13 +134,26 @@ if __name__ == '__main__':
     print(f"  - Average Max Error as % of Dynamic Range: {np.mean(all_norm_errors_imag):.2f}%")
     print(f"  - Average Mean Error as % of Dynamic Range: {np.mean(all_norm_avg_errors_imag):.2f}%")
     
-   # --- 6. plotting (with subplots for direct comparison) ---
+
+
+    # Configure Fonts to match LaTeX / Times New Roman style
+    plt.rcParams.update({
+        "font.family": "serif",
+        "font.serif": ["Times New Roman", "Times", "DejaVu Serif", "serif"],
+        "mathtext.fontset": "cm",  # Computer Modern for math text
+        "font.size": 12,
+        "axes.labelsize": 12,
+        "axes.titlesize": 14,
+        "legend.fontsize": 11
+    })
+
+    # --- 6. plotting (with subplots for direct comparison) ---
     my_envelope_plot = np.abs(my_iq_aline_plot)
     gt_envelope_plot = np.abs(gt_iq_aline_plot)
 
     # create a single figure with two subplots stacked vertically
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14, 10), sharex=True)
-    
+
     # --- top subplot (ax1): ground truth data ---
     ax1.plot(gt_time_axis_plot * 1e6, gt_iq_aline_plot.real, 'b-', linewidth=0.5, label='PICMUS I Component')
     ax1.plot(gt_time_axis_plot * 1e6, gt_iq_aline_plot.imag, 'r-', linewidth=0.5, label='PICMUS Q Component')
@@ -144,11 +161,19 @@ if __name__ == '__main__':
 
     # get the time value where the trimming starts and add the vertical line
     trim_time_us = (gt_time_axis_plot[-num_points_to_trim]) * 1e6
-    ax1.axvline(x=trim_time_us, color='m', linestyle='--', linewidth=2, label=f'Error Trim Point')
-    
-    ax1.set_title(f'PICMUS Ground Truth I/Q Data (Channel {channel_for_plot}, Angle {angle_for_plot}, fs={fs_picmus_iq/1e6:.2f} MHz)')
+    ax1.axvline(
+        x=trim_time_us,
+        color='forestgreen',
+        linestyle='--',
+        linewidth=2,
+        label='Error Trim Point'
+    )
+
+    ax1.set_title(
+        f'PICMUS Ground Truth I/Q Data ($f_s$={fs_picmus_iq/1e6:.2f} MHz)'
+    )
     ax1.set_ylabel('Amplitude')
-    ax1.legend()
+    ax1.legend(loc='lower right')
     ax1.grid(True)
 
     # --- bottom subplot (ax2): generated data by virtual AFE ---
@@ -158,16 +183,28 @@ if __name__ == '__main__':
 
     # get the time value where the trimming starts and add the vertical line
     trim_time_us = (gt_time_axis_plot[-num_points_to_trim]) * 1e6
-    ax2.axvline(x=trim_time_us, color='m', linestyle='--', linewidth=2, label=f'Error Trim Point')
-    
-    ax2.set_title(f'Generated I/Q Data by Virtual AFE (Channel {channel_for_plot}, fs={adc_rate/1e6:.2f} MHz)')
+    ax2.axvline(
+        x=trim_time_us,
+        color='forestgreen',
+        linestyle='--',
+        linewidth=2,
+        label='Error Trim Point'
+    )
+
+    ax2.set_title(
+        f'Generated I/Q Data by Virtual AFE ($f_s$={adc_rate/1e6:.2f} MHz)'
+    )
     ax2.set_xlabel('Time (µs)')
     ax2.set_ylabel('Amplitude')
-    ax2.legend()
+    ax2.legend(loc='lower right')
     ax2.grid(True)
 
     # --- overall figure title and saving ---
-    fig.suptitle('Comparison of Generated vs. Ground Truth I/Q Data (Fixed Test Case)', fontsize=16)
+    fig.suptitle(
+        'Comparison of Generated vs. Ground Truth I/Q Data (Fixed Test Case)',
+        fontsize=18
+    )
+
     # adjust layout to prevent titles from overlapping
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])
 
@@ -179,8 +216,8 @@ if __name__ == '__main__':
 
     # save the figure to the specified path
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
-    
+
     print(f"\nSUCCESS: Comparison plot saved to {output_path}")
-    
+
     # close plot
     plt.close()

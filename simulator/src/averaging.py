@@ -120,16 +120,6 @@ def plot_averaging_result(ax, time_data, fs, res, threshold_db, title_str):
     #     ax.axvline(x=res['f_right']/1e6, color='b', linestyle='--', linewidth=1.5,
     #                label=rf'Est: {res['f_right']/1e6:.2f} MHz')
 
-    if not np.isnan(res['f_left']):
-        # CHANGE: Use rf"..." (double quotes) on the outside
-        ax.axvline(x=res['f_left']/1e6, color='r', linestyle='--', linewidth=1.5,
-                   label=rf"Est: {res['f_left']/1e6:.2f} MHz")
-                   
-    if not np.isnan(res['f_right']):
-        # CHANGE: Use rf"..." (double quotes) on the outside
-        ax.axvline(x=res['f_right']/1e6, color='b', linestyle='--', linewidth=1.5,
-                   label=rf"Est: {res['f_right']/1e6:.2f} MHz")
-
     ax.axhline(y=-threshold_db, color='orange', linestyle=':', linewidth=1.5, label='Threshold')
     
     ax.set_title(title_str, fontweight="bold")

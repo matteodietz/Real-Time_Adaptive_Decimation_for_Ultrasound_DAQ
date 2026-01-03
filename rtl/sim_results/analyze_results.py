@@ -66,17 +66,17 @@ def get_sorted_frequency_bins(mod_freq):
     Reconstructs the exact S_bins array used in generation.
     Returns: Sorted numpy array of frequencies in Hz.
     """
-    delta_f = 1e6 # 1e6 very coarse, 0.5e6 medium, 0.25e6 finde
+    delta_f = 0.5e6 # 1e6 very coarse, 0.5e6 medium, 0.25e6 finde
     half_bw_est = mod_freq / 2
 
-    half_bw_est_left = 2.32e6 # for in vivo datasets for the refinement step
-    half_bw_est_right = 2.25e6 # for in vivo datasets for the refinement step
+    # half_bw_est_left = 2.32e6 # for a specific refinement step
+    # half_bw_est_right = 2.25e6 
 
     s_coarse = np.linspace(-mod_freq, mod_freq, 8)
-    # s_fine_left = np.linspace(-half_bw_est - delta_f, -half_bw_est + delta_f, 8) 
-    # s_fine_right = np.linspace(half_bw_est - delta_f, half_bw_est + delta_f, 8) 
-    s_fine_left = np.linspace(-half_bw_est_left - delta_f, -half_bw_est_left + delta_f, 8)
-    s_fine_right = np.linspace(half_bw_est_right - delta_f, half_bw_est_right + delta_f, 8)
+    s_fine_left = np.linspace(-half_bw_est - delta_f, -half_bw_est + delta_f, 8) 
+    s_fine_right = np.linspace(half_bw_est - delta_f, half_bw_est + delta_f, 8) 
+    # s_fine_left = np.linspace(-half_bw_est_left - delta_f, -half_bw_est_left + delta_f, 8)
+    # s_fine_right = np.linspace(half_bw_est_right - delta_f, half_bw_est_right + delta_f, 8)
     
     # Concatenate and Sort (Crucial: HW indices correspond to sorted array)
     S_bins = np.unique(np.concatenate([s_coarse, s_fine_left, s_fine_right]))
@@ -281,79 +281,6 @@ def main():
         ), axis=1
     )
 
-    # # ===== ADD THIS SECTION HERE =====
-    # # -------------------------------------------------------------------------
-    # # DETAILED CASE-BY-CASE COMPARISON
-    # # -------------------------------------------------------------------------
-    # print("\n" + "="*80)
-    # print(" DETAILED EDGE COMPARISON (Test Case by Test Case)")
-    # print("="*80)
-
-    # for idx, row in df.iterrows():
-    #     print(f"\n--- Test Case {idx+1}: Channel {int(row['channel'])}, Window {int(row['window'])} ---")
-        
-    #     # Calculate bandwidth on the fly
-    #     bw_gt = row['GT_F_Right_MHz'] - row['GT_F_Left_MHz']
-    #     bw_act = row['ACT_F_Star_Right_MHz'] - row['ACT_F_Star_Left_MHz']
-        
-    #     # Ground Truth
-    #     print(f"  GROUND TRUTH (FFT):")
-    #     print(f"    Left Edge:  {row['GT_F_Left_MHz']:.4f} MHz")
-    #     print(f"    Right Edge: {row['GT_F_Right_MHz']:.4f} MHz")
-    #     print(f"    Bandwidth:  {bw_gt:.4f} MHz")
-        
-    #     # Hardware Raw Bins
-    #     print(f"\n  HARDWARE RAW (Bin Indices):")
-    #     print(f"    Left:  f1={int(row['act_f1_left']):2d}, f2={int(row['act_f2_left']):2d} | L1={int(row['act_L1_left']):3d} dB, L2={int(row['act_L2_left']):3d} dB")
-    #     print(f"    Right: f1={int(row['act_f1_right']):2d}, f2={int(row['act_f2_right']):2d} | L1={int(row['act_L1_right']):3d} dB, L2={int(row['act_L2_right']):3d} dB")
-    #     print(f"    Threshold: {int(row['abs_threshold'])} dB")
-        
-    #     # Hardware Mapped to Frequencies
-    #     f1_L = map_idx_to_mhz(row['act_f1_left'])
-    #     f2_L = map_idx_to_mhz(row['act_f2_left'])
-    #     f1_R = map_idx_to_mhz(row['act_f1_right'])
-    #     f2_R = map_idx_to_mhz(row['act_f2_right'])
-        
-    #     print(f"\n  HARDWARE BINS → FREQUENCIES:")
-    #     print(f"    Left:  f1={f1_L:.4f} MHz, f2={f2_L:.4f} MHz")
-    #     print(f"    Right: f1={f1_R:.4f} MHz, f2={f2_R:.4f} MHz")
-        
-    #     # Hardware After Interpolation
-    #     print(f"\n  HARDWARE INTERPOLATED (Final):")
-    #     print(f"    Left Edge:  {row['ACT_F_Star_Left_MHz']:.4f} MHz")
-    #     print(f"    Right Edge: {row['ACT_F_Star_Right_MHz']:.4f} MHz")
-    #     print(f"    Bandwidth:  {bw_act:.4f} MHz")
-        
-    #     # Errors (check for NaN to avoid division issues)
-    #     if not (np.isnan(row['GT_F_Left_MHz']) or np.isnan(row['ACT_F_Star_Left_MHz'])):
-    #         err_left = row['ACT_F_Star_Left_MHz'] - row['GT_F_Left_MHz']
-    #         mape_left = abs(err_left / row['GT_F_Left_MHz']) * 100
-    #     else:
-    #         err_left = float('nan')
-    #         mape_left = float('nan')
-        
-    #     if not (np.isnan(row['GT_F_Right_MHz']) or np.isnan(row['ACT_F_Star_Right_MHz'])):
-    #         err_right = row['ACT_F_Star_Right_MHz'] - row['GT_F_Right_MHz']
-    #         mape_right = abs(err_right / row['GT_F_Right_MHz']) * 100
-    #     else:
-    #         err_right = float('nan')
-    #         mape_right = float('nan')
-        
-    #     if not (np.isnan(bw_gt) or np.isnan(bw_act)):
-    #         err_bw = bw_act - bw_gt
-    #         mape_bw = abs(err_bw / bw_gt) * 100
-    #     else:
-    #         err_bw = float('nan')
-    #         mape_bw = float('nan')
-        
-    #     print(f"\n  ERRORS:")
-    #     print(f"    Left:  {err_left:+.4f} MHz ({mape_left:.2f}% MAPE)")
-    #     print(f"    Right: {err_right:+.4f} MHz ({mape_right:.2f}% MAPE)")
-    #     print(f"    BW:    {err_bw:+.4f} MHz ({mape_bw:.2f}% MAPE)")
-
-    # print("\n" + "="*80)
-    # # ===== END OF ADDED SECTION =====
-
     # -------------------------------------------------------------------------
     # 3. Calculate Derived Metrics
     # -------------------------------------------------------------------------
@@ -461,6 +388,31 @@ def main():
     print(f"Max Edge MAPE:      {mape_max_edge:.2f} %")
     print(f"Decimation Match:   {dec_accuracy:.1f} % (M_est == M_gt)")
     print(f"Decimation Safety:  {dec_safety_ratio:.1f} % (M_est <= M_gt)")
+
+    print("\n--- 4. Efficiency & Baseline Comparison ---")
+    
+    # 1. Setup
+    avg_decimation_factor = valid_df['M_ACT'].mean()
+    baseline_decimation = 4.0
+    
+    # 2. Calculate "Data Volume" (Sample fractions kept)
+    vol_baseline = 1.0 / baseline_decimation  # e.g., 0.25
+    vol_adaptive = 1.0 / avg_decimation_factor # e.g., 0.10
+    
+    # 3. METRIC A: Absolute Gain
+    # "How much MORE of the raw stream do we save?"
+    abs_reduction_gain = (vol_baseline - vol_adaptive) * 100
+    
+    # 4. METRIC B: Relative Reduction (Standard Engineering Metric)
+    # "How much did we shrink the baseline output?"
+    # Formula: (Vol_Base - Vol_Adapt) / Vol_Base
+    rel_reduction_vs_baseline = ((vol_baseline - vol_adaptive) / vol_baseline) * 100
+    
+    print(f"Avg Decimation M:         {avg_decimation_factor:.2f} (Baseline: {baseline_decimation})")
+    print(f"Data Volume Kept:         {vol_adaptive*100:.1f}% of raw stream (Baseline keeps {vol_baseline*100:.1f}%)")
+    print(f"Absolute Improvement:     {abs_reduction_gain:.1f}% more raw data discarded")
+    print(f"Relative Bandwidth Saving:{rel_reduction_vs_baseline:.1f}% reduction vs. Baseline (The 'Headline' Number)")
+    print(f"Compression Ratio:        {avg_decimation_factor / baseline_decimation}x vs. Baseline")
     
     # Save
     output_csv = csv_path.parent / f"analyzed_{csv_path.name}"

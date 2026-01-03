@@ -40,8 +40,8 @@ echo ""
 declare -a DATASETS=(
     "experiments contrast_speckle"
     "experiments resolution_distorsion"
-    # "in_vivo carotid_cross"
-    # "in_vivo carotid_long"
+    "in_vivo carotid_cross"
+    "in_vivo carotid_long"
     # "simulation contrast_speckle"
     # "simulation resolution_distorsion"
 )

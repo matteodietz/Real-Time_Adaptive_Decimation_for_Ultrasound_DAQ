@@ -27,10 +27,14 @@ if __name__ == '__main__':
     except NameError:
         SIMULATOR_ROOT = Path.cwd().parent
     
-    rf_path = SIMULATOR_ROOT / "datasets/in_vivo/carotid_long/carotid_long_expe_dataset_rf.hdf5" # "datasets/experiments/contrast_speckle/contrast_speckle_expe_dataset_rf.hdf5"
-    iq_path = SIMULATOR_ROOT / "datasets/in_vivo/carotid_long/carotid_long_expe_dataset_iq.hdf5" # "datasets/experiments/contrast_speckle/contrast_speckle_expe_dataset_iq.hdf5"
-    scan_path = SIMULATOR_ROOT / "datasets/in_vivo/carotid_long/carotid_long_expe_scan.hdf5" # "datasets/experiments/contrast_speckle/contrast_speckle_expe_scan.hdf5"
-    
+    # rf_path = SIMULATOR_ROOT / "datasets/in_vivo/carotid_long/carotid_long_expe_dataset_rf.hdf5" 
+    # iq_path = SIMULATOR_ROOT / "datasets/in_vivo/carotid_long/carotid_long_expe_dataset_iq.hdf5"
+    # scan_path = SIMULATOR_ROOT / "datasets/in_vivo/carotid_long/carotid_long_expe_scan.hdf5"
+
+    rf_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_dataset_rf.hdf5"
+    iq_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_dataset_iq.hdf5"
+    scan_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_scan.hdf5"
+
     adc_rate = 125e6
     baseline_decimation = 4
 
@@ -53,8 +57,8 @@ if __name__ == '__main__':
     
     # --- 3. Select ONE STFT Window to Analyze ---
     nperseg = 256
-    channel_to_test = 96 #37
-    window_num_to_test = 11 #34
+    channel_to_test = 37
+    window_num_to_test = 34
     hop = nperseg // 2
 
     total_samples = baseline_iq_data.shape[0]
@@ -71,6 +75,18 @@ if __name__ == '__main__':
     
     time_window_data_raw = baseline_iq_data[start_sample:end_sample, channel_to_test]
     print(f"\n--- Analyzing STFT window #{window_num_to_test} from real data ---")
+
+    # --- Add AWGN Noise ---
+    # Adds complex noise with a specified noise floor 50dB down from the signal power
+    target_snr_db = 50.0 
+    sig_power = np.mean(np.abs(time_window_data_raw)**2)
+    noise_power = sig_power / (10**(target_snr_db/10))
+    # Split power between Real and Imaginary parts (/2)
+    noise_std = np.sqrt(noise_power / 2) 
+    noise = (np.random.normal(0, noise_std, time_window_data_raw.shape) + 
+             1j * np.random.normal(0, noise_std, time_window_data_raw.shape))
+    time_window_data_raw = time_window_data_raw + noise
+    # --- END Add AWGN Noise ---
 
     # Scaling
     max_val = np.max(np.abs(time_window_data_raw))
@@ -89,9 +105,9 @@ if __name__ == '__main__':
     print(f"Bins to calculate: {S_bins}")
 
     # Hardware parameters (must match your RTL)
-    ACCUM_WIDTH = 64
-    ACCUM_FRAC = 56
-    INPUT_WIDTH_LOG = 32
+    ACCUM_WIDTH = 36
+    ACCUM_FRAC = 28
+    INPUT_WIDTH_LOG = 18
     POWER_WIDTH = 8 # 32
     POWER_FRAC = 0 # 16
     threshold_db = 30.0  # dB drop from peak
@@ -162,65 +178,6 @@ if __name__ == '__main__':
     psd_welch_shifted = np.fft.fftshift(psd_welch)
     psd_db_welch_norm = 10 * np.log10(psd_welch_shifted + 1e-20)
     psd_db_welch_norm -= np.max(psd_db_welch_norm)
-
-    # # --- 7. Plotting ---
-    # plt.figure(figsize=(14, 7))
-    
-    # # Ground truth PSD
-    # plt.plot(freqs_welch_shifted / 1e6, psd_db_welch_norm, 'k-', 
-    #          label=f'Ground Truth PSD ({nperseg}-pt Welch)', alpha=0.6, linewidth=2)
-
-    # # # Calculate normalized PSD from DFT bins for plotting
-    # win = signal.windows.get_window('hann', nperseg)
-    # enbw_scaling = fs_baseline * np.sum(win**2)
-    
-    # freqs1 = np.array(list(dft_bins.keys()))
-    # powers1 = np.abs(np.array(list(dft_bins.values())))**2
-    # psd1 = powers1
-    # db1_norm = 3 * np.floor(np.log2(psd1))
-    # db1_norm -= np.max(db1_norm)
-    
-    # # Plot DFT bins
-    # plt.plot(freqs1 / 1e6, db1_norm, 'bo', markersize=6, 
-    #          label=f'DFT Bins (PSD, |S|={len(S_bins)})', alpha=0.7)
-    
-    # # Plot edge detection points
-    # if f1_left is not None and f2_left is not None:
-    #     plt.plot([f1_left/1e6, f2_left/1e6], 
-    #             [L1_left - max_power_hw, L2_left - max_power_hw], 
-    #             'rs-', markersize=8, linewidth=2, 
-    #             label='Left Edge Points', alpha=0.8)
-    
-    # if f1_right is not None and f2_right is not None:
-    #     plt.plot([f1_right/1e6, f2_right/1e6], 
-    #             [L1_right - max_power_hw, L2_right - max_power_hw], 
-    #             'gs-', markersize=8, linewidth=2, 
-    #             label='Right Edge Points', alpha=0.8)
-    
-    # # Plot final interpolated edges
-    # if not np.isnan(f_left_final):
-    #     plt.axvline(x=f_left_final/1e6, color='r', linestyle='--', linewidth=2,
-    #                label=f'Est. Lower Edge ({f_left_final/1e6:.3f} MHz)')
-    
-    # if not np.isnan(f_right_final):
-    #     plt.axvline(x=f_right_final/1e6, color='g', linestyle='--', linewidth=2,
-    #                label=f'Est. Upper Edge ({f_right_final/1e6:.3f} MHz)')
-    
-    # # Plot threshold line
-    # threshold_normalized = -threshold_db
-    # plt.axhline(y=threshold_normalized, color='orange', linestyle=':', linewidth=2,
-    #            label=f'{threshold_db} dB Threshold')
-    
-    # plt.title(f'Hardware-Accurate Bandwidth Estimation (Window #{window_num_to_test}, Channel {channel_to_test})')
-    # plt.xlabel('Frequency (MHz)')
-    # plt.ylabel('Power (dB relative to peak)')
-    # plt.legend(loc='best')
-    # plt.grid(True, alpha=0.3)
-    # plt.xlim([min(freqs_welch_shifted)/1e6, max(freqs_welch_shifted)/1e6])
-    # plt.tight_layout()
-    # plt.show()
-    
-    # print("\n--- Test Complete ---")
     
     # --- 7. Plotting ---
     

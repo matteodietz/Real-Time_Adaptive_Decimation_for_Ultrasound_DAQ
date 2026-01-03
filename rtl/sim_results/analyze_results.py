@@ -69,14 +69,14 @@ def get_sorted_frequency_bins(mod_freq):
     delta_f = 1e6 # 1e6 very coarse, 0.5e6 medium, 0.25e6 finde
     half_bw_est = mod_freq / 2
 
-    # half_bw_est_left = 2.26e6 # for in vivo datasets for the refinement step
-    # half_bw_est_right = 1.7e6 # for in vivo datasets for the refinement step
+    half_bw_est_left = 2.32e6 # for in vivo datasets for the refinement step
+    half_bw_est_right = 2.25e6 # for in vivo datasets for the refinement step
 
     s_coarse = np.linspace(-mod_freq, mod_freq, 8)
-    s_fine_left = np.linspace(-half_bw_est - delta_f, -half_bw_est + delta_f, 8) 
-    s_fine_right = np.linspace(half_bw_est - delta_f, half_bw_est + delta_f, 8) 
-    # s_fine_left = np.linspace(-half_bw_est_left - delta_f, -half_bw_est_left + delta_f, 8)
-    # s_fine_right = np.linspace(half_bw_est_right - delta_f, half_bw_est_right + delta_f, 8)
+    # s_fine_left = np.linspace(-half_bw_est - delta_f, -half_bw_est + delta_f, 8) 
+    # s_fine_right = np.linspace(half_bw_est - delta_f, half_bw_est + delta_f, 8) 
+    s_fine_left = np.linspace(-half_bw_est_left - delta_f, -half_bw_est_left + delta_f, 8)
+    s_fine_right = np.linspace(half_bw_est_right - delta_f, half_bw_est_right + delta_f, 8)
     
     # Concatenate and Sort (Crucial: HW indices correspond to sorted array)
     S_bins = np.unique(np.concatenate([s_coarse, s_fine_left, s_fine_right]))

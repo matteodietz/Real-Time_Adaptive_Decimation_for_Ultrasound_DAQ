@@ -559,14 +559,14 @@ Available datasets:
     baseline_decimation = 4
     
     # --- Define Frequency Bins ---
-    delta_f = 1e6
+    delta_f = 0.25e6
     half_bw_est = mod_freq / 2
     
     s_coarse = np.linspace(-mod_freq, mod_freq, 8)
-    s_fine_left = np.linspace(-half_bw_est - delta_f, -half_bw_est + delta_f, 8)
-    s_fine_right = np.linspace(half_bw_est - delta_f, half_bw_est + delta_f, 8)
-    # s_fine_left = np.linspace(-2.26e6 - delta_f, -2.26e6 + delta_f, 8)
-    # s_fine_right = np.linspace(1.7e6 - delta_f, 1.7e6 + delta_f, 8)
+    # s_fine_left = np.linspace(-half_bw_est - delta_f, -half_bw_est + delta_f, 8)
+    # s_fine_right = np.linspace(half_bw_est - delta_f, half_bw_est + delta_f, 8)
+    s_fine_left = np.linspace(-2.32e6 - delta_f, -2.32e6 + delta_f, 8)
+    s_fine_right = np.linspace(2.25e6 - delta_f, 2.25e6 + delta_f, 8)
     S_bins = np.unique(np.concatenate([s_coarse, s_fine_left, s_fine_right]))
     
     print(f"\nFrequency bins: {len(S_bins)} bins")

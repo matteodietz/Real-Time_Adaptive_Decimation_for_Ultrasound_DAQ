@@ -59,10 +59,7 @@ module counter_controller #(
             // Increment counter
             count_d = count_q + 1'b1;
             
-            // Set control signals based on next count value (count_d)
-            // We want specific values at specific count_q values
-            // So we set _d signals one cycle early
-            
+            // Set control signals based on next count value (count_d)            
             if (count_q == initial_delay - 1) begin
                 // Next cycle (count_q = X): osc_reset_q should be 1
                 osc_reset_d = 1'b1;

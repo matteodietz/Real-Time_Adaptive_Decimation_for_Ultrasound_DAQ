@@ -1,25 +1,10 @@
-////////////////////////////////////////////////////////////////////////////////
-//
-//  Module: calc_abs_threshold
-//
-//  Function: Calculates the absolute cutoff threshold based on peak power.
-//            Synchronous Design (One Cycle Latency).
-//
-//  Logic:    If (Max_Power < Drop) -> Threshold = 0 (Signal too weak)
-//            Else                  -> Threshold = Max_Power - Drop
-//
-//  Latency:  1 clock cycle from max_power_valid_i assertion to valid_o assertion
-//
-////////////////////////////////////////////////////////////////////////////////
-
 module calc_abs_threshold #(
-    parameter int POWER_WIDTH = 32,
-    // Default: 30dB in Q16.16 format (0x001E_0000)
-    parameter logic [POWER_WIDTH-1:0] THRESHOLD_DROP = 32'h001E_0000
+    parameter int POWER_WIDTH = 8,
+    parameter logic [POWER_WIDTH-1:0] THRESHOLD_DROP = 8'h1E
 )(
     // Clock and Reset
     input  logic                   clk_i,
-    input  logic                   rst_ni,  // Active-low reset
+    input  logic                   rst_ni,
     
     // Data Inputs
     input  logic [POWER_WIDTH-1:0] max_power_i,
@@ -47,7 +32,7 @@ module calc_abs_threshold #(
         // Default: Hold current values
         abs_threshold_d = abs_threshold_q;
         threshold_ok_d  = threshold_ok_q;
-        valid_d         = 1'b0;  // Valid is pulsed for one cycle
+        valid_d         = 1'b0;
 
         // Perform calculation when input is valid
         if (max_power_valid_i) begin
@@ -66,7 +51,7 @@ module calc_abs_threshold #(
         end
     end
 
-    // Sequential logic: Register outputs
+    // Register outputs
     always_ff @(posedge clk_i or negedge rst_ni) begin
         if (!rst_ni) begin
             abs_threshold_q <= '0;

@@ -1,15 +1,3 @@
-////////////////////////////////////////////////////////////////////////////////
-//
-//  Module: find_max_power
-//
-//  Description:
-//      Finds the maximum power value among NUM_BINS accumulator values.
-//      Refactored to separate Combinational (Next State) and Sequential Logic.
-//
-//  Latency: ceil(log2(NUM_BINS)) + 1 clock cycles
-//
-////////////////////////////////////////////////////////////////////////////////
-
 module find_max_power #(
     parameter int NUM_BINS = 24,
     parameter int POWER_WIDTH = 32
@@ -24,7 +12,6 @@ module find_max_power #(
 );
 
     // Calculate pipeline depth: Need log2(N) stages for reduction + 1 input stage
-    // Example: 4 inputs -> Stage 0 (Reg) -> Stage 1 (2 items) -> Stage 2 (1 item)
     localparam int PIPELINE_DEPTH = $clog2(NUM_BINS) + 1;
 
     // -------------------------------------------------------------------------
@@ -46,7 +33,6 @@ module find_max_power #(
     // -------------------------------------------------------------------------
     // Registers (State _q and Next State _d)
     // -------------------------------------------------------------------------
-    // We use a 2D array. Note: Lower stages use fewer indices, unused ones optimized away.
     logic [POWER_WIDTH-1:0] stage_values_q[PIPELINE_DEPTH][NUM_BINS];
     logic [POWER_WIDTH-1:0] stage_values_d[PIPELINE_DEPTH][NUM_BINS];
     
@@ -79,7 +65,6 @@ module find_max_power #(
                 logic [POWER_WIDTH-1:0] val_b = stage_values_q[s-1][2*i+1];
 
                 // Assign max to current stage next state (d)
-                // Using $signed comparison as per original specification
                 if (val_a > val_b) begin
                     stage_values_d[s][i] = val_a;
                 end else begin

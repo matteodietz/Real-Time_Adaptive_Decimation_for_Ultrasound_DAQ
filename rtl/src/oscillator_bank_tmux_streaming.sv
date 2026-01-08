@@ -1,12 +1,3 @@
-////////////////////////////////////////////////////////////////////////////////
-//
-//  Module: oscillator_bank_tmux_streaming
-//
-//  Function: Generates complex oscillators using 2 time-multiplexed CORDICs
-//            Outputs are streamed directly (no storage) for immediate use
-//
-////////////////////////////////////////////////////////////////////////////////
-
 module oscillator_bank_tmux_streaming #(
     parameter int NUM_BINS = 24,
     parameter int OSC_WIDTH = 16,
@@ -30,9 +21,9 @@ module oscillator_bank_tmux_streaming #(
     
     // Streaming outputs - current CORDIC results
     output logic signed [OSC_WIDTH-1:0] cos_out_0_o,  // CORDIC_0 cosine
-    output logic signed [OSC_WIDTH-1:0] sin_out_0_o,  // CORDIC_0 sine (negated for DFT)
+    output logic signed [OSC_WIDTH-1:0] sin_out_0_o,  // CORDIC_0 sine
     output logic signed [OSC_WIDTH-1:0] cos_out_1_o,  // CORDIC_1 cosine
-    output logic signed [OSC_WIDTH-1:0] sin_out_1_o,  // CORDIC_1 sine (negated for DFT)
+    output logic signed [OSC_WIDTH-1:0] sin_out_1_o,  // CORDIC_1 sine
     output logic [COUNTER_WIDTH-1:0] output_bin_0_o,  // Which bin (0-11) output of cordic 0 belongs to
     output logic [COUNTER_WIDTH-1:0] output_bin_1_o,  // Which bin (12-13) ouput of cordic 1 belongs to
     output logic sincos_tvalid_o                      // Outputs valid
@@ -148,14 +139,12 @@ module oscillator_bank_tmux_streaming #(
     assign output_bin_1 = counter_pipe[CORDIC_LATENCY-1] + COUNTER_WIDTH'(BINS_PER_CORDIC);
 
     // =========================================================================
-    // Output Assignments - Stream directly with DFT negation applied
+    // Output Assignments - Stream directly
     // =========================================================================
-    // Note: Negation is combinational but very fast (invert + add 1)
-    // The multiplication that follows will absorb this delay
     assign cos_out_0_o = cos_raw_0;
-    assign sin_out_0_o = sin_raw_0;  // DFT requires -j*sin // removed negation
+    assign sin_out_0_o = sin_raw_0;  // DFT requires -j*sin, already handled by negating freq steps
     assign cos_out_1_o = cos_raw_1;
-    assign sin_out_1_o = sin_raw_1;  // DFT requires -j*sin // removed negation
+    assign sin_out_1_o = sin_raw_1;  // DFT requires -j*sin, already handled by negating freq steps
     
     assign output_bin_0_o = output_bin_0;
     assign output_bin_1_o = output_bin_1;

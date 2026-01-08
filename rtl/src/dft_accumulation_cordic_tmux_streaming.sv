@@ -4,14 +4,14 @@ module dft_accumulation_cordic_tmux_streaming #(
     parameter integer WINDOW_WIDTH = 16,
     parameter integer WINDOW_WIDTH_FRAC = 14,
     parameter integer ACCUM_WIDTH = 36,
-    parameter integer ACCUM_WIDTH_FRAC = 32,
+    parameter integer ACCUM_WIDTH_FRAC = 28,
     parameter integer NUM_BINS = 24,
     parameter integer OSC_WIDTH = 16,
     parameter integer OSC_WIDTH_FRAC = 14,
     parameter integer PHASE_WIDTH = 16,
     parameter integer SAMPLE_COUNT_WIDTH = 16,
     parameter integer COUNTER_WIDTH = 5,
-    parameter integer STAGE1_WIDTH = 20,
+    parameter integer STAGE1_WIDTH = 24,
     parameter integer CORDIC_LATENCY = 20
 )(
     input  logic clk_i,

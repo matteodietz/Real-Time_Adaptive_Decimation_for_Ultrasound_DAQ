@@ -10,7 +10,7 @@ module dft_accumulation_cordic_tmux #(
     parameter integer OSC_WIDTH_FRAC = 22,
     parameter integer PHASE_WIDTH = 24,
     parameter integer SAMPLE_COUNT_WIDTH = 16,
-    parameter integer COUNTER_WIDTH = 5,        // clog2(NUM_BINS) = 5 bits for 0-23
+    parameter integer COUNTER_WIDTH = 5,        // clog2(NUM_BINS) = 5
     parameter integer STAGE1_WIDTH = 24
 )(
     input  logic clk_i,
@@ -42,8 +42,8 @@ module dft_accumulation_cordic_tmux #(
     output logic busy_o
 );
 
-    localparam int BINS_PER_CORDIC = NUM_BINS / 2;  // 12
-    localparam int CYCLES_PER_SAMPLE = BINS_PER_CORDIC;  // 12 cycles per sample
+    localparam int BINS_PER_CORDIC = NUM_BINS / 2;          // 12
+    localparam int CYCLES_PER_SAMPLE = BINS_PER_CORDIC;     // 12 cycles per sample
 
     // =========================================================================
     // Parameter Sanity Checks
@@ -124,8 +124,8 @@ module dft_accumulation_cordic_tmux #(
     logic [SAMPLE_COUNT_WIDTH-1:0] sample_count_q, sample_count_d;
 
     // --- Pipeline Stage 1: Window Multiplication (held for 12 cycles) ---
-    logic signed [STAGE1_WIDTH-1:0] x_weighted_real_q, x_weighted_real_d; //iq_width+window_width-1
-    logic signed [STAGE1_WIDTH-1:0] x_weighted_imag_q, x_weighted_imag_d; //iq_width+window_width-1
+    logic signed [STAGE1_WIDTH-1:0] x_weighted_real_q, x_weighted_real_d;
+    logic signed [STAGE1_WIDTH-1:0] x_weighted_imag_q, x_weighted_imag_d;
     logic windowed_sample_valid_q, windowed_sample_valid_d;
     logic windowed_last_sample_q, windowed_last_sample_d;
     logic [COUNTER_WIDTH-1:0] windowed_cycle_count_q, windowed_cycle_count_d;
@@ -216,8 +216,6 @@ module dft_accumulation_cordic_tmux #(
             mult_imag_full = $signed(q_sample_i) * $signed(window_coeff_i);
 
             // Round and Truncate
-            // We add '1' at the MSB of the part we are throwing away (Round Half Up behavior)
-            // Then shift right to drop the bits.
             x_weighted_real_d = (mult_real_full + (1'sb1 << (TRUNC_BITS-1))) >>> TRUNC_BITS;
             x_weighted_imag_d = (mult_imag_full + (1'sb1 << (TRUNC_BITS-1))) >>> TRUNC_BITS;
 
@@ -261,8 +259,6 @@ module dft_accumulation_cordic_tmux #(
         prod_bin_counter_d = prod_bin_counter_q;
 
         if (windowed_sample_valid_q) begin
-            // Use windowed_cycle_count_q instead of tmux_counter_q
-            // This correctly tracks which bins we're computing for
             automatic int bin0 = windowed_cycle_count_q;                    // 0-11
             automatic int bin1 = windowed_cycle_count_q + BINS_PER_CORDIC;  // 12-23
             

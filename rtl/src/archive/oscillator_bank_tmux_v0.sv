@@ -1,29 +1,19 @@
-////////////////////////////////////////////////////////////////////////////////
-//
-//  Module: oscillator_bank_tmux (Time-Multiplexed Oscillator Bank)
-//
-//  Function: Generates N complex oscillators using 2 CORDIC blocks time-multiplexed
-//            CORDIC_0 handles bins 0-11, CORDIC_1 handles bins 12-23
-//            Outputs are stored in registers for each bin
-//
-////////////////////////////////////////////////////////////////////////////////
-
 module oscillator_bank_tmux #(
-    parameter int NUM_BINS = 24,           // MUST BE EVEN
+    parameter int NUM_BINS = 24,                    // MUST BE EVEN
     parameter int OSC_WIDTH = 32,
     parameter int PHASE_WIDTH = 32,
-    parameter int COUNTER_WIDTH = 5        // clog2(NUM_BINS)
+    parameter int COUNTER_WIDTH = 5                 // clog2(NUM_BINS)
 )(
     input  logic clk_i,
     input  logic rst_ni,
     
     // Phase accumulator control
-    input  logic phase_acc_enable_i,       // Enable phase accumulator updates
-    input  logic phase_acc_sync_reset_i,   // Reset all phase accumulators
+    input  logic phase_acc_enable_i,                // Enable phase accumulator updates
+    input  logic phase_acc_sync_reset_i,            // Reset all phase accumulators
     
     // CORDIC control
-    input  logic cordic_phase_tvalid_i,    // CORDIC input valid
-    input  logic [COUNTER_WIDTH-1:0] counter_i,  // Bin select counter (0 to NUM_BINS/2-1)
+    input  logic cordic_phase_tvalid_i,             // CORDIC input valid
+    input  logic [COUNTER_WIDTH-1:0] counter_i,     // Bin select counter (0 to NUM_BINS/2-1)
     
     // Configuration
     input  logic [PHASE_WIDTH-1:0] freq_steps_i[NUM_BINS],
@@ -35,8 +25,8 @@ module oscillator_bank_tmux #(
 );
 
     localparam int BINS_PER_CORDIC = NUM_BINS / 2;
-    // CORDIC Latency changes when changing the i/o widths of the CORDIC IP!
-    localparam int CORDIC_LATENCY = 20; //28
+    // CORDIC Latency changes when changing the I/O widths of the CORDIC IP!
+    localparam int CORDIC_LATENCY = 20;
 
     // =========================================================================
     // Phase Accumulators (24 total, updated once every 12 cycles)
@@ -124,7 +114,6 @@ module oscillator_bank_tmux #(
 
     // =========================================================================
     // Pipeline to track which bins the outputs correspond to
-    // Now stores 4-bit counter values (0-11) instead of just 1 bit
     // =========================================================================
     logic [COUNTER_WIDTH-1:0] counter_pipe[CORDIC_LATENCY];
     logic [COUNTER_WIDTH-1:0] output_bin_0;  // Bin index for CORDIC_0 output
@@ -165,11 +154,11 @@ module oscillator_bank_tmux #(
         if (tvalid_0 && tvalid_1) begin
             // CORDIC 0 output goes to bin output_bin_0 (0-11)
             W_real_d[output_bin_0] = cos_out_0;
-            W_imag_d[output_bin_0] = sin_out_0;  // DFT requires -j*sin
+            W_imag_d[output_bin_0] = sin_out_0;  // DFT requires -j*sin, handled directly by negative freq steps
             
             // CORDIC 1 output goes to bin output_bin_1 (12-23)
             W_real_d[output_bin_1] = cos_out_1;
-            W_imag_d[output_bin_1] = sin_out_1;  // DFT requires -j*sin
+            W_imag_d[output_bin_1] = sin_out_1;  // DFT requires -j*sin, handled directly by negative freq steps
         end
     end
     

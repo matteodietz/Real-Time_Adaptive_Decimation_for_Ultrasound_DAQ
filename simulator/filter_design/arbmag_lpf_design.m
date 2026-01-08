@@ -10,7 +10,7 @@ function arbmag_lpf_design
     
     % Signal parameters
     I = 4;                  % Decimation ratio
-    fs = 125;               % Sampling frequency (MHz or relevant unit)
+    fs = 125;               % Sampling frequency (MHz)
     fc = 3;                 % Corner frequency / bandwidth of interest
     
     % Calculate normalized bandwidth edge (0 to 1, where 1 is Nyquist)
@@ -18,7 +18,7 @@ function arbmag_lpf_design
     bw_edge = fc / (fs/2);  
     
     % Boost settings
-    edge_boost_db = 6;     % Boost in dB near the passband edges
+    edge_boost_db = 6;      % Boost in dB near the passband edges
     shape_func = 'cosine';  % Shape of the boost
     
     fprintf('Parameters:\n');
@@ -53,7 +53,7 @@ function arbmag_lpf_design
     fprintf(fid, '%% Normalized BW Edge: %.6f\n', bw_edge);
     fprintf(fid, '%% Edge Boost: %.1f dB\n\n', edge_boost_db);
     
-    % Write coefficients in scientific notation
+    % Write coefficients
     fprintf(fid, '%.15e\n', coeffs);
     
     fclose(fid);
@@ -121,10 +121,6 @@ function [Hd, coeffs] = arbmag_lpf_design_script(I, bw_edge, edge_boost_db, vara
     A_pass = generate_passband_response(f_pass_dense, bw_edge, ...
                                         edge_boost_linear, boost_start, ...
                                         boost_end, shape_func);
-    
-    % Transition band (linear interpolation from passband edge to stopband)
-    % f_trans = linspace(bw_edge + 0.001, bw_edge + trans_width, 50);
-    % A_trans = linspace(A_pass(end), stopband_linear, length(f_trans));
 
     % Transition band (Cosine Roll-off)
     f_trans = linspace(bw_edge + 0.001, bw_edge + trans_width, 50);
@@ -193,15 +189,6 @@ function A_pass = generate_passband_response(f, bw_edge, edge_boost, ...
                     % Peaks in the middle of the boost region (implicit shape)
                     % Note: Modified slightly to ramp up to boost at edge
                     A_pass(i) = 1 + (edge_boost - 1) * (1 - cos(pi*t))/2; 
-                    % If you wanted the 'bump' in the middle of the boost region
-                    % like the original code, use: (1 - cos(2*pi*t))/2
-                    % But usually for equalization we want the peak AT the edge.
-                    % Assuming the original logic intended a peak at edge:
-                    % This standard cosine ramp: 1 at t=0 to Boost at t=1
-                    
-                    % REVERTING TO ORIGINAL LOGIC provided in prompt for consistency:
-                    % "Peaks in the middle of the boost region"
-                    A_pass(i) = 1 + (edge_boost - 1) * (1 - cos(1.2*pi*t))/2;
                     
                 case 'gaussian'
                     % Gaussian bump centered in boost region

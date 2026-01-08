@@ -126,7 +126,7 @@ t = np.arange(n_samples) / FS_HIGH
 channel_atten_db = -6.0
 channel_gain_linear = 10**(channel_atten_db/20.0) # 0.5
 
-# Input Thermal Noise (-50dB SNR relative to full scale)
+# Input Thermal Noise (-35dB SNR relative to full scale)
 noise_db_fs = -35.0 
 noise_std = 10**(noise_db_fs/20.0)
 input_noise = np.random.normal(0, noise_std, n_samples)
@@ -184,9 +184,6 @@ sqnr_B = calculate_sqnr(signal_power, noise_power_B)
 # --- Method 2: IEEE 1241 Sine Wave Fitting SNR ---
 # We calculate SNR on the FINAL output (output_A_int, output_B_int).
 # Note: This will include Input Thermal Noise + Quantization Noise.
-# To be fair to IEEE, we should convert the int16 output back to float/input referred units first
-# OR just fit the int16 directly (IEEE allows units to be anything as long as consistent).
-# We fit directly to the output codes.
 
 # We discard the first few samples to avoid filter transient effects on the fit
 fit_start_idx = 100 

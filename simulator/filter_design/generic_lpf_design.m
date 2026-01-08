@@ -11,8 +11,6 @@ I = 4;
 
 % 3dB Cutoff Frequency (Normalized 0 to 1)
 % 1.0 corresponds to the Nyquist frequency (Fs/2).
-% Example: If Fs=125MHz, Nyquist=62.5MHz. 
-% For a 5MHz cutoff: f_3dB = 5 / 62.5 = 0.08
 fs = 125;
 fc = 3;
 f_3dB = fc * 2 / fs; 
@@ -25,7 +23,7 @@ output_file = 'generic_lpf_coeffs.txt';
 % Hardware Constraint: Number of taps is 16 * I
 num_taps = 16 * I;
 
-% Filter Order is always Taps - 1
+% Filter Order is Taps - 1
 filter_order = num_taps - 1;
 
 fprintf('Designing Filter...\n');

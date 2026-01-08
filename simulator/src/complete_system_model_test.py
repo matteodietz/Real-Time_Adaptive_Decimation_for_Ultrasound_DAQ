@@ -57,8 +57,8 @@ if __name__ == '__main__':
     
     # --- 3. Select ONE STFT Window to Analyze ---
     nperseg = 256
-    channel_to_test = 37
-    window_num_to_test = 34
+    channel_to_test = 54 #37
+    window_num_to_test = 6 #5
     hop = nperseg // 2
 
     total_samples = baseline_iq_data.shape[0]
@@ -95,7 +95,7 @@ if __name__ == '__main__':
 
     # --- 4. Define Analysis Parameters ---
     delta_f = 0.5e6 
-    half_bw_est = mod_freq / 2
+    half_bw_est = mod_freq / 2 - 0.5e6
 
     s_coarse = np.linspace(-mod_freq, mod_freq, 8)
     s_fine_left = np.linspace(-half_bw_est - delta_f, -half_bw_est + delta_f, 8) 

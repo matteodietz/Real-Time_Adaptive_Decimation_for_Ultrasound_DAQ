@@ -66,8 +66,8 @@ def get_sorted_frequency_bins(mod_freq):
     Reconstructs the exact S_bins array used in generation.
     Returns: Sorted numpy array of frequencies in Hz.
     """
-    delta_f = 0.5e6 # 1e6 very coarse, 0.5e6 medium, 0.25e6 finde
-    half_bw_est = mod_freq / 2
+    delta_f = 0.5e6 # 1e6 very coarse, 0.5e6 medium, 0.25e6 fine
+    half_bw_est = mod_freq / 2 - 0.5e6
 
     # half_bw_est_left = 2.32e6 # for a specific refinement step
     # half_bw_est_right = 2.25e6 
@@ -176,30 +176,6 @@ def main():
 
     # --- Reconstruct Frequency Bins ---
     sorted_bins_hz = get_sorted_frequency_bins(mod_freq)
-
-    # ===== ADD THIS SECTION HERE =====
-    print("\n" + "="*80)
-    print(" FREQUENCY BIN CONFIGURATION")
-    print("="*80)
-    print(f"Total bins: {len(sorted_bins_hz)}")
-    print(f"Modulation frequency: {mod_freq/1e6:.4f} MHz")
-    print(f"\nBin mapping (Index → Frequency):")
-    print("-" * 40)
-    for idx, freq in enumerate(sorted_bins_hz):
-        freq_mhz = freq / 1e6
-        
-        # Identify which region this bin belongs to
-        if -2.51e6 <= freq <= -2.01e6:
-            region = "FINE LEFT"
-        elif 1.45e6 <= freq <= 1.95e6:
-            region = "FINE RIGHT"
-        else:
-            region = "COARSE"
-        
-        print(f"  Bin {idx:2d}: {freq_mhz:+8.4f} MHz  ({region})")
-
-    print("="*80 + "\n")
-    # ===== END OF ADDED SECTION =====
     
     # Helper to map Index -> MHz
     def map_idx_to_mhz(idx):
@@ -215,6 +191,8 @@ def main():
     gt_f_right = []
     nperseg = 256
     hop = nperseg // 2
+
+    print(f"modulation frequency = {mod_freq}")
 
     print(f"Processing {len(df)} test cases...")
 
@@ -238,18 +216,6 @@ def main():
 
     df['GT_F_Left_MHz'] = gt_f_left
     df['GT_F_Right_MHz'] = gt_f_right
-
-    # Add to analyze_results.py after calculating GT edges:
-    print(f"\nRight Edge Distribution:")
-    print(f"  Mean GT Right Edge: {df['GT_F_Right_MHz'].mean():.3f} MHz")
-    print(f"  Expected bin center: {1.7e6/1e6:.3f} MHz")
-    print(f"  Difference: {abs(df['GT_F_Right_MHz'].mean() - 1.7e6/1e6):.3f} MHz")
-
-    # Add to analyze_results.py after calculating GT edges:
-    print(f"\nLeft Edge Distribution:")
-    print(f"  Mean GT Left Edge: {df['GT_F_Left_MHz'].mean():.3f} MHz")
-    print(f"  Expected bin center: {-2.26e6/1e6:.3f} MHz")
-    print(f"  Difference: {abs(df['GT_F_Left_MHz'].mean() - (-2.26e6)/1e6):.3f} MHz")
 
     # 2. Hardware: Map Indices to MHz and Interpolate
     
@@ -304,7 +270,7 @@ def main():
         if fs_min >= 125.0:
             return 1.0 
             
-        return np.floor(125.0 / fs_min)
+        return np.round(125.0 / fs_min)
 
     df['M_GT'] = df['MaxAbs_GT_MHz'].apply(calc_decimation)
     df['M_ACT'] = df['MaxAbs_ACT_MHz'].apply(calc_decimation)
@@ -369,6 +335,20 @@ def main():
     dec_safe_count = np.sum(valid_df['M_ACT'] <= valid_df['M_GT'])
     dec_safety_ratio = (dec_safe_count / valid_cases) * 100
 
+    print(" DECIMATION FACTOR MISMATCHES")
+    print("="*60)
+    mismatch_df = valid_df[valid_df['M_ACT'] != valid_df['M_GT']]
+    if len(mismatch_df) > 0:
+        print(f"Found {len(mismatch_df)} mismatches out of {valid_cases} valid cases:")
+        print("-" * 60)
+        for idx, row in mismatch_df.iterrows():
+            print(f"Channel {int(row['channel']):3d}, Window {int(row['window']):3d}: "
+                f"M_GT = {int(row['M_GT']):2d}, M_ACT = {int(row['M_ACT']):2d} "
+                f"(GT MaxF: {row['MaxAbs_GT_MHz']:.3f} MHz, ACT MaxF: {row['MaxAbs_ACT_MHz']:.3f} MHz)")
+    else:
+        print("No decimation factor mismatches found - perfect match!")
+    print("="*60)
+
     print("\n--- 1. Edge Accuracy ---")
     print(f"Left Edge MAE:      {mae_left:.4f} MHz")
     print(f"Left Edge MAPE:     {mape_left:.2f} %")
@@ -393,7 +373,7 @@ def main():
     
     # 1. Setup
     avg_decimation_factor = valid_df['M_ACT'].mean()
-    baseline_decimation = 4.0
+    baseline_decimation = 12.0
     
     # 2. Calculate "Data Volume" (Sample fractions kept)
     vol_baseline = 1.0 / baseline_decimation  # e.g., 0.25

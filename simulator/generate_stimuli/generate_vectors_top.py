@@ -501,6 +501,10 @@ Available datasets:
                         help='Number of test cases to generate (default: 5)')
     
     args = parser.parse_args()
+
+    # Set seed for reproducibility
+    random.seed(42) 
+    np.random.seed(42)
     
     print("=" * 80)
     print("Top Module Stimulus Generation")
@@ -514,9 +518,9 @@ Available datasets:
     hw_params = {
         'IQ_WIDTH': 16,
         'WINDOW_WIDTH': 16,
-        'ACCUM_WIDTH': 36,
-        'ACCUM_FRAC': 28,
-        'POWER_INPUT_WIDTH': 18,
+        'ACCUM_WIDTH': 36, # 36
+        'ACCUM_FRAC': 28, # 28
+        'POWER_INPUT_WIDTH': 18, # 18
         'POWER_WIDTH': 8,
         'POWER_FRAC': 0,
         'PHASE_WIDTH': 16,
@@ -560,7 +564,7 @@ Available datasets:
     
     # --- Define Frequency Bins ---
     delta_f = 0.5e6
-    half_bw_est = mod_freq / 2
+    half_bw_est = mod_freq / 2 - 0.5e6
     
     s_coarse = np.linspace(-mod_freq, mod_freq, 8)
     s_fine_left = np.linspace(-half_bw_est - delta_f, -half_bw_est + delta_f, 8)
@@ -603,8 +607,13 @@ Available datasets:
     print(f"Total valid windows: {num_windows_total}")
     print(f"Valid window range: 0 to {num_windows_total - 1}")
     
-    # Select windows from second half
+    # Select windows from last third 
     last_third_start = 2 * num_windows_total // 3
+
+    # Select windows from first half 
+    last_half_end = num_windows_total
+
+
     
     # --- Generate Test Cases ---
     print("\n--- Generating Test Cases ---")
@@ -615,6 +624,8 @@ Available datasets:
     for i in range(num_test_cases):
         # Random window from second half
         window_num = random.randint(last_third_start, num_windows_total - 2)
+        # Random windof from first half
+        # window_num = random.randint(1, last_half_end)
         
         # Random channel
         channel = random.randint(1, 127)

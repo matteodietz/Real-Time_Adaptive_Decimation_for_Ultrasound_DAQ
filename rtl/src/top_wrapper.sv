@@ -86,7 +86,7 @@ module top_wrapper (
     assign L1_right_o = L1_right;
     assign L2_right_o = L2_right;
 
-    // --- Instantiate wrapper with DONT_TOUCH attribute ---
+    // --- Instantiate wrapper ---
     (* DONT_TOUCH = "true" *)
     top #(
         .IQ_WIDTH(IQ_WIDTH),

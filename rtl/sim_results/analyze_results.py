@@ -95,7 +95,6 @@ def linear_interpolate_hw(f1, f2, L1, L2, abs_threshold):
         return float('nan') # Avoid division by zero
 
     # Standard linear interpolation formula
-    # f_star = f1 + (f2 - f1) * (threshold - L1) / (L2 - L1)
     f_star = f1 + (f2 - f1) * (abs_threshold - L1) / (L2 - L1)
     return f_star
 
@@ -260,7 +259,7 @@ def main():
     df['MaxAbs_ACT_MHz'] = np.maximum(np.abs(df['ACT_F_Star_Left_MHz']), np.abs(df['ACT_F_Star_Right_MHz']))
     
     # C. Decimation Factor M
-    # M = floor(125 / (4 * MaxAbs))
+    # M = round(125 / (4 * MaxAbs))
     def calc_decimation(max_freq):
         # Handle cases where max_freq is small or nan
         if np.isnan(max_freq) or max_freq <= 0.1: 
@@ -299,14 +298,12 @@ def main():
     err_left = valid_df['ACT_F_Star_Left_MHz'] - valid_df['GT_F_Left_MHz']
     mae_left = np.mean(np.abs(err_left))
     std_left = np.std(err_left)
-    # NEW: MAPE Left
     mape_left = np.mean(np.abs(err_left / valid_df['GT_F_Left_MHz'])) * 100
 
     # Metric 2: Right Edge Accuracy
     err_right = valid_df['ACT_F_Star_Right_MHz'] - valid_df['GT_F_Right_MHz']
     mae_right = np.mean(np.abs(err_right))
     std_right = np.std(err_right)
-    # NEW: MAPE Right
     mape_right = np.mean(np.abs(err_right / valid_df['GT_F_Right_MHz'])) * 100
 
     # Metric 3: Total Bandwidth Accuracy
@@ -323,7 +320,6 @@ def main():
     # Metric 5: Nyquist / Max Edge Error
     err_max_edge = np.abs(valid_df['MaxAbs_ACT_MHz'] - valid_df['MaxAbs_GT_MHz'])
     mae_max_edge = np.mean(err_max_edge)
-    # NEW: MAPE Max Edge
     mape_max_edge = np.mean(np.abs(err_max_edge / valid_df['MaxAbs_GT_MHz'])) * 100
 
     # Metric 6: Decimation Accuracy
@@ -380,11 +376,11 @@ def main():
     vol_adaptive = 1.0 / avg_decimation_factor # e.g., 0.10
     
     # 3. METRIC A: Absolute Gain
-    # "How much MORE of the raw stream do we save?"
+    # How much MORE of the raw stream do we save?
     abs_reduction_gain = (vol_baseline - vol_adaptive) * 100
     
     # 4. METRIC B: Relative Reduction (Standard Engineering Metric)
-    # "How much did we shrink the baseline output?"
+    # How much did we shrink the baseline output?
     # Formula: (Vol_Base - Vol_Adapt) / Vol_Base
     rel_reduction_vs_baseline = ((vol_baseline - vol_adaptive) / vol_baseline) * 100
     

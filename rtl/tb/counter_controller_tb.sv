@@ -49,7 +49,7 @@ module counter_controller_tb;
     initial begin
         // Initialize
         rst_n = 0;
-        INITIAL_DELAY = 20;
+        INITIAL_DELAY = 100;
         OSC_DELAY = 20;
         WINDOW_DELAY = 4;
         clear = 0;

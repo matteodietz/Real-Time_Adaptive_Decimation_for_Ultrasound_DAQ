@@ -1,13 +1,3 @@
-////////////////////////////////////////////////////////////////////////////////
-//
-//  Testbench: find_max_power_tb
-//
-//  Description:
-//      Testbench for the find_max_power module.
-//      Simplified for fixed NUM_BINS = 24.
-//
-////////////////////////////////////////////////////////////////////////////////
-
 module find_max_power_tb();
 
     timeunit 1ns;
@@ -32,26 +22,22 @@ module find_max_power_tb();
     logic valid_out;
     logic [POWER_WIDTH-1:0] max_power_out;
     
-    ////////////////////////////////////////////////////////////////////////////
+
     // Clock generation
-    ////////////////////////////////////////////////////////////////////////////
     initial begin
         clk = 0;
         forever #(CLK_PERIOD/2) clk = ~clk;
     end
     
-    ////////////////////////////////////////////////////////////////////////////
     // Reset generation
-    ////////////////////////////////////////////////////////////////////////////
     initial begin
         rst_n = 1'b0;
         repeat(RST_CLK_CYCLES) @(posedge clk);
         rst_n = 1'b1;
     end
     
-    ////////////////////////////////////////////////////////////////////////////
+    
     // DUT instantiation
-    ////////////////////////////////////////////////////////////////////////////
     find_max_power #(
         .NUM_BINS(NUM_BINS),
         .POWER_WIDTH(POWER_WIDTH)
@@ -64,9 +50,8 @@ module find_max_power_tb();
         .max_power_o(max_power_out)
     );
     
-    ////////////////////////////////////////////////////////////////////////////
+    
     // Test stimulus and checking
-    ////////////////////////////////////////////////////////////////////////////
     initial begin: test_runner
         integer file, status, c;
         string line, test_name;
@@ -92,7 +77,6 @@ module find_max_power_tb();
         $display("DUT Pipeline Latency: %0d cycles", latency);
 
         // Open vector file
-        // Ensure this path matches where your Python script saves the file
         file = $fopen("/home/bsc25h10/mdietz/bachelors_thesis/rtl/simvectors/find_max_power_vectors.txt", "r");
         if (file == 0) begin
             $display("ERROR: Could not open vector file");
@@ -140,11 +124,7 @@ module find_max_power_tb();
             
             // 4. Read Expected Maximum
             status = $fscanf(file, "%h\n", expected_max);
-            
-            // Consume any trailing newlines after the hex value to align for next fgets
-            // (Python script writes expected hex + newline, then a blank line)
-            // status = $fgets(line, file); // Consumes rest of expected line if any
-            // status = $fgets(line, file); // Consumes the blank line
+    
             
             // --- Drive DUT ---
             @(posedge clk);
@@ -167,9 +147,9 @@ module find_max_power_tb();
                 // Since we are in the middle of a cycle (due to wait statement), 
                 // the values max_power_out are currently valid.
                 
-                // Convert to real for display (Assuming Unsigned Q16.16 based on Python script)
-                expected_float = $itor(expected_max) / 65536.0;
-                actual_float   = $itor(max_power_out) / 65536.0;
+                // Convert to real for display (Assuming Unsigned Q8.0)
+                expected_float = $itor(expected_max);
+                actual_float   = $itor(max_power_out);
                 
                 error = actual_float - expected_float;
                 if (error < 0) error = -error;

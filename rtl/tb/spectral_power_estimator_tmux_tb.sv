@@ -3,7 +3,7 @@ module spectral_power_estimator_tmux_tb();
     timeunit 1ns;
     timeprecision 1ps;
 
-    // --- Parameters (MUST match DUT and Python generator) ---
+    // --- Parameters ---
     localparam time CLK_PERIOD = 10ns;
     localparam unsigned RST_CLK_CYCLES = 5;
     
@@ -176,19 +176,6 @@ module spectral_power_estimator_tmux_tb();
             $display("Test Case %0d: %s", test_count, test_name);
             $display("========================================");
             
-            // // Read: NUM_BINS NUM_SAMPLES WINDOW_SIZE DELAY_CYCLES OSC_LATENCY
-            // status = $fscanf(file, "%d %d %d %d %d\n", 
-            //                num_bins_read, num_samples_read, window_size_read, 
-            //                delay_cycles_read, osc_latency_read);
-            
-            // $display("  NUM_BINS: %0d", num_bins_read);
-            // $display("  NUM_SAMPLES: %0d", num_samples_read);
-            // $display("  WINDOW_SIZE: %0d", window_size_read);
-            // $display("  DELAY_CYCLES: %0d", delay_cycles_read);
-            // $display("  OSC_LATENCY: %0d", osc_latency_read);
-            
-            // // Set delay_cycles for this test
-            // delay_cycles = delay_cycles_read[15:0];
 
             // Read: NUM_BINS NUM_SAMPLES WINDOW_SIZE DELAY_CYCLES OSC_LATENCY
             status = $fscanf(file, "%d %d %d %d %d\n", 

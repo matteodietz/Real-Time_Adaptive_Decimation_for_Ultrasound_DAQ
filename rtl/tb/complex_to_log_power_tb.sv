@@ -3,13 +3,13 @@ module complex_to_log_power_tb ();
     timeunit 1ns;
     timeprecision 1ps;
 
-    // --- Parameters (MUST match DUT and Python generator) ---
+    // --- Parameters ---
     localparam time CLK_PERIOD         = 10ns;
     localparam unsigned RST_CLK_CYCLES = 5;
     
-    localparam integer INPUT_WIDTH  = 18; // As per Python script
-    localparam integer OUTPUT_WIDTH = 8; // As per Python script
-    localparam integer OUTPUT_FRAC  = 0; // As per Python script
+    localparam integer INPUT_WIDTH  = 18; 
+    localparam integer OUTPUT_WIDTH = 8;
+    localparam integer OUTPUT_FRAC  = 0; 
 
     // --- Signals ---
     logic                                 clk;
@@ -89,7 +89,7 @@ module complex_to_log_power_tb ();
 
         // Loop through all test cases in the file
         while (!$feof(file)) begin
-            // Try to read I and Q values
+            // Read I and Q values
             automatic int scan_result = $fscanf(file, "%d %d\n", in_i, in_q);
             
             if (scan_result != 2) begin
@@ -120,7 +120,7 @@ module complex_to_log_power_tb ();
             #1;
             valid_in = 1'b0;
             
-            // Wait for output (pipeline latency is 3 cycles)
+            // Wait for output
             repeat(3) @(posedge clk);
             
             // Check results

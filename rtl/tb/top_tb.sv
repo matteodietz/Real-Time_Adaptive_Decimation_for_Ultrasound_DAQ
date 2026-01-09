@@ -1,20 +1,9 @@
-// //////////////////////////////////////////////////////////////////////////////
-//
-//  Module: top_with_config_loader_tb
-//
-//  Description:
-//      Testbench for top module with AXI-Stream configuration interface.
-//      Loads configuration via AXI-Stream, then streams I/Q data
-//      Updated for time-multiplexed operation (12 cycles per sample)
-//
-// //////////////////////////////////////////////////////////////////////////////
-
 module top_tb();
 
     timeunit 1ns;
     timeprecision 1ps;
 
-    // --- Parameters (MUST match DUT and Python generator) ---
+    // --- Parameters ---
     localparam time CLK_PERIOD = 10ns;
     localparam unsigned RST_CLK_CYCLES = 5;
     
@@ -80,7 +69,6 @@ module top_tb();
     logic signed [WINDOW_WIDTH-1:0] window_coeff;
     
     // Outputs
-    // logic dft_busy;
     logic threshold_ok;
     
     // Left edge outputs
@@ -225,27 +213,6 @@ module top_tb();
         $display("Vector file: %s", vector_path);
         $display("Results file: %s", csv_path);
         
-
-        // integer file, status, csv_file;
-        // string line, test_name;
-        // integer num_bins_read, num_samples_read, window_size_read;
-        // integer delay_cycles_read, osc_latency_read, threshold_drop_read;
-        // integer angle, channel, window_number;
-        // static integer n_errs = 0;
-        // static integer test_count = 0;
-        // logic valid_captured;
-        
-        // string vector_path;
-        // string csv_path;
-        
-        // $display("=== Starting Top Module with Config Loader Testbench (Time-Multiplexed) ===");
-        
-        // // Build file paths
-        // vector_path = "/home/bsc25h10/mdietz/bachelors_thesis/rtl/simvectors/top_vectors.txt";
-        // csv_path = "/home/bsc25h10/mdietz/bachelors_thesis/rtl/sim_results/top_with_config_loader_tmux_results.csv";
-        
-        // $display("Vector file: %s", vector_path);
-        // $display("Results file: %s", csv_path);
         
         // Initialize signals
         enable = 1'b0;
@@ -421,7 +388,7 @@ module top_tb();
             $display("    Loading freq_bins...");
             for (int i = 0; i < num_bins_read; i++) begin
                 @(posedge clk);
-                s_axis_config_tdata = {16'h0000, freq_bins[i]};  // Zero-extend to 32 bits
+                s_axis_config_tdata = {16'h0000, freq_bins[i]};  // Zero-extend to 32 bits, has no effect
                 s_axis_config_tvalid = 1'b1;
                 
                 // Wait for ready (handshake)
@@ -563,12 +530,6 @@ module top_tb();
         $display("Dataset: %s/%s", dataset_type, dataset_name); 
         $display("Total test cases: %0d", test_count);
         $display("Total errors:     %0d", n_errs);
-                
-        // $display("\n========================================");
-        // $display("Test Summary");
-        // $display("========================================");
-        // $display("Total test cases: %0d", test_count);
-        // $display("Total errors:     %0d", n_errs);
         
         if (n_errs > 0) begin
             $display("\n*** TEST FAILED ***");
@@ -579,141 +540,6 @@ module top_tb();
         
         $finish;
     end
-
-    // --- Checking Task ---
-    // task check_result(
-    //     input integer csv_file,
-    //     input integer angle,
-    //     input integer channel,
-    //     input integer window_num,
-    //     input logic [FREQ_BIN_WIDTH-1:0] expected_f1_left,
-    //     input logic [FREQ_BIN_WIDTH-1:0] expected_f2_left,
-    //     input logic [POWER_WIDTH-1:0] expected_L1_left,
-    //     input logic [POWER_WIDTH-1:0] expected_L2_left,
-    //     input logic [FREQ_BIN_WIDTH-1:0] expected_f1_right,
-    //     input logic [FREQ_BIN_WIDTH-1:0] expected_f2_right,
-    //     input logic [POWER_WIDTH-1:0] expected_L1_right,
-    //     input logic [POWER_WIDTH-1:0] expected_L2_right,
-    //     input logic [POWER_WIDTH-1:0] actual_abs_threshold,
-    //     inout integer error_count
-    // );
-    //     automatic logic has_error = 1'b0;
-    //     automatic logic has_warning = 1'b0;
-    //     automatic integer L1_left_error, L2_left_error;
-    //     automatic integer L1_right_error, L2_right_error;
-    //     automatic integer power_tolerance = 6;  // Allow ±6 dB for power values
-        
-    //     // Check left edge frequencies
-    //     if (f1_left == expected_f1_left && f2_left == expected_f2_left) begin
-    //         // Perfect match - no action needed
-    //     end else if ((f1_left == expected_f1_left - 1 && f2_left == expected_f2_left - 1) ||
-    //                 (f1_left == expected_f1_left + 1 && f2_left == expected_f2_left + 1)) begin
-    //         // Off by 1 bin in the same direction - warning
-    //         has_warning = 1'b1;
-    //         $display("    WARNING: Left edge bins off by 1 (Expected: %0d,%0d Got: %0d,%0d)",
-    //                 expected_f1_left, expected_f2_left, f1_left, f2_left);
-    //     end else begin
-    //         // Larger mismatch - error
-    //         has_error = 1'b1;
-    //         $display("    ERROR: Left edge bins mismatch (Expected: %0d,%0d Got: %0d,%0d)",
-    //                 expected_f1_left, expected_f2_left, f1_left, f2_left);
-    //     end
-        
-    //     // Check right edge frequencies
-    //     if (f1_right == expected_f1_right && f2_right == expected_f2_right) begin
-    //         // Perfect match - no action needed
-    //     end else if ((f1_right == expected_f1_right - 1 && f2_right == expected_f2_right - 1) ||
-    //                 (f1_right == expected_f1_right + 1 && f2_right == expected_f2_right + 1)) begin
-    //         // Off by 1 bin in the same direction - warning
-    //         has_warning = 1'b1;
-    //         $display("    WARNING: Right edge bins off by 1 (Expected: %0d,%0d Got: %0d,%0d)",
-    //                 expected_f1_right, expected_f2_right, f1_right, f2_right);
-    //     end else begin
-    //         // Larger mismatch - error
-    //         has_error = 1'b1;
-    //         $display("    ERROR: Right edge bins mismatch (Expected: %0d,%0d Got: %0d,%0d)",
-    //                 expected_f1_right, expected_f2_right, f1_right, f2_right);
-    //     end
-        
-    //     // Check powers (with tolerance)
-    //     // L1_left
-    //     if (L1_left > expected_L1_left) begin
-    //         L1_left_error = L1_left - expected_L1_left;
-    //     end else begin
-    //         L1_left_error = expected_L1_left - L1_left;
-    //     end
-    //     if (L1_left_error > power_tolerance) begin
-    //         has_error = 1'b1;
-    //         $display("    ERROR: L1_left power error %0d dB (tolerance +/-%0d dB)", 
-    //                 L1_left_error, power_tolerance);
-    //     end else if (L1_left_error > 0) begin
-    //         has_warning = 1'b1;
-    //         $display("    WARNING: L1_left power error %0d dB", L1_left_error);
-    //     end
-        
-    //     // L2_left
-    //     if (L2_left > expected_L2_left) begin
-    //         L2_left_error = L2_left - expected_L2_left;
-    //     end else begin
-    //         L2_left_error = expected_L2_left - L2_left;
-    //     end
-    //     if (L2_left_error > power_tolerance) begin
-    //         has_error = 1'b1;
-    //         $display("    ERROR: L2_left power error %0d dB (tolerance +/-%0d dB)", 
-    //                 L2_left_error, power_tolerance);
-    //     end else if (L2_left_error > 0) begin
-    //         has_warning = 1'b1;
-    //         $display("    WARNING: L2_left power error %0d dB", L2_left_error);
-    //     end
-        
-    //     // L1_right
-    //     if (L1_right > expected_L1_right) begin
-    //         L1_right_error = L1_right - expected_L1_right;
-    //     end else begin
-    //         L1_right_error = expected_L1_right - L1_right;
-    //     end
-    //     if (L1_right_error > power_tolerance) begin
-    //         has_error = 1'b1;
-    //         $display("    ERROR: L1_right power error %0d dB (tolerance +/-%0d dB)", 
-    //                 L1_right_error, power_tolerance);
-    //     end else if (L1_right_error > 0) begin
-    //         has_warning = 1'b1;
-    //         $display("    WARNING: L1_right power error %0d dB", L1_right_error);
-    //     end
-        
-    //     // L2_right
-    //     if (L2_right > expected_L2_right) begin
-    //         L2_right_error = L2_right - expected_L2_right;
-    //     end else begin
-    //         L2_right_error = expected_L2_right - L2_right;
-    //     end
-    //     if (L2_right_error > power_tolerance) begin
-    //         has_error = 1'b1;
-    //         $display("    ERROR: L2_right power error %0d dB (tolerance +/-%0d dB)", 
-    //                 L2_right_error, power_tolerance);
-    //     end else if (L2_right_error > 0) begin
-    //         has_warning = 1'b1;
-    //         $display("    WARNING: L2_right power error %0d dB", L2_right_error);
-    //     end
-        
-    //     // Write to CSV
-    //     $fwrite(csv_file, "%0d,%0d,%0d,", channel, angle, window_num);
-    //     $fwrite(csv_file, "%0d,%0d,%0d,%0d,", expected_f1_left, expected_f2_left, expected_L1_left, expected_L2_left);
-    //     $fwrite(csv_file, "%0d,%0d,%0d,%0d,", expected_f1_right, expected_f2_right, expected_L1_right, expected_L2_right);
-    //     $fwrite(csv_file, "%0d,%0d,%0d,%0d,", f1_left, f2_left, L1_left, L2_left);
-    //     $fwrite(csv_file, "%0d,%0d,%0d,%0d,", f1_right, f2_right, L1_right, L2_right);
-    //     $fwrite(csv_file, "%0d,%0d,%0d\n", actual_abs_threshold, has_warning, has_error);
-        
-    //     // Update error count
-    //     if (has_error) begin
-    //         error_count++;
-    //         $display("  RESULT: FAIL");
-    //     end else if (has_warning) begin
-    //         $display("  RESULT: PASS (with warnings)");
-    //     end else begin
-    //         $display("  RESULT: PASS");
-    //     end
-    // endtask
 
     // --- Checking Task ---
     task check_result(

@@ -3,7 +3,7 @@ module dft_power_estimator_tb();
     timeunit 1ns;
     timeprecision 1ps;
 
-    // --- Parameters (MUST match DUT and Python generator) ---
+    // --- Parameters ---
     localparam time CLK_PERIOD = 10ns;
     localparam unsigned RST_CLK_CYCLES = 5;
     
@@ -141,7 +141,7 @@ module dft_power_estimator_tb();
 
         $display("=== Starting DFT Power Estimator Testbench ===");
         
-        // Skip header lines (23 lines based on the format)
+        // Skip header lines (23 lines)
         for (int i = 0; i < 23; i++) begin
             status = $fgets(line, file);
         end
@@ -324,55 +324,7 @@ module dft_power_estimator_tb();
         
         $finish;
     end
-    
-    // // --- Checking Task ---
-    // task check_result(
-    //     input integer num_bins,
-    //     input logic [POWER_WIDTH-1:0] expected_db_power[NUM_BINS],
-    //     inout integer error_count
-    // );
-    //     automatic logic mismatch = 1'b0;
-    //     automatic integer max_error = 0;
-    //     automatic integer error_val;
-        
-    //     // Allow tolerance for rounding differences
-    //     automatic integer tolerance = 3;  // Allow ±3 dB error
-        
-    //     $display("  Checking power results...");
-        
-    //     for (int k = 0; k < num_bins; k++) begin
-    //         // Calculate absolute error
-    //         if (act_db_power[k] > expected_db_power[k]) begin
-    //             error_val = act_db_power[k] - expected_db_power[k];
-    //         end else begin
-    //             error_val = expected_db_power[k] - act_db_power[k];
-    //         end
-            
-    //         // Track maximum error
-    //         if (error_val > max_error) max_error = error_val;
-            
-    //         // Check against tolerance
-    //         if (error_val > tolerance) begin
-    //             $display("    ERROR: Bin %0d power mismatch", k);
-    //             $display("      Expected: 0x%02h (%0d dB)", expected_db_power[k], expected_db_power[k]);
-    //             $display("      Got:      0x%02h (%0d dB)", act_db_power[k], act_db_power[k]);
-    //             $display("      Error:    %0d dB", error_val);
-    //             mismatch = 1'b1;
-    //         end else begin
-    //             $display("    SUCCESS: Bin %0d - Expected: 0x%02h, Got: 0x%02h, Error: %0d dB", 
-    //                     k, expected_db_power[k], act_db_power[k], error_val);
-    //         end
-    //     end
-        
-    //     if (mismatch) begin
-    //         error_count++;
-    //         $display("  RESULT: FAIL");
-    //     end else begin
-    //         $display("  RESULT: PASS");
-    //     end
-        
-    //     $display("    Max error across all bins: %0d dB", max_error);
-    // endtask
+
 
     // --- Checking Task ---
     task check_result(
@@ -390,7 +342,7 @@ module dft_power_estimator_tb();
         logic in_noise_floor;
         
         // Allow tolerance for rounding differences in significant bins
-        automatic integer tolerance = 3;  // Allow ±3 dB error
+        automatic integer tolerance = 3;  // Allow +/-3 dB error
         
         $display("  Checking power results...");
         

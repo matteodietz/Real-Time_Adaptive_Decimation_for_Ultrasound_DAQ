@@ -8,7 +8,7 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 # Define project roots relative to the script location
-# Structure assumption:
+# Structure:
 #   repo_root/
 #     rtl/
 #       scripts/ (Where this script is)
@@ -75,7 +75,7 @@ echo -e "${BLUE}STEP 2: Compile and Elaborate${NC}"
 cd "$RTL_DIR" || { echo "Error: Could not find RTL dir: $RTL_DIR"; exit 1; }
 mkdir -p sim_results
 
-# Note: We use relative path 'scripts/' because we are now inside 'rtl/'
+# We use relative path 'scripts/' because we are now inside 'rtl/'
 vitis-2024.2 vivado -mode batch -source scripts/compile_elaborate.tcl \
     -log sim_results/vivado_compile.log \
     -journal sim_results/vivado_compile.jou

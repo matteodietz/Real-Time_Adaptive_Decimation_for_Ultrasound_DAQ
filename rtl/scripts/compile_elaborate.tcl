@@ -5,7 +5,7 @@ puts "========================================"
 puts "  Compile and Elaborate Design"
 puts "========================================"
 
-# 1. Robust Path Detection
+# 1. Path Detection
 set script_path [file normalize [info script]]
 set script_dir  [file dirname $script_path]
 set project_name "bw_estim"

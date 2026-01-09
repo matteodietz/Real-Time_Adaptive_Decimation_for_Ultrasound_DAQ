@@ -1,8 +1,8 @@
 # Ignore all subdirectories inside datasets/
 simulator/datasets/*/
 
-# Ignore ancient directory
-simulator/src/ancient
+# Ignore plots directory
+simulator/src/plots
 # Ignore all ancient directories
 **/ancient/
 

@@ -17,7 +17,6 @@ from complete_system_model import (
     find_right_edge_points,
     linear_interpolate_hw
 )
-from fixed_float_conversions import float_to_fixed_point
 
 # --- Configuration for Thesis Plots ---
 plt.rcParams.update({

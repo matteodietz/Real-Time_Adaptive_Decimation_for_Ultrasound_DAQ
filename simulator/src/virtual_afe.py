@@ -5,7 +5,7 @@ from pathlib import Path
 
 # data loader for RF data
 from afe_interface_rf import load_picmus_rf_data
-from quick_spectrogram_test import load_picmus_iq_data
+from ancient.quick_spectrogram_test import load_picmus_iq_data
 
 def run_virtual_afe_processing(rf_data, angle_index, fs_picmus, modulation_frequency, decimation_factor, adc_sample_rate=125e6, snr_db=None, transducer_bw_percent=67):
     """
@@ -167,135 +167,135 @@ def run_virtual_afe_processing(rf_data, angle_index, fs_picmus, modulation_frequ
     return decimated_iq, high_rate_iq, fs_new
 
 
-# --- UNIT TEST ---
-if __name__ == '__main__':
-    # print("--- Running unit test for virtual_afe.py (RF input) ---")
+# # --- UNIT TEST ---
+# if __name__ == '__main__':
+#     # print("--- Running unit test for virtual_afe.py (RF input) ---")
 
-    # define paths and parameters
-    try:
-        SIMULATOR_ROOT = Path(__file__).parent.parent
-    except NameError:
-        SIMULATOR_ROOT = Path.cwd().parent
+#     # define paths and parameters
+#     try:
+#         SIMULATOR_ROOT = Path(__file__).parent.parent
+#     except NameError:
+#         SIMULATOR_ROOT = Path.cwd().parent
     
-    # !!! IMPORTANT: need all three paths since modulation_frequency in RF dataset is 0 !!!
-    rf_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_dataset_rf.hdf5"
-    iq_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_dataset_iq.hdf5"
-    scan_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_scan.hdf5"
+#     # !!! IMPORTANT: need all three paths since modulation_frequency in RF dataset is 0 !!!
+#     rf_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_dataset_rf.hdf5"
+#     iq_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_dataset_iq.hdf5"
+#     scan_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_scan.hdf5"
     
-    baseline_decimation = 4
-    test_decimation = 5
-    adc_rate = 125e6
-    snr = None
+#     baseline_decimation = 4
+#     test_decimation = 5
+#     adc_rate = 125e6
+#     snr = None
 
-    # load the RF data
-    try:
-        print("\nLoading PICMUS RF dataset from disk...")
-        rf_data, angles, _, _, fs_picmus, mod_freq, _, _, _ = load_picmus_rf_data(rf_path, iq_path, scan_path)
-        print("RF Data loaded successfully.")
-    except Exception as e:
-        print(f"Test failed: Could not load data. Check your afe_interface.py. Error: {e}")
-        exit()
+#     # load the RF data
+#     try:
+#         print("\nLoading PICMUS RF dataset from disk...")
+#         rf_data, angles, _, _, fs_picmus, mod_freq, _, _, _ = load_picmus_rf_data(rf_path, iq_path, scan_path)
+#         print("RF Data loaded successfully.")
+#     except Exception as e:
+#         print(f"Test failed: Could not load data. Check your afe_interface.py. Error: {e}")
+#         exit()
 
-    center_angle_index = np.argmin(np.abs(angles))
+#     center_angle_index = np.argmin(np.abs(angles))
 
-    # call the processing function for the baseline case
-    baseline_data_iq, _, fs_baseline = run_virtual_afe_processing(
-        rf_data=rf_data,
-        angle_index=center_angle_index,
-        fs_picmus=fs_picmus,
-        modulation_frequency=mod_freq,
-        decimation_factor=baseline_decimation,
-        adc_sample_rate=adc_rate,
-        snr_db=snr # None by default
-    )
-    print(f"SUCCESS: Got baseline I/Q data (M={baseline_decimation}) with shape: {baseline_data_iq.shape}")
+#     # call the processing function for the baseline case
+#     baseline_data_iq, _, fs_baseline = run_virtual_afe_processing(
+#         rf_data=rf_data,
+#         angle_index=center_angle_index,
+#         fs_picmus=fs_picmus,
+#         modulation_frequency=mod_freq,
+#         decimation_factor=baseline_decimation,
+#         adc_sample_rate=adc_rate,
+#         snr_db=snr # None by default
+#     )
+#     print(f"SUCCESS: Got baseline I/Q data (M={baseline_decimation}) with shape: {baseline_data_iq.shape}")
         
-    # call the processing function for the test case
-    test_data_iq, _, fs_test = run_virtual_afe_processing(
-        rf_data=rf_data,
-        angle_index=center_angle_index,
-        fs_picmus=fs_picmus,
-        modulation_frequency=mod_freq,
-        decimation_factor=test_decimation,
-        adc_sample_rate=adc_rate,
-        snr_db=snr # None by default
-    )
-    print(f"SUCCESS: Got test I/Q data (M={test_decimation}) with shape: {test_data_iq.shape}")
+#     # call the processing function for the test case
+#     test_data_iq, _, fs_test = run_virtual_afe_processing(
+#         rf_data=rf_data,
+#         angle_index=center_angle_index,
+#         fs_picmus=fs_picmus,
+#         modulation_frequency=mod_freq,
+#         decimation_factor=test_decimation,
+#         adc_sample_rate=adc_rate,
+#         snr_db=snr # None by default
+#     )
+#     print(f"SUCCESS: Got test I/Q data (M={test_decimation}) with shape: {test_data_iq.shape}")
     
-    # visual verification
-    channel_to_plot = 64
+#     # visual verification
+#     channel_to_plot = 64
     
-    # plot the spectra of the generated I/Q data
-    freqs_baseline, psd_baseline = signal.welch(baseline_data_iq[:, channel_to_plot], fs=fs_baseline, nperseg=1024)
-    freqs_test, psd_test = signal.welch(test_data_iq[:, channel_to_plot], fs=fs_test, nperseg=1024)
+#     # plot the spectra of the generated I/Q data
+#     freqs_baseline, psd_baseline = signal.welch(baseline_data_iq[:, channel_to_plot], fs=fs_baseline, nperseg=1024)
+#     freqs_test, psd_test = signal.welch(test_data_iq[:, channel_to_plot], fs=fs_test, nperseg=1024)
 
-    # convert to a relative dB scale
-    # find the absolute peak power from the high-quality baseline signal to use as a reference
-    peak_power = np.max(psd_baseline)
-    print(f"peak_power = {peak_power}")
+#     # convert to a relative dB scale
+#     # find the absolute peak power from the high-quality baseline signal to use as a reference
+#     peak_power = np.max(psd_baseline)
+#     print(f"peak_power = {peak_power}")
     
-    # convert both PSDs to dB relative to this single peak.
-    psd_baseline_db = 10 * np.log10(psd_baseline / peak_power)
-    psd_test_db = 10 * np.log10(psd_test / peak_power)
+#     # convert both PSDs to dB relative to this single peak.
+#     psd_baseline_db = 10 * np.log10(psd_baseline / peak_power)
+#     psd_test_db = 10 * np.log10(psd_test / peak_power)
 
 
-    # --- ADD non upsampled I/Q data as comparison ---
-    try:
-        picmus_data, angles, fs_picmus = load_picmus_iq_data(iq_path)
-    except Exception as e:
-        print(f"Test failed: Could not load data. Error: {e}")
-        exit()
+#     # --- ADD non upsampled I/Q data as comparison ---
+#     try:
+#         picmus_data, angles, fs_picmus = load_picmus_iq_data(iq_path)
+#     except Exception as e:
+#         print(f"Test failed: Could not load data. Error: {e}")
+#         exit()
 
-    signal_iq_non_upsampled = picmus_data[center_angle_index, channel_to_plot, :]
+#     signal_iq_non_upsampled = picmus_data[center_angle_index, channel_to_plot, :]
     
-    print(f"\nAnalyzing data from center angle #{center_angle_index}, channel #{channel_to_plot}")
-    print(f"Data shape: {signal_iq_non_upsampled.shape}, Sample Rate: {fs_picmus/1e6:.2f} MHz")
+#     print(f"\nAnalyzing data from center angle #{center_angle_index}, channel #{channel_to_plot}")
+#     print(f"Data shape: {signal_iq_non_upsampled.shape}, Sample Rate: {fs_picmus/1e6:.2f} MHz")
 
-    # calculate the Power Spectral Density (PSD) using Welch's method
-    # return_onesided=False for complex I/Q data.
-    freqs, psd = signal.welch(
-        signal_iq_non_upsampled,
-        fs=fs_picmus,
-        nperseg=256,         # Use a segment length for averaging
-        return_onesided=False
-    )
+#     # calculate the Power Spectral Density (PSD) using Welch's method
+#     # return_onesided=False for complex I/Q data.
+#     freqs, psd = signal.welch(
+#         signal_iq_non_upsampled,
+#         fs=fs_picmus,
+#         nperseg=256,         # Use a segment length for averaging
+#         return_onesided=False
+#     )
     
-    # shift the frequency axis so 0 Hz is in the center
-    freqs = np.fft.fftshift(freqs)
-    psd = np.fft.fftshift(psd)
+#     # shift the frequency axis so 0 Hz is in the center
+#     freqs = np.fft.fftshift(freqs)
+#     psd = np.fft.fftshift(psd)
     
-    # convert power to a relative dB scale for better visualization
-    psd_db = 10 * np.log10(psd + 1e-20)
-    psd_db_normalized = psd_db - np.max(psd_db)
-    # --- END OF non upsampled I/Q data
+#     # convert power to a relative dB scale for better visualization
+#     psd_db = 10 * np.log10(psd + 1e-20)
+#     psd_db_normalized = psd_db - np.max(psd_db)
+#     # --- END OF non upsampled I/Q data
 
     
-    # create the plot using a linear y-axis
-    plt.figure(figsize=(12, 6))
+#     # create the plot using a linear y-axis
+#     plt.figure(figsize=(12, 6))
     
-    # use plt.plot, not plt.semilogy, because the data is now already in a log (dB) scale
-    plt.plot(freqs_baseline / 1e6, psd_baseline_db, label=f'Baseline I/Q Spectrum (M={baseline_decimation}, fs={fs_baseline/1e6:.2f} MHz)')
-    plt.plot(freqs_test / 1e6, psd_test_db, label=f'Test I/Q Spectrum (M={test_decimation}, fs={fs_test/1e6:.2f} MHz)')
-    plt.plot(freqs / 1e6, psd_db_normalized, label=f'Non Upsampled I/Q Data') # non upsampled I/Q data
+#     # use plt.plot, not plt.semilogy, because the data is now already in a log (dB) scale
+#     plt.plot(freqs_baseline / 1e6, psd_baseline_db, label=f'Baseline I/Q Spectrum (M={baseline_decimation}, fs={fs_baseline/1e6:.2f} MHz)')
+#     plt.plot(freqs_test / 1e6, psd_test_db, label=f'Test I/Q Spectrum (M={test_decimation}, fs={fs_test/1e6:.2f} MHz)')
+#     plt.plot(freqs / 1e6, psd_db_normalized, label=f'Non Upsampled I/Q Data') # non upsampled I/Q data
     
-    plt.title(f'Normalized Power Spectral Density of Generated I/Q Data (Channel {channel_to_plot})')
-    plt.xlabel('Frequency (MHz)')
-    plt.ylabel('Power (dB relative to peak)') # update the y-axis label
-    plt.grid(True, which='both', linestyle='--')
-    plt.legend()
+#     plt.title(f'Normalized Power Spectral Density of Generated I/Q Data (Channel {channel_to_plot})')
+#     plt.xlabel('Frequency (MHz)')
+#     plt.ylabel('Power (dB relative to peak)') # update the y-axis label
+#     plt.grid(True, which='both', linestyle='--')
+#     plt.legend()
     
-    # set the axis limits
-    # plt.ylim(-100, 5)
-    # plt.xlim(-2.51, 2.51)
+#     # set the axis limits
+#     # plt.ylim(-100, 5)
+#     # plt.xlim(-2.51, 2.51)
 
-    # define the output path and create the directory if it doesn't exist
-    plots_dir = Path(__file__).resolve().parent / "plots"
-    plots_dir.mkdir(parents=True, exist_ok=True) # exist_ok=True prevents an error if the folder already exists
-    file_name = "virtual_afe.png"
-    output_path = plots_dir / file_name
+#     # define the output path and create the directory if it doesn't exist
+#     plots_dir = Path(__file__).resolve().parent / "plots"
+#     plots_dir.mkdir(parents=True, exist_ok=True) # exist_ok=True prevents an error if the folder already exists
+#     file_name = "virtual_afe.png"
+#     output_path = plots_dir / file_name
 
-    # save the figure to the specified path
-    plt.savefig(output_path, dpi=300, bbox_inches='tight')
+#     # save the figure to the specified path
+#     plt.savefig(output_path, dpi=300, bbox_inches='tight')
     
-    print(f"\nSUCCESS: Plot saved to {output_path}")
-    plt.close()
+#     print(f"\nSUCCESS: Plot saved to {output_path}")
+#     plt.close()

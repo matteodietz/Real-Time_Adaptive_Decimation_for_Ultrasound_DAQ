@@ -19,8 +19,8 @@ DECIMATION_BASELINE = 4   # Standard fixed decimation
 DECIMATION_MAX = 10       # Max allowable decimation for this test case
 
 # Dataset selection
-DATASET_TYPE = "in_vivo" # 'experiments' or 'in_vivo'
-DATASET_NAME = "carotid_long" # 'contrast_speckle' or 'carotid_long'
+DATASET_TYPE = "experiments" # 'experiments' or 'in_vivo'
+DATASET_NAME = "contrast_speckle" # 'contrast_speckle' or 'carotid_long'
 
 def get_dataset_paths(root, type_str, name_str):
     base = root / "datasets" / type_str / name_str

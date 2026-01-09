@@ -18,13 +18,13 @@ if __name__ == '__main__':
         SIMULATOR_ROOT = Path.cwd().parent
     
     # change dataset as needed
-    # rf_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_dataset_rf.hdf5"
-    # iq_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_dataset_iq.hdf5"
-    # scan_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_scan.hdf5"
+    rf_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_dataset_rf.hdf5"
+    iq_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_dataset_iq.hdf5"
+    scan_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_scan.hdf5"
 
-    rf_path = SIMULATOR_ROOT / "datasets/in_vivo/carotid_long/carotid_long_expe_dataset_rf.hdf5"
-    iq_path = SIMULATOR_ROOT / "datasets/in_vivo/carotid_long/carotid_long_expe_dataset_iq.hdf5"
-    scan_path = SIMULATOR_ROOT / "datasets/in_vivo/carotid_long/carotid_long_expe_scan.hdf5"
+    # rf_path = SIMULATOR_ROOT / "datasets/in_vivo/carotid_long/carotid_long_expe_dataset_rf.hdf5"
+    # iq_path = SIMULATOR_ROOT / "datasets/in_vivo/carotid_long/carotid_long_expe_dataset_iq.hdf5"
+    # scan_path = SIMULATOR_ROOT / "datasets/in_vivo/carotid_long/carotid_long_expe_scan.hdf5"
     
     adc_rate = 125e6
     decimation_for_generation = 1 

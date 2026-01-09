@@ -4,19 +4,6 @@ from pathlib import Path
 import sys
 import math
 
-SIMULATOR_ROOT = Path(__file__).resolve().parent.parent
-sys.path.append(str(SIMULATOR_ROOT))
-
-# 3. Construct the path to the folder containing the file (.../simulator/generate_stimuli)
-TARGET_DIR = SIMULATOR_ROOT / "generate_stimuli"
-
-# 4. Add that specific directory to the python path
-if str(TARGET_DIR) not in sys.path:
-    sys.path.append(str(TARGET_DIR))
-
-# 5. Now Python can find the file inside that directory
-from fixed_float_conversions import float_to_fixed_point, fixed_point_to_float
-
 # ==============================================================================
 # 1. DFT Processor
 # ==============================================================================

@@ -117,7 +117,7 @@ print(f"  Gain A at {F_CUTOFF/1e6:.1f} MHz: {gain_A_linear:.4f} ({20*np.log10(ga
 print(f"  Gain B at {F_CUTOFF/1e6:.1f} MHz: {gain_B_linear:.4f} ({20*np.log10(gain_B_linear):.2f} dB)")
 
 # ==============================================================================
-# 2. Signal Generation (The Physical World)
+# 2. Signal Generation
 # ==============================================================================
 n_samples = 4096
 t = np.arange(n_samples) / FS_HIGH

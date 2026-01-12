@@ -7,6 +7,10 @@ simulator/src/plots
 **/ancient/
 
 
+# Ignore dft error eval and interp error eval dirs
+simulator/generate_stimuli/dft_error_eval
+simulator/generate_stimuli/interp_error_eval
+
 # Ignore macOS metadata files
 **/.DS_Store
 

@@ -93,57 +93,6 @@ if __name__ == '__main__':
     
     print(f"Average Interpolation Error: {avg_err_norm:.2f}% (relative to peak)")
 
-    # # 6. Plotting
-    # plt.rcParams.update({
-    #     "font.family": "serif",
-    #     "font.serif": ["Times New Roman", "Times", "DejaVu Serif", "serif"],
-    #     "mathtext.fontset": "cm",
-    #     "font.size": 12
-    # })
-
-    # fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 12), sharex=True)
-
-    # # Plot 1: Baseline
-    # ax1.plot(t_base * 1e6, sig_base.real, 'b-', label='I (Real)')
-    # ax1.plot(t_base * 1e6, np.abs(sig_base), 'k-', linewidth=1.0, alpha=0.7, label='Envelope')
-    # ax1.set_title(f"Baseline Decimation (M={DECIMATION_BASELINE}, $f_s$={fs_baseline/1e6:.2f} MHz)", fontweight='bold')
-    # ax1.set_ylabel("Amplitude")
-    # ax1.legend(loc='upper right', fontsize=10)
-    # ax1.grid(True, alpha=0.3)
-
-    # # Plot 2: Max Decimation
-    # ax2.plot(t_max * 1e6, sig_max.real, 'r-', label='I (Real)')
-    # ax2.plot(t_max * 1e6, np.abs(sig_max), 'k-', linewidth=1.0, alpha=0.7, label='Envelope')
-    # # Mark the actual sample points to show scarcity
-    # ax2.plot(t_max * 1e6, sig_max.real, 'r.', markersize=4, alpha=0.5, label='Samples') 
-    # ax2.set_title(f"Max Allowable Decimation (M={DECIMATION_MAX}, $f_s$={fs_max/1e6:.2f} MHz)", fontweight='bold')
-    # ax2.set_ylabel("Amplitude")
-    # ax2.legend(loc='upper right', fontsize=10)
-    # ax2.grid(True, alpha=0.3)
-
-    # # Plot 3: Overlay / Comparison (Zoomed on a segment if long)
-    # # Plotting Baseline as a solid line
-    # ax3.plot(t_base * 1e6, sig_base.real, 'b-', linewidth=1.5, alpha=0.6, label=f'Baseline (M={DECIMATION_BASELINE})')
-    # # Plotting Interpolated Max as dashed
-    # ax3.plot(t_base * 1e6, sig_max_interp.real, 'r--', linewidth=1.5, label=f'Max Decim (M={DECIMATION_MAX})')
-    
-    # ax3.set_title("Direct Comparison (Real Component)", fontweight='bold')
-    # ax3.set_xlabel("Time (µs)")
-    # ax3.set_ylabel("Amplitude")
-    # ax3.legend(loc='upper right', fontsize=10)
-    # ax3.grid(True, alpha=0.3)
-    
-    # plt.tight_layout()
-
-    # # Save
-    # plots_dir = Path(__file__).resolve().parent / "plots"
-    # plots_dir.mkdir(parents=True, exist_ok=True)
-    # out_path = plots_dir / "decimation_comparison.png"
-    # plt.savefig(out_path, dpi=300, bbox_inches='tight')
-    
-    # print(f"Plot saved to {out_path}")
-    # plt.close()
-
     # 6. Plotting
     plt.rcParams.update({
         "font.family": "serif",

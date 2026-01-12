@@ -19,7 +19,7 @@ def load_picmus_data(iq_path="../datasets/experiments/contrast_speckle/contrast_
         modulation_frequency = f["/US/US_DATASET0000/modulation_frequency"][0]
         initial_time = f["/US/US_DATASET0000/initial_time"][0]
 
-    # Read HDF5 file containing grid to beamform on
+
     with h5py.File(scan_path, 'r') as f:
         x_axis = f["/US/US_DATASET0000/x_axis"][:]
         z_axis = f["/US/US_DATASET0000/z_axis"][:]

@@ -6,7 +6,6 @@ import sys
 import math
 
 # --- User Imports ---
-# Ensure these files are in the python path or same directory
 from afe_interface_rf import load_picmus_rf_data
 from virtual_afe import run_virtual_afe_processing
 from complete_system_model import (

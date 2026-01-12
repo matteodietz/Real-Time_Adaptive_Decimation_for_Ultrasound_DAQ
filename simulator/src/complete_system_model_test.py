@@ -66,7 +66,7 @@ if __name__ == '__main__':
         adc_sample_rate=adc_rate
     )
     
-    # --- 3. Select ONE STFT Window to Analyze ---
+    # --- 3. Select ONE Window to Analyze ---
     nperseg = 256
     channel_to_test = 54 #37
     window_num_to_test = 6 #5
@@ -97,7 +97,6 @@ if __name__ == '__main__':
     noise = (np.random.normal(0, noise_std, time_window_data_raw.shape) + 
              1j * np.random.normal(0, noise_std, time_window_data_raw.shape))
     time_window_data_raw = time_window_data_raw + noise
-    # --- END Add AWGN Noise ---
 
     # Scaling
     max_val = np.max(np.abs(time_window_data_raw))
@@ -119,8 +118,8 @@ if __name__ == '__main__':
     ACCUM_WIDTH = 36
     ACCUM_FRAC = 28
     INPUT_WIDTH_LOG = 18
-    POWER_WIDTH = 8 # 32
-    POWER_FRAC = 0 # 16
+    POWER_WIDTH = 8
+    POWER_FRAC = 0
     threshold_db = 30.0  # dB drop from peak
 
     # --- 5. Run the Hardware-Accurate Processing Pipeline ---
@@ -132,9 +131,6 @@ if __name__ == '__main__':
 
     # Step 2: Convert to Hardware dB Power (using integer log2)
     print("\n--- Step 2: Convert to Hardware dB Power ---")
-    # freqs_sorted, power_hw_db = convert_to_hardware_db_power(
-    #     dft_bins, ACCUM_WIDTH, ACCUM_FRAC, POWER_WIDTH, POWER_FRAC
-    # )
     freqs_sorted, power_hw_db = convert_to_hardware_db_power(
         dft_bins, INPUT_WIDTH_LOG, INPUT_WIDTH_LOG - (ACCUM_WIDTH - ACCUM_FRAC), POWER_WIDTH, POWER_FRAC
     )
@@ -196,7 +192,7 @@ if __name__ == '__main__':
     plt.rcParams.update({
         "font.family": "serif",
         "font.serif": ["Times New Roman", "Times", "DejaVu Serif", "serif"],
-        "mathtext.fontset": "cm",  # Computer Modern for math text
+        "mathtext.fontset": "cm",
         "font.size": 12,
         "axes.labelsize": 12,
         "axes.titlesize": 14,
@@ -205,12 +201,11 @@ if __name__ == '__main__':
 
     plt.figure(figsize=(14, 7))
     
-    # 2. Ground truth PSD (Lighter Grey)
-    # Using 'silver' or 'gray' with alpha makes it visible but background
+    # 2. Ground truth PSD
     plt.plot(freqs_welch_shifted / 1e6, psd_db_welch_norm, color='dimgray', alpha=0.8, linewidth=2, 
              label=r'Ground Truth PSD')
 
-    # 3. Calculate normalized PSD from DFT bins (Content Preserved)
+    # 3. Calculate normalized PSD from DFT bins
     win = signal.windows.get_window('hann', nperseg)
     enbw_scaling = fs_baseline * np.sum(win**2)
     
@@ -255,7 +250,6 @@ if __name__ == '__main__':
                label=rf'-{threshold_db} dB Threshold')
     
     # 9. Labels and Styling
-    # Using r"" strings allows LaTeX formatting like \textbf
     plt.title(r"Hardware-Accurate Bandwidth Estimation", fontweight="bold")
     plt.xlabel(r"Frequency (MHz)")
     plt.ylabel(r"Power (dB relative to peak)")
@@ -268,7 +262,7 @@ if __name__ == '__main__':
 
     # Define the output path and create the directory if it doesn't exist
     plots_dir = Path(__file__).resolve().parent / "plots"
-    plots_dir.mkdir(parents=True, exist_ok=True) # exist_ok=True prevents an error if the folder already exists
+    plots_dir.mkdir(parents=True, exist_ok=True)
     file_name = "hw_accurate_bw_estimation.png"
     output_path = plots_dir / file_name
 

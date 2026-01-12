@@ -31,20 +31,6 @@ def streaming_dft_processor(b, fs, freq_bins_to_calc, window='hann'):
     final_dft_bins = {freq: accumulator for freq, accumulator in zip(freq_bins_to_calc, A)}
     return final_dft_bins
 
-# ==============================================================================
-# 2. Hardware-Accurate Power Conversion
-# ==============================================================================
-def ilog2_abs2(z: complex) -> int:
-    """
-    Returns 3 floor(log2(|z|^2)) for a complex number z = a + ib.
-    """
-    # squared magnitude = a^2 + b^2
-    mag2 = (z.real * z.real) + (z.imag * z.imag)
-
-    if mag2 == 0:
-        raise ValueError("log2(0) is undefined")
-
-    return 3 * math.ceil(math.log2(mag2))      # TODO: was np.floor before
 
 def calculate_hw_log_power(complex_val, accum_frac=56, power_frac=16):
     """
@@ -78,10 +64,10 @@ def calculate_hw_log_power(complex_val, accum_frac=56, power_frac=16):
     
     # 4. Scale and Shift
     #    Hardware: 
-    #       log2_val = msb_index_q << OUTPUT_FRAC;
-    #       db_power_d = (log2_val << 1) + log2_val; // * 3
+    #       log2_val = msb_index_q << OUTPUT_FRAC; # OUTPUT_FRAC = 0
+    #       db_power_d = (log2_val << 1) + log2_val; # * 3
     
-    log2_val_fixed = msb_index # << power_frac
+    log2_val_fixed = msb_index
     db_power_hw = (log2_val_fixed * 3)
     
     return db_power_hw
@@ -102,9 +88,7 @@ def convert_to_hardware_db_power(dft_bins, accum_width=64, accum_frac=56, power_
     power_values = []
     for val in complex_sorted:
         p_hw = calculate_hw_log_power(val, accum_frac=accum_frac, power_frac=power_frac)
-        # p_hw = p_hw & ((1 << power_width) - 1) # mask to correct width
 
-        # p_hw = ilog2_abs2(val)
         power_values.append(p_hw)
         
     return freqs_sorted, np.array(power_values, dtype=object)

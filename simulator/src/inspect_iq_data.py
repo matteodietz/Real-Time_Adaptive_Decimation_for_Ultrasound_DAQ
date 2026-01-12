@@ -11,13 +11,13 @@ from virtual_afe import run_virtual_afe_processing
 if __name__ == '__main__':
     print("--- Comparing Generated I/Q Data vs. PICMUS Ground Truth I/Q ---")
 
-    # --- 1. setup and data loading ---
+    # --- 1. Setup and data loading ---
     try:
         SIMULATOR_ROOT = Path(__file__).resolve().parent.parent
     except NameError:
         SIMULATOR_ROOT = Path.cwd().parent
     
-    # change dataset as needed
+    # Change dataset as needed
     rf_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_dataset_rf.hdf5"
     iq_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_dataset_iq.hdf5"
     scan_path = SIMULATOR_ROOT / "datasets/experiments/contrast_speckle/contrast_speckle_expe_scan.hdf5"
@@ -29,7 +29,7 @@ if __name__ == '__main__':
     adc_rate = 125e6
     decimation_for_generation = 1 
 
-    # --- 2. load picmus data ---
+    # --- 2. Load picmus data ---
     print("\n--- Loading all necessary datasets from disk ---")
     try:
         rf_data, angles_rf, _, _, fs_picmus_rf, mod_freq, _, _, _ = load_picmus_rf_data(rf_path, iq_path, scan_path)
@@ -39,7 +39,7 @@ if __name__ == '__main__':
         print(f"Failed to load data. Error: {e}")
         exit()
 
-    # --- 3. define test cases ---
+    # --- 3. Define test cases ---
     num_random_channels = 50
     num_angles_per_channel = 10
     num_points_to_trim = 20
@@ -72,25 +72,25 @@ if __name__ == '__main__':
         
         print(f"  -> Testing Case {i+1}/{len(test_configs)}: Channel {channel}, Angle {angle}...")
         
-        # --- generate high-fidelity I/Q data for this case ---
+        # --- Generate high-fidelity I/Q data for this case ---
         _, high_rate_iq_generated, _ = run_virtual_afe_processing(
             rf_data=rf_data, angle_index=angle, fs_picmus=fs_picmus_rf,
             modulation_frequency=mod_freq, decimation_factor=decimation_for_generation,
             adc_sample_rate=adc_rate
         )
         
-        # --- prepare data for comparison ---
+        # --- Prepare data for comparison ---
         my_iq_aline = high_rate_iq_generated[:, channel]
         my_time_axis = np.arange(len(my_iq_aline)) / adc_rate
 
         gt_iq_aline = picmus_iq_data[angle, channel, :]
         gt_time_axis = np.arange(len(gt_iq_aline)) / fs_picmus_iq
         
-        # --- quantitative error analysis (with trimming) ---
+        # --- Quantitative error analysis (with trimming) ---
         gt_time_axis_trimmed = gt_time_axis[:-num_points_to_trim]
         gt_iq_aline_trimmed = gt_iq_aline[:-num_points_to_trim]
 
-        # need to interpolate otherwise points of the two signals don't align
+        # Need to interpolate otherwise points of the two signals don't align
         my_iq_resampled_real = np.interp(gt_time_axis_trimmed, my_time_axis, my_iq_aline.real)
         my_iq_resampled_imag = np.interp(gt_time_axis_trimmed, my_time_axis, my_iq_aline.imag)
         
@@ -100,7 +100,7 @@ if __name__ == '__main__':
         gt_range_real = np.max(gt_iq_aline_trimmed.real) - np.min(gt_iq_aline_trimmed.real)
         gt_range_imag = np.max(gt_iq_aline_trimmed.imag) - np.min(gt_iq_aline_trimmed.imag)
 
-        # store the results
+        # Store the results
         all_max_errors_real.append(np.max(error_real))
         all_avg_errors_real.append(np.mean(error_real))
         all_norm_errors_real.append(100 * np.max(error_real) / gt_range_real if gt_range_real > 0 else 0)
@@ -111,14 +111,14 @@ if __name__ == '__main__':
         all_norm_errors_imag.append(100 * np.max(error_imag) / gt_range_imag if gt_range_imag > 0 else 0)
         all_norm_avg_errors_imag.append(100 * np.mean(error_imag) / gt_range_imag if gt_range_imag > 0 else 0)
 
-        # save the data for the last case (fixed) for plotting
+        # Save the data for the last case (fixed) for plotting
         if i == len(test_configs) - 1:
             my_iq_aline_plot = my_iq_aline
             my_time_axis_plot = my_time_axis
             gt_iq_aline_plot = gt_iq_aline
             gt_time_axis_plot = gt_time_axis
 
-    # --- 5. final averaged results ---
+    # --- 5. Final averaged results ---
     print("\n" + "="*30 + " FINAL AVERAGED RESULTS " + "="*30)
     print(f"Averaged over {len(all_max_errors_real)} total test cases.\n")
     
@@ -151,15 +151,15 @@ if __name__ == '__main__':
     my_envelope_plot = np.abs(my_iq_aline_plot)
     gt_envelope_plot = np.abs(gt_iq_aline_plot)
 
-    # create a single figure with two subplots stacked vertically
+    # Create a single figure with two subplots stacked vertically
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14, 10), sharex=True)
 
-    # --- top subplot (ax1): ground truth data ---
+    # --- Top subplot (ax1): ground truth data ---
     ax1.plot(gt_time_axis_plot * 1e6, gt_iq_aline_plot.real, 'b-', linewidth=0.5, label='PICMUS I Component')
     ax1.plot(gt_time_axis_plot * 1e6, gt_iq_aline_plot.imag, 'r-', linewidth=0.5, label='PICMUS Q Component')
     ax1.plot(gt_time_axis_plot * 1e6, gt_envelope_plot, 'k-', linewidth=1.5, label='PICMUS Envelope')
 
-    # get the time value where the trimming starts and add the vertical line
+    # Get the time value where the trimming starts and add the vertical line
     trim_time_us = (gt_time_axis_plot[-num_points_to_trim]) * 1e6
     ax1.axvline(
         x=trim_time_us,
@@ -176,12 +176,12 @@ if __name__ == '__main__':
     ax1.legend(loc='lower right')
     ax1.grid(True)
 
-    # --- bottom subplot (ax2): generated data by virtual AFE ---
+    # --- Bottom subplot (ax2): generated data by virtual AFE ---
     ax2.plot(my_time_axis_plot * 1e6, my_iq_aline_plot.real, 'b-', linewidth=0.5, label='Generated I Component')
     ax2.plot(my_time_axis_plot * 1e6, my_iq_aline_plot.imag, 'r-', linewidth=0.5, label='Generated Q Component')
     ax2.plot(my_time_axis_plot * 1e6, my_envelope_plot, 'k-', linewidth=1.5, label='Generated Envelope')
 
-    # get the time value where the trimming starts and add the vertical line
+    # Get the time value where the trimming starts and add the vertical line
     trim_time_us = (gt_time_axis_plot[-num_points_to_trim]) * 1e6
     ax2.axvline(
         x=trim_time_us,
@@ -200,19 +200,19 @@ if __name__ == '__main__':
     ax2.grid(True)
 
 
-    # adjust layout to prevent titles from overlapping
+    # Adjust layout to prevent titles from overlapping
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])
 
-    # define output path and create the directory if it doesn't exist
+    # Define output path and create the directory if it doesn't exist
     plots_dir = Path(__file__).resolve().parent / "plots"
     plots_dir.mkdir(parents=True, exist_ok=True)
     file_name = "virtual_afe_gt_comparison.png"
     output_path = plots_dir / file_name
 
-    # save the figure to the specified path
+    # Save the figure to the specified path
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
 
     print(f"\nSUCCESS: Comparison plot saved to {output_path}")
 
-    # close plot
+    # Close plot
     plt.close()

@@ -154,8 +154,7 @@ def generate_test_case(test_name, baseline_iq_data, fs_baseline, S_bins,
         # Calculate the positive step magnitude
         raw_step = normalized_freq * (2 ** PHASE_WIDTH)
         
-        # Negate it! This creates the backward rotation (e^-jtheta)
-        # Use round() to be precise, or int() for truncation
+        # Negated: This creates the backward rotation (e^-jtheta)
         neg_step = -round(raw_step) 
         
         # Apply mask to convert the negative number to its unsigned bit representation
@@ -287,7 +286,7 @@ def write_vector_file(test_cases, output_path):
             
             f.write("\n")
     
-    print(f"\n✓ Test vectors written to: {output_path}")
+    print(f"\n Test vectors written to: {output_path}")
 
 
 def main():
@@ -365,7 +364,7 @@ def main():
         decimation_factor=baseline_decimation,
         adc_sample_rate=adc_rate
     )
-    print(f"✓ AFE processing complete. fs_baseline = {fs_baseline/1e6:.2f} MHz")
+    print(f" AFE processing complete. fs_baseline = {fs_baseline/1e6:.2f} MHz")
     
     # Calculate maximum IQ magnitude for normalization
     max_iq = np.max(np.abs(baseline_iq_data_full))

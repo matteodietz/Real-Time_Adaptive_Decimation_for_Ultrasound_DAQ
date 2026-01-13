@@ -76,8 +76,7 @@ def generate_test_case(test_name, iq_data, fs, freq_bins, window_type,
         # Calculate the positive step magnitude
         raw_step = normalized_freq * (2 ** phase_width)
         
-        # Negate it! This creates the backward rotation (e^-jtheta)
-        # Use round() to be precise, or int() for truncation
+        # Negated: This creates the backward rotation (e^-jtheta)
         neg_step = -round(raw_step) 
         
         # Apply mask to convert the negative number to its unsigned bit representation
@@ -95,7 +94,7 @@ def generate_test_case(test_name, iq_data, fs, freq_bins, window_type,
         # We want 'max_magnitude' (e.g. 2*max_rf) to map to the maximum representable
         # value of the fixed point format.
         # Max value of Q2.14 is approx 2.0 (specifically 2^(int_bits-1))
-        # We use a slight safety margin or just map to the boundary.
+        # Use a slight safety margin or just map to the boundary.
         target_max_val = 2 ** (iq_int_bits - 1)
         
         scale_factor = target_max_val / max_magnitude
@@ -125,11 +124,11 @@ def generate_test_case(test_name, iq_data, fs, freq_bins, window_type,
     window_coeffs_hw = [float_to_fixed_point(w, window_int_bits, window_frac_bits, signed=True) 
                        for w in window_coeffs]
     
-    # Expected accumulator outputs: Q8.56 format
-    accum_frac_bits = 28 # 56
+    # Expected accumulator outputs:
+    accum_frac_bits = 28 
     accum_int_bits = accum_width - accum_frac_bits
     
-    # IMPORTANT: We must scale the expected golden result by the same factor
+    # We must scale the expected golden result by the same factor
     # we scaled the input by, otherwise they won't match!
     accums_scaled_real = np.real(accums_sorted) * scale_factor
     accums_scaled_imag = np.imag(accums_sorted) * scale_factor
@@ -236,10 +235,10 @@ def main():
     # Hardware parameters
     IQ_WIDTH = 16           # Q2.14
     WINDOW_WIDTH = 16       # Q2.14
-    ACCUM_WIDTH = 36        # Q8.56 # 64
-    OSC_WIDTH = 16          # CORDIC output width #32
-    PHASE_WIDTH = 16        # Phase accumulator width #32
-    NUM_BINS = 24           # Maximum
+    ACCUM_WIDTH = 36        
+    OSC_WIDTH = 16         
+    PHASE_WIDTH = 16        
+    NUM_BINS = 24     
     
     test_cases = []
 
@@ -356,9 +355,9 @@ def main():
             
             rf_data, angles, _, _, fs_picmus, mod_freq, _, _, _ = load_picmus_rf_data(rf_path, iq_path, scan_path)
 
-            # find max abs val of rf_data to properly quantize the iq data
-            max_rf = np.max(np.abs(rf_data))        # apparently this is 1.0, but iq data is much smaller
-            max_rf_safe = max_rf                    # -> normalize according to max iq value * 2
+            # Find max abs val of rf_data to properly quantize the iq data
+            max_rf = np.max(np.abs(rf_data)) 
+            max_rf_safe = max_rf 
 
             print(f"max safe rf value for iq normalization before quantization: {max_rf_safe}")
             
@@ -378,7 +377,7 @@ def main():
 
             print(f"max safe iq value for comparison: {max_iq_safe}")
             
-            # STFT parameters
+            # DFT parameters
             nperseg = 256
             hop = nperseg // 2
             

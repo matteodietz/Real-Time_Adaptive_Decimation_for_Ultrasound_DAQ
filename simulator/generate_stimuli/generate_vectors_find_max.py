@@ -22,7 +22,7 @@ def generate_test_vectors(output_file):
     # Test configuration
     NUM_BINS_OPTIONS = [24] 
     POWER_WIDTH = 8
-    POWER_FRAC = 0  # Q16.16 format
+    POWER_FRAC = 0 
     POWER_INT  = POWER_WIDTH - POWER_FRAC
     IS_SIGNED  = False # The log_power output is Unsigned
     

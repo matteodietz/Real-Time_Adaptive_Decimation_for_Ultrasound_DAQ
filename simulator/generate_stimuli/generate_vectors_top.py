@@ -235,8 +235,7 @@ def generate_test_case(test_name, baseline_iq_data, fs_baseline, S_bins,
         # Calculate the positive step magnitude
         raw_step = normalized_freq * (2 ** PHASE_WIDTH)
         
-        # Negate it! This creates the backward rotation (e^-jtheta)
-        # Use round() to be precise, or int() for truncation
+        # Negated: This creates the backward rotation (e^-jtheta)
         neg_step = -round(raw_step) 
         
         # Apply mask to convert the negative number to its unsigned bit representation
@@ -328,25 +327,9 @@ def generate_test_case(test_name, baseline_iq_data, fs_baseline, S_bins,
     
     # Frequency steps (32-bit unsigned)
     freq_steps_hw = freq_steps
-    
-    # # Frequency bins (16-bit signed, Hz as integer)
-    # freq_bins_hw = []
-    # for freq in freqs_sorted:
-    #     # Store frequency in Hz as signed 16-bit integer
-    #     freq_val = int(freq) & 0xFFFF
-    #     freq_bins_hw.append(freq_val)
-    
-    # # --- Format Expected Outputs ---
-    
-    # def fix_freq(f):
-    #     """Convert frequency in Hz to fixed point, return 0 if None"""
-    #     if f is None:
-    #         return 0
-    #     # Store as signed 16-bit integer in Hz
-    #     return int(f) & 0xFFFF
 
-    # --- UPDATED: Frequency Bins are just Indices ---
-    # We create a list [0, 1, 2, ... K-1]
+    # --- Frequency Bins are just Indices ---
+    # A list [0, 1, 2, ... K-1]
     freq_bins_hw = list(range(len(S_bins)))
     
     # Helper to convert Frequency Float to Index
@@ -569,8 +552,6 @@ Available datasets:
     s_coarse = np.linspace(-mod_freq, mod_freq, 8)
     s_fine_left = np.linspace(-half_bw_est - delta_f, -half_bw_est + delta_f, 8)
     s_fine_right = np.linspace(half_bw_est - delta_f, half_bw_est + delta_f, 8)
-    # s_fine_left = np.linspace(-2.32e6 - delta_f, -2.32e6 + delta_f, 8)
-    # s_fine_right = np.linspace(2.25e6 - delta_f, 2.25e6 + delta_f, 8)
     S_bins = np.unique(np.concatenate([s_coarse, s_fine_left, s_fine_right]))
     
     print(f"\nFrequency bins: {len(S_bins)} bins")

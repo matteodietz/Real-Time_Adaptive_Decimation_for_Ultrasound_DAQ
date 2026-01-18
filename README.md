@@ -61,7 +61,7 @@ For further details about the algorithms, system overview and implementation, re
    - `./full_simulation_flow.sh [NUM_TESTS]`
    - Datasets to be tested can be specified inside the `full_simulation_flow.sh` script.
    - Again, the paths must align with the folder structure inside `simulator/datasets/`.
-5. Compare RTL outputs to a full floating point ground truth FFT using `rtl/sim_results/analyze_results.py`. The RTL outputs are explicitly not compared to the golden model, since this is supposed to be very hardware accurate.
+5. Compare RTL outputs to a full floating point ground truth FFT using `rtl/sim_results/analyze_results.py`. The RTL outputs are intentionally not compared to the golden model, since the golden model is supposed to be very hardware accurate. By comparing it to a ground truth FFT, we can both quantify errors caused by the fixed point architecture and errors that are caused by algorithmic limitations themselves.
 
 ## Testbench Support
 

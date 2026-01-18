@@ -85,7 +85,7 @@ Note: large vivado simulation and build directories and other heavy artifacts ar
 ├── .gitattributes
 ├── .gitignore
 ├── LICENSE
-├── **docs**
+├── docs
 │   ├── figures                             # figures for the README 
 │   └── technical_report.pdf                # complete technical report (thesis)
 ├── rtl

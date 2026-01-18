@@ -37,7 +37,7 @@ For further details about the algorithms, system overview and implementation, re
 ## Usage and Implementation
 - RTL
   - SystemVerilog modules implement:
-    - Streaming sparse DFT engine (24 selected bins, streaming windows).
+    - Streaming sparse DFT (24 selected bins, streaming windows of I/Q demodulated samples).
     - Real‑time dB conversion, thresholding, and left/right edge detection for bandwidth estimation.
   - Target: Xilinx ZU19EG (Zynq UltraScale+ family). Aimed to run at 375 MHz
   - Vivado Version: 2024.2 
@@ -50,12 +50,13 @@ For further details about the algorithms, system overview and implementation, re
 
 ## Quick start
 1. Inspect the [technical report](docs/technical_report.pdf) for algorithms, design rationale and experimental results.
-2. Download Datasets from the [PICMUS challenge](https://www.ustb.no/ustb-datasets/) (or any other hdf5  ultrasound dataset) and move them into the `simulator/datasets/` directory.
+2. Download datasets from the [PICMUS challenge](https://www.ustb.no/ustb-datasets/) (or any other hdf5  ultrasound dataset) and move them into the `simulator/datasets/` directory.
 3. Generate stimuli (example):
    - `cd simulator/generate_stimuli`
    - `python generate_dft_power_vectors.py`
    - Ensure the paths in the generate stimuli scripts match with the folder structure inside `simulator/datasets/`.
-4. Run the automated behavioral simulation of the RTL (batch, no GUI) using helper scripts:
+   - Run module-level testbenches in vivado manually.
+4. Run the automated behavioral simulation of the full RTL end-to-end bandwidth estimation pipeline (batch, no GUI) using helper scripts:
    - `cd rtl/scripts`
    - `./full_simulation_flow.sh [NUM_TESTS]`
    - Datasets to be tested can be specified inside the `full_simulation_flow.sh` script.
@@ -84,7 +85,7 @@ Note: large vivado simulation and build directories and other heavy artifacts ar
 ├── .gitattributes
 ├── .gitignore
 ├── LICENSE
-├── docs
+├── **docs**
 │   ├── figures                             # figures for the README 
 │   └── technical_report.pdf                # complete technical report (thesis)
 ├── rtl

@@ -143,7 +143,7 @@ In the following table, the exact results can be seen for several experimental a
 | `contrast_speckle` | 13.56 | 7.4% | 3.39x (70.5%) | 1.13x (11.5%) |
 | `resolution_distorsion` | 13.69 | 7.3% | 3.42x (70.8%) | 1.14x (12.3%) |
 | `carotid_cross` | 12.88 | 7.8% | 3.22x (68.9%) | 1.07x (6.8%) |
-| `carotid_long` | 13.07 | 7.6% | (69.4%) | 1.09x (8.2%) |
+| `carotid_long` | 13.07 | 7.6% | 3.27x (69.4%) | 1.09x (8.2%) |
 
 The compression achieved a **decimation safety of >98.6%** (meaning that the bandwidth is always slightly overestimated, such that the decimation factor is never overestimated, resulting in perfect reconstructability) and a functional accuracy of **<4.4% Mean Absolute Percentage Error** on the bandwidth edge estimates.
 

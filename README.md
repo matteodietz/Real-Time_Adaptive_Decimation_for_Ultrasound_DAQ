@@ -136,7 +136,7 @@ Achieved a **~1.1x compression improvement** over naive compressor (M=12) (**7-1
 
 In the following table, the exact results can be seen for several experimental and in vivo PICMUS datasets:
 
-| Dataset | Avg M | Data Kept | vs Naive | vs Baseline|
+| Dataset | Avg M | Data Kept | vs Baseline | vs Naive |
 |----------|----------|----------|----------|----------|
 | Baseline (fixed) | 4.0 | 25% | - | - |
 | Naive (fixed) | 12.0 | 8.33% | 3.0x (66.7%) | - |

@@ -54,3 +54,6 @@ rtl/vivado/
 
 # VSCode settings
 **/.vscode/
+
+simulator/src/iterative_refinement_plots.py
+simulator/src/iterative_refinement/
